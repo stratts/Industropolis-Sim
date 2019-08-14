@@ -1,11 +1,19 @@
 using System;
 using System.Collections.Generic;
 
-public class Map {
+public interface MapInfo {
+    int Width { get; }
+    int Height { get; }
+    Building GetBuilding(int x, int y);
+}
+
+public class Map : MapInfo {
     private Tile[,] tiles;
     private List<Entity> entities;
 
     public List<Entity> Entities => entities;
+    public int Width => tiles.GetLength(0);
+    public int Height => tiles.GetLength(1);
 
     public Map() {
         entities = new List<Entity>();
