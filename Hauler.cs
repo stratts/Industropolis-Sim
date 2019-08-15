@@ -9,7 +9,7 @@ public class Hauler : Entity {
     private bool followingRoute = false;
  
     public int Inventory { get; set; } = 0;
-    public int MaxInventory { get; set; } = 5;
+    public int MaxInventory { get; set; } = 300;
     public bool Hauling { get; set; } = false;
 
     public Hauler(Map map, int x, int y) : base(map, x, y) {
@@ -21,19 +21,17 @@ public class Hauler : Entity {
         timeSinceMove = 0;
     }
 
-    private bool Pickup(Building building) {
-        if (building.Storage <= 0) return false;
-        
+    private bool Pickup(DirectInOut output) {
+        if (Inventory >= MaxInventory || !output.CanRetrieve) return false;
+        output.Retrieve();
         Inventory++;
-        building.Storage--;
         return true;
     }
 
-    private bool Dropoff(Building building) {
-        if (Inventory <= 0) return false;
-
+    private bool Dropoff(DirectInOut input) {
+        if (Inventory <= 0 || !input.CanPush) return false;
+        input.Push();
         Inventory--;
-        building.Storage++;
         return true;
     }
 
@@ -45,10 +43,10 @@ public class Hauler : Entity {
          if (Pos == Route.Dest || Pos == Route.Source) {
                 var building = MapInfo.GetBuilding(Pos.X, Pos.Y);
                 if (Pos == Route.Dest) {  
-                    if (Dropoff(building)) return;
+                    if (Dropoff((DirectInOut)building.Input)) return;
                 }
                 else if (Pos == Route.Source) {
-                    if (Pickup(building)) return;
+                    if (Pickup((DirectInOut)building.Output)) return;
                 }   
         }
 
