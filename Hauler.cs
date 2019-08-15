@@ -3,7 +3,7 @@ using Godot;
 
 
 public class Hauler : Entity {
-    private Route route;
+    public Route Route { get; set; } = null;
     private float timeSinceMove = 0;
     private float moveInterval = 1;
     private bool followingRoute = false;
@@ -16,9 +16,7 @@ public class Hauler : Entity {
 
     }
 
-    public void Haul(TilePos source, TilePos dest) {
-        route = new Route(MapInfo, source, dest);
-        route.Pathfind();
+    public void Haul() {
         Hauling = true;
         timeSinceMove = 0;
     }
@@ -40,16 +38,16 @@ public class Hauler : Entity {
     }
 
     public override void Update(float elapsedTime) {
-        if (!Hauling) return;
+        if (!Hauling || Route == null) return;
 
         timeSinceMove += elapsedTime;
 
-         if (Pos == route.Dest || Pos == route.Source) {
+         if (Pos == Route.Dest || Pos == Route.Source) {
                 var building = MapInfo.GetBuilding(Pos.X, Pos.Y);
-                if (Pos == route.Dest) {  
+                if (Pos == Route.Dest) {  
                     if (Dropoff(building)) return;
                 }
-                else if (Pos == route.Source) {
+                else if (Pos == Route.Source) {
                     if (Pickup(building)) return;
                 }   
         }
@@ -60,14 +58,14 @@ public class Hauler : Entity {
 
             if (followingRoute) {
                 if (Inventory > 0) {
-                    target = route.Next(this.Pos, Route.Direction.Forwards);
+                    target = Route.Next(this.Pos, Route.Direction.Forwards);
                 }
-                else target = route.Next(this.Pos, Route.Direction.Backwards);
+                else target = Route.Next(this.Pos, Route.Direction.Backwards);
                 GD.Print(target.X + " " + target.Y);
             }
             else {
-                target = route.Source;
-                if (this.Pos == route.Source) followingRoute = true;
+                target = Route.Source;
+                if (this.Pos == Route.Source) followingRoute = true;
             }
            
             if (Pos.X < target.X) Pos.X += 1;

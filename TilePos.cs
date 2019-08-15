@@ -31,6 +31,10 @@ public struct TilePos {
         else return false;
     }
 
+    public override string ToString() {
+        return $"({X}, {Y})";
+    }
+
     public bool WithinBounds(int width, int height) {
         return (X > 0 && Y > 0 && X < width && Y < height);
     }

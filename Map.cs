@@ -10,6 +10,7 @@ public interface MapInfo {
 public class Map : MapInfo {
     private Tile[,] tiles;
     private List<Entity> entities;
+    private List<Route> routes;
 
     public List<Entity> Entities => entities;
     public int Width => tiles.GetLength(0);
@@ -17,6 +18,7 @@ public class Map : MapInfo {
 
     public Map() {
         entities = new List<Entity>();
+        routes = new List<Route>();
 
         int size = 10;
         tiles = new Tile[size,size];
@@ -42,5 +44,31 @@ public class Map : MapInfo {
 
     public void Update(float delta) {
         foreach (Entity e in entities) e.Update(delta);
+    }
+
+    public Route AddRoute(TilePos start, TilePos dest) {
+        var route = new Route(this, start, dest);
+        route.Pathfind();
+        routes.Add(route);
+
+        foreach (Entity e in entities) {
+            if (e is Hauler h && h.Route == null) {
+                h.Route = route;
+                h.Haul();
+                break;
+            }
+        }
+        
+        return route;
+    }
+
+    public Route GetRoute(TilePos pos) {
+        foreach (Route r in routes) {
+            foreach (TilePos t in r.Path) {
+                if (t == pos) return r;
+            }
+        }
+
+        return null;
     }
 }
