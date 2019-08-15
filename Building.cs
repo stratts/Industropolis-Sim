@@ -7,8 +7,8 @@ public class Building {
 
     private float lastProcess = 0;
 
-    public void Update(float delta) {
-        if (Input.CanRetrieve) {
+    public virtual void Update(float delta) {
+        if (Input.CanRetrieve && Output.CanPush) {
             lastProcess += delta;
             if (lastProcess >= ProcessingTime) {
                 lastProcess = 0;
@@ -21,9 +21,14 @@ public class Building {
 
 public class Storage : Building {
     public Storage() {
-        Input = new DirectInOut();
-        Output = new DirectInOut(100);
+        var buffer = new DirectInOut(200);
+        Input = buffer;
+        Output = buffer;
         ProcessingTime = 0;
+    }
+
+    public override void Update(float delta) {
+
     }
 }
 

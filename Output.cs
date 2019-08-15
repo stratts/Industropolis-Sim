@@ -12,6 +12,7 @@ public class DirectInOut : IConsumer, IProducer {
     private int retrieveAmount = 1;
 
     public int Buffer => buffer;
+    public int BufferSize => bufferSize;
     public bool CanRetrieve => buffer >= retrieveAmount;
     public bool CanPush => buffer <= bufferSize - retrieveAmount;
 
@@ -19,8 +20,8 @@ public class DirectInOut : IConsumer, IProducer {
 
     }
 
-    public DirectInOut(int initBuffer) {
-        buffer = initBuffer;
+    public DirectInOut(int bufferSize) {
+        this.bufferSize = bufferSize;
     }
 
     public bool Retrieve() {
