@@ -36,6 +36,14 @@ public class Map : MapInfo {
         entities.Add(entity);
     }
 
+    public Entity GetEntity(TilePos pos) {
+        foreach (Entity e in entities) {
+            if (e.Pos == pos) return e;
+        }
+
+        return null;
+    }
+
     public void AddBuilding(Building building, int x, int y) {
         tiles[x, y].Building = building;
         buildings.Add(building);

@@ -9,7 +9,7 @@ public class Hauler : Entity {
     private bool followingRoute = false;
  
     public int Inventory { get; set; } = 0;
-    public int MaxInventory { get; set; } = 100;
+    public int MaxInventory { get; set; } = 5;
     public bool Hauling { get; set; } = false;
 
     public Hauler(Map map, int x, int y) : base(map, x, y) {

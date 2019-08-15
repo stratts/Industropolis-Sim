@@ -19,9 +19,23 @@ public class Building {
     }
 }
 
-public class Storage : Building {
+public class Workshop : Building {
+    public Workshop(Item input, int inputReq, Item output, int outputAmount, int time) {
+        var inp = new DirectInOut(inputReq * 2, input);
+        inp.RetrieveAmount = 5;
+        Input = inp;
+
+        var outp = new DirectInOut(5, output);
+        outp.PushAmount = outputAmount;
+        Output = outp;
+
+        ProcessingTime = time;
+    }
+}
+
+/*public class Storage : Building {
     public Storage() {
-        var buffer = new DirectInOut(200);
+        var buffer = new DirectInOut(200, Item.Wood);
         Input = buffer;
         Output = buffer;
         ProcessingTime = 0;
@@ -30,12 +44,12 @@ public class Storage : Building {
     public override void Update(float delta) {
 
     }
-}
+}*/
 
 public class InfiniteStorage : Building {
-    public InfiniteStorage() {
-        Input = new InfiniteInput();
-        Output = new DirectInOut();
+    public InfiniteStorage(Item item) {
+        Input = new InfiniteInput(item);
+        Output = new DirectInOut(200, item);
         ProcessingTime = 0;
     }
 }
