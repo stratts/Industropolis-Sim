@@ -20,7 +20,7 @@ public class Map : MapInfo {
         entities = new List<Entity>();
         routes = new List<Route>();
 
-        int size = 10;
+        int size = 50;
         tiles = new Tile[size,size];
 
         for (int i = 0; i < size; i++) {
