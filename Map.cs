@@ -7,6 +7,14 @@ public interface MapInfo {
     Building GetBuilding(int x, int y);
 }
 
+public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
+
+public class MapChangedEventArgs : EventArgs {
+    public Building Building { get; set; } = null;
+    public Entity Entity { get; set; } = null;
+    public Route Route { get; set; } = null;
+}
+
 public class Map : MapInfo {
     private Tile[,] tiles;
     private List<Entity> entities;
@@ -16,6 +24,8 @@ public class Map : MapInfo {
     public List<Entity> Entities => entities;
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
+
+    public event MapChangedEvent MapChanged;
 
     public Map() {
         entities = new List<Entity>();
@@ -34,9 +44,13 @@ public class Map : MapInfo {
 
     public void AddEntity(Entity entity) {
         entities.Add(entity);
+        if (MapChanged != null) {
+            MapChanged(this, new MapChangedEventArgs { Entity = entity });
+        }
     }
 
     public void RemoveEntity(Entity entity) {
+        entity.Remove();
         entities.Remove(entity);
     }
 
@@ -52,14 +66,18 @@ public class Map : MapInfo {
         tiles[x, y].Building = building;
         building.Pos = new TilePos(x, y);
         buildings.Add(building);
+        if (MapChanged != null) {
+            MapChanged(this, new MapChangedEventArgs { Building = building });
+        }
     }
 
     public Building GetBuilding(int x, int y) {
         return tiles[x, y].Building;
     }
 
-    public void RemoveBuilding(TilePos pos) {
-        tiles[pos.X, pos.Y].Building = null;
+    public void RemoveBuilding(Building building) {
+        building.Remove();
+        tiles[building.Pos.X, building.Pos.X].Building = null;
     }
 
     public void Update(float delta) {
@@ -79,6 +97,10 @@ public class Map : MapInfo {
                 break;
             }
         }
+
+        if (MapChanged != null) {
+            MapChanged(this, new MapChangedEventArgs { Route = route });
+        }
         
         return route;
     }
@@ -95,6 +117,7 @@ public class Map : MapInfo {
 
     public void RemoveRoute(Route route) {
         routes.Remove(route);
+        route.Remove();
         foreach (Entity e in entities) {
             if (e is Hauler h && h.Route == route) {
                 h.Route = null;

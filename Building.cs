@@ -1,4 +1,4 @@
-public class Building { 
+public class Building : GameObject { 
     public TilePos Pos { get; set; }
 
     public float ProcessingTime { get; set; } = 0;
