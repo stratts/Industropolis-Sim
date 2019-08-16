@@ -21,16 +21,16 @@ public class Hauler : Entity {
         timeSinceMove = 0;
     }
 
-    private bool Pickup(DirectInOut output) {
-        if (Inventory >= MaxInventory || !output.CanRetrieve) return false;
-        output.Retrieve();
+    private bool Pickup(DirectOutput output) {
+        if (Inventory >= MaxInventory || !output.CanRemove) return false;
+        output.Remove();
         Inventory++;
         return true;
     }
 
-    private bool Dropoff(DirectInOut input) {
-        if (Inventory <= 0 || !input.CanPush) return false;
-        input.Push();
+    private bool Dropoff(DirectInput input) {
+        if (Inventory <= 0 || !input.CanInsert) return false;
+        input.Insert();
         Inventory--;
         return true;
     }
@@ -43,10 +43,10 @@ public class Hauler : Entity {
          if (Pos == Route.Dest || Pos == Route.Source) {
                 var building = MapInfo.GetBuilding(Pos.X, Pos.Y);
                 if (Pos == Route.Dest) {  
-                    if (Dropoff((DirectInOut)building.Input)) return;
+                    if (Dropoff((DirectInput)building.Input)) return;
                 }
                 else if (Pos == Route.Source) {
-                    if (Pickup((DirectInOut)building.Output)) return;
+                    if (Pickup((DirectOutput)building.Output)) return;
                 }   
         }
 

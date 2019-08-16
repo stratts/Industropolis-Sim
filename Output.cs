@@ -1,44 +1,34 @@
 
 public interface IProducer {
     Item Item { get; }
-    bool CanPush { get; }
-    bool Push();
+    bool CanProduce { get; }
+    bool Produce();
 }
 
-public class DirectInOut : IConsumer, IProducer {
-    private int buffer = 0;
-    private int bufferSize = 200;
+public class DirectOutput : DirectBase, IProducer {
+    public int ProduceAmount { get; set; }
 
-    public Item Item { get; set; }
+    public bool CanProduce => buffer <= bufferSize - ProduceAmount;
+    public bool CanRemove => buffer > 0;
 
-    public int PushAmount { get; set; } = 1;
-    public int RetrieveAmount { get; set; }= 1;
-
-    public int Buffer => buffer;
-    public int BufferSize => bufferSize;
-    public bool CanRetrieve => buffer >= RetrieveAmount;
-    public bool CanPush => buffer <= bufferSize - RetrieveAmount;
-
-    public DirectInOut() {
-
-    }
-
-    public DirectInOut(int bufferSize, Item item) {
+    public DirectOutput(int bufferSize, int produceAmount, Item item) {
         this.bufferSize = bufferSize;
         this.Item = item;
+        this.ProduceAmount = produceAmount;
     }
 
-    public bool Retrieve() {
-        if (!CanRetrieve) return false;
-        buffer -= RetrieveAmount;
-        return true;
-    }
-
-    public bool Push() {
-        if (CanPush) {
-            buffer += PushAmount;
+    public bool Produce() {
+        if (CanProduce) {
+            buffer += ProduceAmount;
             return true;
+            
         }
         return false;
+    }
+
+    public bool Remove() {
+        if (!CanRemove) return false;
+        buffer -= 1;
+        return true;
     }
 }

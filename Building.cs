@@ -8,26 +8,21 @@ public class Building {
     private float lastProcess = 0;
 
     public virtual void Update(float delta) {
-        if (Input.CanRetrieve && Output.CanPush) {
+        if (Input.CanConsume && Output.CanProduce) {
             lastProcess += delta;
             if (lastProcess >= ProcessingTime) {
                 lastProcess = 0;
-                Input.Retrieve();
-                Output.Push();
+                Input.Consume();
+                Output.Produce();
             }
         }
     }
 }
 
 public class Workshop : Building {
-    public Workshop(Item input, int inputReq, Item output, int outputAmount, int time) {
-        var inp = new DirectInOut(inputReq * 2, input);
-        inp.RetrieveAmount = 5;
-        Input = inp;
-
-        var outp = new DirectInOut(5, output);
-        outp.PushAmount = outputAmount;
-        Output = outp;
+    public Workshop(Item input, int inputReq, Item output, int outputAmount, int time) { 
+        Input = new DirectInput(inputReq * 2, inputReq, input);
+        Output = new DirectOutput(5, outputAmount, output);
 
         ProcessingTime = time;
     }
@@ -49,7 +44,7 @@ public class Workshop : Building {
 public class InfiniteStorage : Building {
     public InfiniteStorage(Item item) {
         Input = new InfiniteInput(item);
-        Output = new DirectInOut(200, item);
+        Output = new DirectOutput(200, 1, item);
         ProcessingTime = 0;
     }
 }
