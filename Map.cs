@@ -36,6 +36,10 @@ public class Map : MapInfo {
         entities.Add(entity);
     }
 
+    public void RemoveEntity(Entity entity) {
+        entities.Remove(entity);
+    }
+
     public Entity GetEntity(TilePos pos) {
         foreach (Entity e in entities) {
             if (e.Pos == pos) return e;
@@ -46,11 +50,16 @@ public class Map : MapInfo {
 
     public void AddBuilding(Building building, int x, int y) {
         tiles[x, y].Building = building;
+        building.Pos = new TilePos(x, y);
         buildings.Add(building);
     }
 
     public Building GetBuilding(int x, int y) {
         return tiles[x, y].Building;
+    }
+
+    public void RemoveBuilding(TilePos pos) {
+        tiles[pos.X, pos.Y].Building = null;
     }
 
     public void Update(float delta) {
@@ -82,5 +91,14 @@ public class Map : MapInfo {
         }
 
         return null;
+    }
+
+    public void RemoveRoute(Route route) {
+        routes.Remove(route);
+        foreach (Entity e in entities) {
+            if (e is Hauler h && h.Route == route) {
+                h.Route = null;
+            }
+        }
     }
 }

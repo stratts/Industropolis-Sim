@@ -1,4 +1,6 @@
 public class Building { 
+    public TilePos Pos { get; set; }
+
     public float ProcessingTime { get; set; } = 0;
     public bool Processing { get; private set; } = false;
 
