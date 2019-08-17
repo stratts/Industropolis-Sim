@@ -5,6 +5,7 @@ public interface MapInfo {
     int Width { get; }
     int Height { get; }
     Building GetBuilding(int x, int y);
+    IEnumerable<T> GetEntities<T>() where T: Entity;
 }
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
@@ -62,6 +63,12 @@ public class Map : MapInfo {
         return null;
     }
 
+    public IEnumerable<T> GetEntities<T>() where T : Entity {
+        foreach (Entity e in entities) {
+            if (e is T t) yield return t;
+        }
+    }
+
     public void AddBuilding(Building building, int x, int y) {
         tiles[x, y].Building = building;
         building.Pos = new TilePos(x, y);
@@ -89,14 +96,7 @@ public class Map : MapInfo {
         var route = new Route(this, start, dest);
         route.Pathfind();
         routes.Add(route);
-
-        foreach (Entity e in entities) {
-            if (e is Hauler h && h.Route == null) {
-                h.Route = route;
-                h.Haul();
-                break;
-            }
-        }
+        route.AddHauler();
 
         if (MapChanged != null) {
             MapChanged(this, new MapChangedEventArgs { Route = route });

@@ -2,11 +2,16 @@ using System;
 using System.Collections.Generic;
 
 public class Route : MapObject {
-    public List<TilePos> _path;
+    private List<TilePos> _path;
     
     public IReadOnlyList<TilePos> Path => _path;
     public TilePos Source { get; set; }
     public TilePos Dest { get; set; }
+
+    public Item Item { get; set; } = Item.None;
+    public List<Hauler> Haulers { get; }= new List<Hauler>();
+
+    public int NumHaulers => Haulers.Count;
 
     public enum Direction { Forwards, Backwards };
 
@@ -43,5 +48,22 @@ public class Route : MapObject {
         }
 
         _path.Add(curr);
+    }
+
+    public void AddHauler() {
+        foreach (var h in MapInfo.GetEntities<Hauler>()) {
+            if (h.Route == null) {
+                Haulers.Add(h);
+                h.Route = this;
+                h.Haul();
+                return;
+            }
+        }
+    }
+
+    public void RemoveHauler() {
+        Hauler h = Haulers[0];
+        Haulers.RemoveAt(0);
+        h.Route = null;
     }
 }
