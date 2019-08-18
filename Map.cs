@@ -96,7 +96,6 @@ public class Map : MapInfo {
         var route = new Route(this, start, dest);
         route.Pathfind();
         routes.Add(route);
-        route.AddHauler();
 
         if (MapChanged != null) {
             MapChanged(this, new MapChangedEventArgs { Route = route });

@@ -62,6 +62,7 @@ public class Route : MapObject {
     }
 
     public void RemoveHauler() {
+        if (Haulers.Count == 0) return;
         Hauler h = Haulers[0];
         Haulers.RemoveAt(0);
         h.Route = null;
