@@ -84,7 +84,7 @@ public class Map : MapInfo {
 
     public void RemoveBuilding(Building building) {
         building.Remove();
-        tiles[building.Pos.X, building.Pos.X].Building = null;
+        tiles[building.Pos.X, building.Pos.Y].Building = null;
     }
 
     public void Update(float delta) {
