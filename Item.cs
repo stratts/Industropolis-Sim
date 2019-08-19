@@ -2,5 +2,6 @@
 public enum Item {
     None,
     Wood,
-    Log
+    Log,
+    Food
 }

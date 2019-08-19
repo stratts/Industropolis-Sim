@@ -6,6 +6,7 @@ public interface MapInfo {
     int Height { get; }
     Building GetBuilding(int x, int y);
     IEnumerable<T> GetEntities<T>() where T: Entity;
+    PopulationInfo Population { get; }
 }
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
@@ -25,6 +26,8 @@ public class Map : MapInfo {
     public List<Entity> Entities => entities;
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
+
+    public PopulationInfo Population { get; } = new PopulationInfo();
 
     public event MapChangedEvent MapChanged;
 
@@ -70,6 +73,7 @@ public class Map : MapInfo {
     }
 
     public void AddBuilding(Building building, TilePos pos) {
+        if (GetBuilding(pos) != null) return;
         tiles[pos.X, pos.Y].Building = building;
         building.Pos = pos;
         buildings.Add(building);

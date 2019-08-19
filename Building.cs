@@ -46,6 +46,14 @@ public class Workshop : Building {
     }
 }
 
+public class House : Building {
+    public House(PopulationInfo population) {
+        Input = new DirectInput(5, 1, Item.Food);
+        Output = new PopulationOutput(population);
+        ProcessingTime = 5;
+    }
+}
+
 /*public class Storage : Building {
     public Storage() {
         var buffer = new DirectInOut(200, Item.Wood);
