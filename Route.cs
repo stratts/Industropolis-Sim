@@ -51,14 +51,12 @@ public class Route : MapObject {
     }
 
     public void AddHauler() {
-        foreach (var h in MapInfo.GetEntities<Hauler>()) {
-            if (h.Route == null) {
-                Haulers.Add(h);
-                h.Route = this;
-                h.Haul();
-                return;
-            }
-        }
+        if (!MapInfo.Population.Use()) return;
+        var hauler = new Hauler(MapInfo, Source.X, Source.Y);
+        hauler.Route = this;
+        Haulers.Add(hauler);
+        hauler.Haul();
+        MapInfo.AddEntity(hauler);
     }
 
     public void RemoveHauler() {
@@ -66,5 +64,7 @@ public class Route : MapObject {
         Hauler h = Haulers[0];
         Haulers.RemoveAt(0);
         h.Route = null;
+        MapInfo.RemoveEntity(h);
+        MapInfo.Population.Free();
     }
 }

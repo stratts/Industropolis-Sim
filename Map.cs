@@ -6,6 +6,8 @@ public interface MapInfo {
     int Height { get; }
     Building GetBuilding(int x, int y);
     IEnumerable<T> GetEntities<T>() where T: Entity;
+    void AddEntity(Entity entity);
+    void RemoveEntity(Entity entity);
     PopulationInfo Population { get; }
 }
 
