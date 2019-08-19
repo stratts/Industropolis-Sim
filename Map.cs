@@ -69,17 +69,25 @@ public class Map : MapInfo {
         }
     }
 
-    public void AddBuilding(Building building, int x, int y) {
-        tiles[x, y].Building = building;
-        building.Pos = new TilePos(x, y);
+    public void AddBuilding(Building building, TilePos pos) {
+        tiles[pos.X, pos.Y].Building = building;
+        building.Pos = pos;
         buildings.Add(building);
         if (MapChanged != null) {
             MapChanged(this, new MapChangedEventArgs { Building = building });
         }
     }
 
+    public void AddBuilding(Building building, int x, int y) {
+        AddBuilding(building, new TilePos(x, y));
+    }
+
     public Building GetBuilding(int x, int y) {
         return tiles[x, y].Building;
+    }
+
+    public Building GetBuilding(TilePos pos) {
+        return tiles[pos.X, pos.Y].Building;
     }
 
     public void RemoveBuilding(Building building) {

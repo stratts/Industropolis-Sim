@@ -4,12 +4,13 @@ public class Building : GameObject {
     public float ProcessingTime { get; set; } = 0;
     public bool Processing { get; private set; } = false;
 
-    public IConsumer Input { get; set; }
-    public IProducer Output { get; set; }
+    public IConsumer Input { get; set; } = null;
+    public IProducer Output { get; set; } = null;
 
     private float lastProcess = 0;
 
     public virtual void Update(float delta) {
+        if (Input == null || Output == null) return;
         if (Input.CanConsume && Output.CanProduce) {
             lastProcess += delta;
             if (lastProcess >= ProcessingTime) {
@@ -22,11 +23,26 @@ public class Building : GameObject {
 }
 
 public class Workshop : Building {
-    public Workshop(Item input, int inputReq, Item output, int outputAmount, int time) { 
-        Input = new DirectInput(inputReq * 2, inputReq, input);
-        Output = new DirectOutput(5, outputAmount, output);
+    public Recipe Recipe {
+        get {
+            return _recipe;
+        }
+        set {
+            _recipe = value;
+            LoadRecipe(value);
+        }
+    }
 
-        ProcessingTime = time;
+    private Recipe _recipe;
+
+    public Workshop() {
+
+    }
+
+    public void LoadRecipe(Recipe recipe) {
+        Input = new DirectInput(recipe.InputCount * 2, recipe.InputCount, recipe.InputItem);
+        Output = new DirectOutput(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
+        ProcessingTime = recipe.ProcessingTime;
     }
 }
 
