@@ -9,6 +9,8 @@ public interface MapInfo {
     void AddEntity(Entity entity);
     void RemoveEntity(Entity entity);
     PopulationInfo Population { get; }
+    bool HasResource(Item item, int amount);
+    void GetResource(Item item, int amount);
 }
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
@@ -76,6 +78,14 @@ public class Map : MapInfo {
 
     public void AddBuilding(Building building, TilePos pos) {
         if (GetBuilding(pos) != null) return;
+        if (building.RequiredResources != null) {
+            foreach (var resource in building.RequiredResources) {
+                if (!HasResource(resource.Key, resource.Value)) return;
+            }
+            foreach (var resource in building.RequiredResources) {
+                GetResource(resource.Key, resource.Value);
+            }
+        }
         tiles[pos.X, pos.Y].Building = building;
         building.Pos = pos;
         buildings.Add(building);
@@ -134,6 +144,26 @@ public class Map : MapInfo {
         foreach (Entity e in entities) {
             if (e is Hauler h && h.Route == route) {
                 h.Route = null;
+            }
+        }
+    }
+
+    public bool HasResource(Item item, int amount) {
+        foreach (Building b in buildings) {
+            if (b is Stockpile s) {
+                if (s.HasItem(item, amount)) return true;
+            }
+        }
+        return false;
+    }
+
+    public void GetResource(Item item, int amount) {
+        foreach (Building b in buildings) {
+            if (b is Stockpile s) {
+                if (s.HasItem(item, amount)) {
+                    s.RemoveItem(item, amount);
+                    return;
+                }
             }
         }
     }

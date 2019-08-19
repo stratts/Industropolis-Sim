@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class Building : GameObject { 
     public TilePos Pos { get; set; }
 
@@ -7,6 +9,9 @@ public class Building : GameObject {
     public IConsumer Input { get; set; } = null;
     public IProducer Output { get; set; } = null;
 
+    public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
+
+    protected Dictionary<Item, int> _requiredResources = null;
     private float lastProcess = 0;
 
     public virtual void Update(float delta) {
@@ -36,7 +41,9 @@ public class Workshop : Building {
     private Recipe _recipe;
 
     public Workshop() {
-
+        _requiredResources = new Dictionary<Item, int>() {
+            {Item.Wood, 50}
+        };
     }
 
     public void LoadRecipe(Recipe recipe) {
@@ -54,18 +61,32 @@ public class House : Building {
     }
 }
 
-/*public class Storage : Building {
-    public Storage() {
-        var buffer = new DirectInOut(200, Item.Wood);
-        Input = buffer;
-        Output = buffer;
+public class Stockpile : Building {
+    private DirectOutput output = new DirectOutput(1000, 1, Item.Wood);
+    private DirectInput input = new DirectInput(1000, 1, Item.Wood);
+
+    public Stockpile() {
+        Input = input;
+        Output = output;
         ProcessingTime = 0;
     }
 
-    public override void Update(float delta) {
-
+    public void AddItem(Item item, int amount) {
+        for (int i = 0; i < amount; i++) {
+            input.Insert();
+        }
     }
-}*/
+
+    public bool HasItem(Item item, int amount) {
+        return output.Buffer >= amount;
+    }
+
+    public void RemoveItem(Item item, int amount) {
+        for (int i = 0; i < amount; i++) {
+            output.Remove();
+        }
+    }
+}
 
 public class InfiniteStorage : Building {
     public InfiniteStorage(Item item) {
