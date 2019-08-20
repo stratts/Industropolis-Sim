@@ -54,6 +54,7 @@ public class Route : MapObject {
         if (!MapInfo.Population.Use()) return;
         var hauler = new Hauler(MapInfo, Source.X, Source.Y);
         hauler.Route = this;
+        hauler.Item = Item;
         Haulers.Add(hauler);
         hauler.Haul();
         MapInfo.AddEntity(hauler);

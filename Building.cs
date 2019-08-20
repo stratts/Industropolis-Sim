@@ -73,7 +73,7 @@ public class Stockpile : Building {
 
     public void AddItem(Item item, int amount) {
         for (int i = 0; i < amount; i++) {
-            input.Insert();
+            input.Insert(item);
         }
     }
 

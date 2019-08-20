@@ -1,6 +1,7 @@
 
+using System.Collections.Generic;
+
 public interface IConsumer {
-    Item Item { get; }
     bool CanConsume { get; }
     bool Consume();
 }
@@ -25,29 +26,85 @@ public abstract class DirectBase {
     public int BufferSize => bufferSize;
 }
 
-public class DirectInput : DirectBase, IConsumer {
-    public int ConsumeAmount { get; private set; }
+public class ItemBuffer {
+    public int Buffer { get; set; }
+    public int BufferSize { get; private set; }
+    public Item Item { get; private set; }
 
-    public bool CanConsume => buffer >= ConsumeAmount;
-    public bool CanInsert => buffer < bufferSize;
+    public bool CanInsert => Buffer < BufferSize;
+    public bool CanRemove => Buffer > 0;
+
+    public ItemBuffer(int bufferSize, Item item) {
+        BufferSize = bufferSize;
+        Item = item;
+    }
+
+    public void Insert() {
+        if (CanInsert) Buffer++;
+    }
+
+    public void Remove() {
+        if (CanRemove) Buffer--;
+    }
+}
+
+public class DirectInput : IConsumer {
+    private List<ItemBuffer> _buffers = new List<ItemBuffer>();
+    private Dictionary<Item, int> _consumeAmount = new Dictionary<Item, int>();
+
+    public bool CanConsume => _canConsume();
+    public IEnumerable<Item> Items => _consumeAmount.Keys;
+
+    public DirectInput() {
+
+    }
 
     public DirectInput(int bufferSize, int consumeAmount, Item item) {
-        this.bufferSize = bufferSize;
-        this.Item = item;
-        this.ConsumeAmount = consumeAmount;
+        AddItem(bufferSize, consumeAmount, item);
+    }
+
+    public bool Accepts(Item item) {
+        return _consumeAmount.ContainsKey(item);
+    }
+
+    public bool CanInsert(Item item) {
+        return GetBuffer(item).CanInsert;
+    }
+
+    public bool Insert(Item item) {
+        if (!CanInsert(item)) return false;
+        GetBuffer(item).Insert();
+        return true;
+    }
+
+    public int GetConsumeAmount(Item item) {
+        return _consumeAmount[item];
+    }
+
+    public ItemBuffer GetBuffer(Item item) {
+        foreach (ItemBuffer b in _buffers) {
+            if (b.Item == item) return b;
+        }
+        return null;
+    }
+
+    public void AddItem(int bufferSize, int consumeAmount, Item item) {
+        _consumeAmount[item] = consumeAmount;
+        _buffers.Add(new ItemBuffer(bufferSize, item));
+    }
+
+    private bool _canConsume() {
+        foreach (ItemBuffer b in _buffers) {
+            if (_consumeAmount[b.Item] > b.Buffer) return false;
+        }
+        return true;
     }
 
     public bool Consume() {
         if (!CanConsume) return false;
-        buffer -= ConsumeAmount;
-        return true;
-    }
-
-    public bool Insert() {
-        if (CanInsert) {
-            buffer++;
-            return true;
+        foreach (ItemBuffer b in _buffers) {
+            b.Buffer -= _consumeAmount[b.Item];
         }
-        return false;
+        return true;
     }
 }

@@ -10,6 +10,7 @@ public class Hauler : Entity {
  
     public int Inventory { get; set; } = 0;
     public int MaxInventory { get; set; } = 5;
+    public Item Item { get; set; }
     public bool Hauling { get; set; } = false;
 
     public Hauler(MapInfo map, int x, int y) : base(map, x, y) {
@@ -29,8 +30,8 @@ public class Hauler : Entity {
     }
 
     private bool Dropoff(DirectInput input) {
-        if (Inventory <= 0 || !input.CanInsert) return false;
-        input.Insert();
+        if (Inventory <= 0 || !input.CanInsert(Item)) return false;
+        input.Insert(Item);
         Inventory--;
         return true;
     }

@@ -80,7 +80,10 @@ public class Map : MapInfo {
         if (GetBuilding(pos) != null) return;
         if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
-                if (!HasResource(resource.Key, resource.Value)) return;
+                if (!HasResource(resource.Key, resource.Value)) {
+                    Godot.GD.Print($"Not enough resources to build {building.GetType().Name}");
+                    return;
+                }
             }
             foreach (var resource in building.RequiredResources) {
                 GetResource(resource.Key, resource.Value);
@@ -116,8 +119,9 @@ public class Map : MapInfo {
         foreach (Building b in buildings) b.Update(delta);
     }
 
-    public Route AddRoute(TilePos start, TilePos dest) {
+    public Route AddRoute(TilePos start, TilePos dest, Item item) {
         var route = new Route(this, start, dest);
+        route.Item = item;
         route.Pathfind();
         routes.Add(route);
 
