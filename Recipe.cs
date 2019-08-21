@@ -2,11 +2,20 @@ using System.Collections.Generic;
 
 public struct Recipe {
     public string Name { get; set; }
-    public Item InputItem { get; set; }
-    public int InputCount { get; set; }
+    public RecipeInput[] Input;
     public Item OutputItem { get; set; }
     public int OutputCount { get; set; }
     public int ProcessingTime { get; set; }
+}
+
+public struct RecipeInput {
+    public Item Item { get; set; }
+    public int Count { get; set; }
+
+    public RecipeInput(Item item, int count) {
+        Item = item;
+        Count = count;
+    }
 }
 
 public static class Recipes {
@@ -14,8 +23,7 @@ public static class Recipes {
         {
             "None", new Recipe() {
                 Name = "None",
-                InputItem = Item.None,
-                InputCount = 0,
+                Input = new [] { new RecipeInput(Item.None, 0) },
                 OutputItem = Item.None,
                 OutputCount = 0,
                 ProcessingTime = 0
@@ -24,8 +32,10 @@ public static class Recipes {
         {
             "Log", new Recipe() {
                 Name = "Log",
-                InputItem = Item.Wood,
-                InputCount = 5,
+                Input = new [] { 
+                    new RecipeInput(Item.Wood, 5),
+                    new RecipeInput(Item.Food, 10) 
+                    },
                 OutputItem = Item.Log,
                 OutputCount = 1,
                 ProcessingTime = 1
@@ -34,8 +44,7 @@ public static class Recipes {
         {
             "Food", new Recipe() {
                 Name = "Food",
-                InputItem = Item.None,
-                InputCount = 0,
+                Input = new [] { new RecipeInput(Item.None, 0) },
                 OutputItem = Item.Food,
                 OutputCount = 1,
                 ProcessingTime = 1

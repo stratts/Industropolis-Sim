@@ -16,12 +16,18 @@ public class Building : GameObject {
 
     public virtual void Update(float delta) {
         if (Input == null || Output == null) return;
-        if (Input.CanConsume && Output.CanProduce) {
-            lastProcess += delta;
-            if (lastProcess >= ProcessingTime) {
-                lastProcess = 0;
+        if (Output.CanProduce) {
+            if (Input.CanConsume && !Processing) {
                 Input.Consume();
-                Output.Produce();
+                Processing = true;
+                lastProcess = 0;
+            }
+            else if (Processing) {
+                lastProcess += delta;
+                if (lastProcess >= ProcessingTime) {
+                    Processing = false;
+                    Output.Produce();
+                }
             }
         }
     }
@@ -47,7 +53,11 @@ public class Workshop : Building {
     }
 
     public void LoadRecipe(Recipe recipe) {
-        Input = new DirectInput(recipe.InputCount * 2, recipe.InputCount, recipe.InputItem);
+        var input = new DirectInput();
+        foreach (RecipeInput i in recipe.Input) {
+            input.AddItem(i.Count * 2, i.Count, i.Item);
+        }
+        Input = input;
         Output = new DirectOutput(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
         ProcessingTime = recipe.ProcessingTime;
     }
