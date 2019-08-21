@@ -1,34 +1,60 @@
 
+using System.Collections.Generic;
+
 public interface IProducer {
-    Item Item { get; }
     bool CanProduce { get; }
     bool Produce();
 }
 
-public class DirectOutput : DirectBase, IProducer {
+public interface IDirectOutput {
+    IReadOnlyList<Item> Items { get; }
+    bool Has(Item item);
+    bool CanRemove(Item item);
+    bool Remove(Item item);
+}
+
+public class DirectProducer : IProducer, IDirectOutput {
+    private ItemBuffer _buffer;
+    private Item[] _items;
+    private Item _item;
+
+    public int Buffer => _buffer.Buffer;
+    public int BufferSize => _buffer.BufferSize;
+
+    public Item Item => _item;
     public int ProduceAmount { get; set; }
+    public IReadOnlyList<Item> Items => _items;
+    public bool CanProduce => _buffer.Buffer <= _buffer.BufferSize - ProduceAmount;
 
-    public bool CanProduce => buffer <= bufferSize - ProduceAmount;
-    public bool CanRemove => buffer > 0;
-
-    public DirectOutput(int bufferSize, int produceAmount, Item item) {
-        this.bufferSize = bufferSize;
-        this.Item = item;
+    public DirectProducer(int bufferSize, int produceAmount, Item item) {
+        _buffer = new ItemBuffer(bufferSize, item);
+        _items = new [] { item };
+        _item = item;
         this.ProduceAmount = produceAmount;
     }
 
     public bool Produce() {
         if (CanProduce) {
-            buffer += ProduceAmount;
+            _buffer.Buffer += ProduceAmount;
             return true;
             
         }
         return false;
     }
 
-    public bool Remove() {
-        if (!CanRemove) return false;
-        buffer -= 1;
+    public bool Has(Item item) {
+        if (item != _item) return false;
+        return true;
+    }
+
+    public bool CanRemove(Item item) {
+        if (item != _item || _buffer.Buffer <= 0) return false;
+        return true;
+    }
+
+    public bool Remove(Item item) {
+        if (!CanRemove(item)) return false;
+        _buffer.Buffer -= 1;
         return true;
     }
 }

@@ -3,22 +3,32 @@ using System.Collections.Generic;
 public class Building : GameObject { 
     public TilePos Pos { get; set; }
 
-    public float ProcessingTime { get; set; } = 0;
-    public bool Processing { get; private set; } = false;
-
-    public IConsumer Input { get; set; } = null;
-    public IProducer Output { get; set; } = null;
+    public IDirectInput Input { get; set; } = null;
+    public IDirectOutput Output { get; set; } = null;
 
     public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 
     protected Dictionary<Item, int> _requiredResources = null;
-    private float lastProcess = 0;
 
     public virtual void Update(float delta) {
-        if (Input == null || Output == null) return;
-        if (Output.CanProduce) {
-            if (Input.CanConsume && !Processing) {
-                Input.Consume();
+        
+    }
+}
+
+public class ProductionBuilding : Building {
+    public float ProcessingTime { get; set; } = 0;
+    public bool Processing { get; private set; } = false;
+
+    public IConsumer Consumer { get; set; } = null;
+    public IProducer Producer { get; set; } = null;
+
+    private float lastProcess = 0;
+
+    public override void Update(float delta) {
+        if (Consumer == null || Producer == null) return;
+        if (Producer.CanProduce) {
+            if (Consumer.CanConsume && !Processing) {
+                Consumer.Consume();
                 Processing = true;
                 lastProcess = 0;
             }
@@ -26,14 +36,14 @@ public class Building : GameObject {
                 lastProcess += delta;
                 if (lastProcess >= ProcessingTime) {
                     Processing = false;
-                    Output.Produce();
+                    Producer.Produce();
                 }
             }
         }
     }
 }
 
-public class Workshop : Building {
+public class Workshop : ProductionBuilding {
     public Recipe Recipe {
         get {
             return _recipe;
@@ -53,55 +63,53 @@ public class Workshop : Building {
     }
 
     public void LoadRecipe(Recipe recipe) {
-        var input = new DirectInput();
+        var input = new DirectConsumer();
         foreach (RecipeInput i in recipe.Input) {
             input.AddItem(i.Count * 2, i.Count, i.Item);
         }
         Input = input;
-        Output = new DirectOutput(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
+        Consumer = input;
+        var producer = new DirectProducer(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
+        Producer = producer;
+        Output = producer;
         ProcessingTime = recipe.ProcessingTime;
     }
 }
 
-public class House : Building {
+public class House : ProductionBuilding {
     public House(PopulationInfo population) {
-        Input = new DirectInput(5, 1, Item.Food);
-        Output = new PopulationOutput(population);
+        var input = new DirectConsumer(5, 1, Item.Food);
+        Input = input;
+        Consumer = input;
+        Producer = new PopulationOutput(population);
         ProcessingTime = 5;
     }
 }
 
 public class Stockpile : Building {
-    private DirectOutput output = new DirectOutput(1000, 1, Item.Wood);
-    private DirectInput input = new DirectInput(1000, 1, Item.Wood);
+    private Storage _storage = new Storage();
 
     public Stockpile() {
-        Input = input;
-        Output = output;
-        ProcessingTime = 0;
+        Input = _storage;
+        Output = _storage;
     }
 
     public void AddItem(Item item, int amount) {
         for (int i = 0; i < amount; i++) {
-            input.Insert(item);
+            _storage.Insert(item);
         }
     }
 
     public bool HasItem(Item item, int amount) {
-        return output.Buffer >= amount;
+        if (!_storage.Has(item)) return false;
+        var buffer = _storage.GetBuffer(item);
+        if (buffer.Buffer < amount) return false;
+        return true;
     }
 
     public void RemoveItem(Item item, int amount) {
         for (int i = 0; i < amount; i++) {
-            output.Remove();
+            _storage.Remove(item);
         }
-    }
-}
-
-public class InfiniteStorage : Building {
-    public InfiniteStorage(Item item) {
-        Input = new InfiniteInput(item);
-        Output = new DirectOutput(200, 1, item);
-        ProcessingTime = 0;
     }
 }
