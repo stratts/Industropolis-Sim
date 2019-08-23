@@ -11,6 +11,7 @@ public interface MapInfo {
     PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
+    Tile GetTile(TilePos pos);
 }
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
@@ -170,5 +171,13 @@ public class Map : MapInfo {
                 }
             }
         }
+    }
+
+    public Tile GetTile(TilePos pos) {
+        int x = pos.X;
+        int y = pos.Y;
+
+        if (x < 0 || y < 0 || x >= Width || y >= Height) return null;
+        return tiles[pos.X, pos.Y];
     }
 }
