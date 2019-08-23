@@ -1,17 +1,4 @@
-
 using System.Collections.Generic;
-
-public interface IProducer {
-    bool CanProduce { get; }
-    bool Produce();
-}
-
-public interface IDirectOutput {
-    IReadOnlyList<Item> Items { get; }
-    bool Has(Item item);
-    bool CanRemove(Item item);
-    bool Remove(Item item);
-}
 
 public class DirectProducer : IProducer, IDirectOutput {
     private ItemBuffer _buffer;
@@ -55,23 +42,6 @@ public class DirectProducer : IProducer, IDirectOutput {
     public bool Remove(Item item) {
         if (!CanRemove(item)) return false;
         _buffer.Buffer -= 1;
-        return true;
-    }
-}
-
-public class PopulationOutput : IProducer {
-    public Item Item => Item.None;
-    public bool CanProduce => _population.Population < _population.MaxPopulation;
-
-    private PopulationInfo _population;
-
-    public PopulationOutput(PopulationInfo population) {
-        _population = population;
-    }
-
-    public bool Produce() {
-        if (!CanProduce) return false;
-        _population.Population++;
         return true;
     }
 }
