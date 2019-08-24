@@ -123,6 +123,8 @@ public class Map : MapInfo {
     public Route AddRoute(TilePos start, TilePos dest, Item item) {
         var route = new Route(this, start, dest);
         route.Item = item;
+        route.SourceOutput = GetBuilding(start).Output;
+        route.DestInput = GetBuilding(dest).Input;
         route.Pathfind();
         routes.Add(route);
 

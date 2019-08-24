@@ -8,6 +8,9 @@ public class Route : MapObject {
     public TilePos Source { get; set; }
     public TilePos Dest { get; set; }
 
+    public IDirectOutput SourceOutput { get; set; }
+    public IDirectInput DestInput { get; set; }
+
     public Item Item { get; set; } = Item.None;
     public List<Hauler> Haulers { get; }= new List<Hauler>();
 
