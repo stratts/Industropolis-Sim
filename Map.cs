@@ -182,4 +182,16 @@ public class Map : MapInfo {
         if (x < 0 || y < 0 || x >= Width || y >= Height) return null;
         return tiles[pos.X, pos.Y];
     }
+
+    public void CreateResourcePatch(int x, int y, int size, Item resource, int amount) {
+        for (int i = x; i < x + size; i++) {
+            for (int j = y; j < y + size; j++) {
+                Tile t = GetTile(new TilePos(i, j));
+                if (t != null) {
+                    t.Resource = resource;
+                    t.ResourceCount = amount;
+                }
+            }
+        }
+    }
 }
