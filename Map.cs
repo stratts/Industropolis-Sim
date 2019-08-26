@@ -78,7 +78,6 @@ public class Map : MapInfo {
     }
 
     public void AddBuilding(Building building, TilePos pos) {
-        if (GetBuilding(pos) != null) return;
         if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
                 if (!HasResource(resource.Key, resource.Value)) {
@@ -90,7 +89,13 @@ public class Map : MapInfo {
                 GetResource(resource.Key, resource.Value);
             }
         }
-        tiles[pos.X, pos.Y].Building = building;
+        building.Pos = pos;
+        foreach (var tile in GetBuildingTiles(building)) {
+            if (GetBuilding(tile) != null) return;
+        }
+        foreach (var tile in GetBuildingTiles(building)) {
+            tiles[tile.X, tile.Y].Building = building;
+        }
         building.Pos = pos;
         buildings.Add(building);
         if (MapChanged != null) {
@@ -110,10 +115,20 @@ public class Map : MapInfo {
         return tiles[pos.X, pos.Y].Building;
     }
 
+    public IEnumerable<TilePos> GetBuildingTiles(Building building) {
+        for (int x = 0; x < building.Width; x++) {
+            for (int y = 0; y < building.Height; y++) {
+                yield return building.Pos + new TilePos(x, y);
+            }
+        }
+    }
+
     public void RemoveBuilding(Building building) {
         building.Remove();
         buildings.Remove(building);
-        tiles[building.Pos.X, building.Pos.Y].Building = null;
+        foreach (var pos in GetBuildingTiles(building)) {
+            tiles[pos.X, pos.Y].Building = null;
+        }
     }
 
     public void Update(float delta) {

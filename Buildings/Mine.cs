@@ -6,5 +6,7 @@ public class Mine : ProductionBuilding {
         Output = output;
         Producer = output;
         ProcessingTime = 2;
+        Width = 2;
+        Height = 2;
     }
 }

@@ -6,6 +6,9 @@ public class Building : GameObject {
     public IDirectInput Input { get; set; } = null;
     public IDirectOutput Output { get; set; } = null;
 
+    public int Width { get; protected set; } = 1;
+    public int Height { get; protected set; } = 1;
+
     public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 
     protected Dictionary<Item, int> _requiredResources = null;
