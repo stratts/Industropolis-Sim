@@ -112,6 +112,7 @@ public class Map : MapInfo {
 
     public void RemoveBuilding(Building building) {
         building.Remove();
+        buildings.Remove(building);
         tiles[building.Pos.X, building.Pos.Y].Building = null;
     }
 
