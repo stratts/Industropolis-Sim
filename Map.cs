@@ -42,13 +42,7 @@ public class Map : MapInfo {
         buildings = new List<Building>();
 
         int size = 50;
-        tiles = new Tile[size,size];
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                tiles[i,j] = new Tile();
-            }
-        }     
+        tiles = MapGenerator.GenerateTiles(size, size, 1);
     }
 
     public void AddEntity(Entity entity) {
