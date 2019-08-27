@@ -40,17 +40,33 @@ public class Route : MapObject {
         _path.Clear();
 
         TilePos curr = Source;
+        _path.Add(Source);
 
         while (curr != Dest) {
-            _path.Add(curr);
-
-            if (Dest.X > curr.X) curr.X += 1;
-            else if (Dest.X < curr.X) curr.X -= 1;
-            if (Dest.Y > curr.Y) curr.Y += 1;
-            else if (Dest.Y < curr.Y) curr.Y -= 1;
+            TilePos next = curr;
+            float minDist = -1;
+            // Find next valid tile with shortest distance to dest
+            for (int x = -1; x <= 1 && curr != Dest; x++) {
+                for (int y = -1; y <= 1 && curr != Dest; y++) {
+                    if (x == 0 && y == 0) continue;
+                    TilePos p = new TilePos(curr.X + x, curr.Y + y);
+                    Tile t = MapInfo.GetTile(p);
+                    if (p != Dest && (t == null || t.Building != null)) continue;
+                    float d = p.Distance(Dest);
+                    if (minDist == -1 || d < minDist) {
+                        minDist = d;
+                        next = p;
+                    }
+                }
+            }
+            _path.Add(next);
+            // Infinite loops possible, so break if too long
+            if (_path.Count >= Source.Distance(Dest) * 2) {
+                _path.Clear();
+                return;
+            }
+            curr = next;
         }
-
-        _path.Add(curr);
     }
 
     public void AddHauler() {
