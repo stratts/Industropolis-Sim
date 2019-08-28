@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace NoiseTest
+namespace OpenSimplex
 {
     public class OpenSimplexNoise
     {
@@ -104,6 +104,22 @@ namespace NoiseTest
             }
         }
 
+        public double EvaluateOctave(double x, double y, int octaves, double persistence) {
+            double total = 0;
+            double frequency = 1;
+            double amplitude = 1;
+            double maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
+
+            for(int i = 0; i < octaves; i++) {
+                total += Evaluate(x * frequency, y * frequency) * amplitude;  
+                maxValue += amplitude;
+                amplitude *= persistence;
+                frequency *= 2;
+            }
+    
+            return total/maxValue;
+        }
+
         public double Evaluate(double x, double y)
         {
             var stretchOffset = (x + y) * STRETCH_2D;
@@ -149,7 +165,7 @@ namespace NoiseTest
                 }
                 c = c.Next;
             }
-            return value * NORM_2D;
+            return (value * NORM_2D) * 1.15;
         }
 
         private class Contribution2
