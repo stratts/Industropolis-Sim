@@ -68,7 +68,6 @@ public class Hauler : Entity {
                     target = Route.Next(this.Pos, Route.Direction.Forwards);
                 }
                 else target = Route.Next(this.Pos, Route.Direction.Backwards);
-                GD.Print(target.X + " " + target.Y);
             }
             else {
                 target = Route.Source;
