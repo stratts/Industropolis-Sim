@@ -11,8 +11,15 @@ public class Route : MapObject {
     public IDirectOutput SourceOutput { get; set; }
     public IDirectInput DestInput { get; set; }
 
-    public Item Item { get; set; } = Item.None;
-    public List<Hauler> Haulers { get; }= new List<Hauler>();
+    private Item _item = Item.None;
+    public Item Item { 
+        get => _item;
+        set {
+            _item = value;
+            foreach (var h in Haulers) h.Item = value;
+        }
+    }
+    public List<Hauler> Haulers { get; } = new List<Hauler>();
 
     public int NumHaulers => Haulers.Count;
 

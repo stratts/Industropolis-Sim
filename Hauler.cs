@@ -7,12 +7,20 @@ public class Hauler : Entity {
     private float timeSinceMove = 0;
     private float moveInterval = 1;
     private bool followingRoute = false;
+    private Item _item = Item.None;
  
     public int Inventory { get; set; } = 0;
     public int MaxInventory { get; set; } = 5;
-    public Item Item { get; set; }
     public bool Hauling { get; set; } = false;
 
+    public Item Item {
+        get => _item;
+        set {
+            _item = value;
+            Inventory = 0;
+        }
+    }
+    
     public Hauler(MapInfo map, int x, int y) : base(map, x, y) {
 
     }
