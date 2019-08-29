@@ -1,5 +1,13 @@
 using System.Collections.Generic;
 
+
+public enum BuildingType {
+    None,
+    Workshop,
+    House,
+    Mine
+}
+
 public class Building : GameObject { 
     public TilePos Pos { get; set; }
 
