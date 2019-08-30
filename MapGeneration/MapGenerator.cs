@@ -40,6 +40,8 @@ public static class MapGenerator {
             GenerateResource(tiles, resource, seed);
         }
 
+        GenerateNutrients(tiles, seed);
+
         return tiles;
     }
 
@@ -59,6 +61,22 @@ public static class MapGenerator {
                     tiles[x,y].Resource = resource.Item;
                     tiles[x,y].ResourceCount = (int)(amount * ((value - threshold)/(1 - threshold)));
                 }
+            }
+        }
+    }
+
+    private static void GenerateNutrients(Tile[,] tiles, long seed) {
+        var noise = new OpenSimplexNoise(seed + 256);
+        var scale = 30;
+        var amount = 500;
+
+        for (int x = 0; x < tiles.GetLength(0); x++) {
+            for (int y = 0; y < tiles.GetLength(1); y++) {
+                double _x = x;
+                double _y = y;
+                double value = (noise.EvaluateOctave(_x / scale, _y / scale, 2, 0.5) + 0.5) / 1.5;
+                if (value < 0) continue;
+                tiles[x,y].Nutrients = (int)(amount * value);
             }
         }
     }

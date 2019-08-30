@@ -1,17 +1,15 @@
 
-public class TileInput : IConsumer
+public abstract class BaseTileInput : IConsumer
 {
-    private TilePos pos;
-    private MapInfo map;
-    private Item resource;
-    private int size;
+    protected TilePos pos;
+    protected MapInfo map;
+    protected int size;
 
     private Tile currentTile = null;
 
-    public TileInput(MapInfo map, TilePos pos, int size, Item resource) {
+    public BaseTileInput(MapInfo map, TilePos pos, int size) {
         this.map = map;
         this.pos = pos;
-        this.resource = resource;
         this.size = size;
     }
 
@@ -21,12 +19,12 @@ public class TileInput : IConsumer
     {
         Tile t = GetCurrentTile();
         if (t == null) return false;
-        t.ResourceCount--;
+        ConsumeResource(t);
         return true;
     }
 
     private Tile GetCurrentTile() {
-        if (currentTile == null || currentTile.ResourceCount <= 0) {
+        if (currentTile == null || !HasResource(currentTile)) {
             currentTile = NextTileWithResource();
         }
         return currentTile;
@@ -38,12 +36,48 @@ public class TileInput : IConsumer
             for (int y = -s; y <= s; y++) {
                 Tile t = map.GetTile(new TilePos(pos.X + x, pos.Y + y));
                 if (t != null) {
-                    if (t.Resource == resource && t.ResourceCount > 0) 
+                    if (HasResource(t)) 
                         return t;
                 }
             }
         }
 
         return null;
+    }
+
+    protected abstract bool HasResource(Tile tile); 
+
+    protected abstract void ConsumeResource(Tile tile);
+}
+
+public class ResourceInput : BaseTileInput
+{
+    private Item resource;
+
+    public ResourceInput(MapInfo map, TilePos pos, int size, Item resource) : base(map, pos, size) {
+        this.resource = resource;
+    }
+
+    protected override bool HasResource(Tile tile) {
+        return tile.Resource == resource && tile.ResourceCount > 0;
+    }
+
+    protected override void ConsumeResource(Tile tile) {
+        tile.ResourceCount--;
+    }
+}
+
+public class NutrientInput : BaseTileInput
+{
+    public NutrientInput(MapInfo map, TilePos pos, int size) : base(map, pos, size) {
+
+    }
+
+    protected override bool HasResource(Tile tile) {
+        return tile.Nutrients > 0;
+    }
+
+    protected override void ConsumeResource(Tile tile) {
+        tile.Nutrients--;
     }
 }

@@ -6,6 +6,7 @@ public class Tile {
 
     public event EventHandler ResourceExhausted;
     public Building Building { get; set; } = null;
+    public int Nutrients = 0;
     public Item Resource { get; set; } = Item.None;
     public int ResourceCount {
         get => _resourceCount;
