@@ -52,4 +52,10 @@ public class Storage : IDirectInput, IDirectOutput
 
         return buffer;
     }
+
+    public int AmountOf(Item item) {
+        _buffers.TryGetValue(item, out ItemBuffer buffer);
+        if (buffer != null) return buffer.Buffer;
+        return 0;
+    }
 }

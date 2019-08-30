@@ -44,4 +44,9 @@ public class DirectProducer : IProducer, IDirectOutput {
         _buffer.Buffer -= 1;
         return true;
     }
+
+    public int AmountOf(Item item) {
+        if (!Has(item)) return 0;
+        return Buffer;
+    }
 }

@@ -20,6 +20,7 @@ public interface IProducer {
 public interface IDirectOutput {
     IReadOnlyList<Item> Items { get; }
     bool Has(Item item);
+    int AmountOf(Item item);
     bool CanRemove(Item item);
     bool Remove(Item item);
 }

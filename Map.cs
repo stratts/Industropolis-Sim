@@ -165,6 +165,18 @@ public class Map : MapInfo {
         }
     }
 
+    public int GetResourceAmount(Item item) {
+        foreach (Building b in buildings) {
+            if (b is Stockpile s) {
+                if (s.Output.Has(item)) {
+                    return s.Output.AmountOf(item);
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public bool HasResource(Item item, int amount) {
         foreach (Building b in buildings) {
             if (b is Stockpile s) {
