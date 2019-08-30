@@ -49,15 +49,12 @@ public class Hauler : Entity {
 
         timeSinceMove += elapsedTime;
 
-         if (Pos == Route.Dest || Pos == Route.Source) {
-                var building = MapInfo.GetBuilding(Pos.X, Pos.Y);
-                if (Pos == Route.Dest) {  
-                    if (Dropoff(building.Input)) return;
-                }
-                else if (Pos == Route.Source) {
-                    if (Pickup(building.Output)) return;
-                }   
+        if (Pos == Route.Dest) {  
+            if (Dropoff(Route.DestInput)) return;
         }
+        else if (Pos == Route.Source) {
+            if (Pickup(Route.SourceOutput)) return;
+        }   
 
         if (timeSinceMove >= moveInterval) {
             timeSinceMove = 0;
