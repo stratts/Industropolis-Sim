@@ -5,11 +5,13 @@ public enum BuildingType {
     None,
     Workshop,
     House,
-    Mine
+    Mine,
+    Farm
 }
 
 public class Building : GameObject { 
     public TilePos Pos { get; set; }
+    public BuildingType Type { get; protected set; }
 
     public IDirectInput Input { get; set; } = null;
     public IDirectOutput Output { get; set; } = null;

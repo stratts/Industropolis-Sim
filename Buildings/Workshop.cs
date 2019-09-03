@@ -14,6 +14,7 @@ public class Workshop : ProductionBuilding {
     private Recipe _recipe;
 
     public Workshop() {
+        Type = BuildingType.Workshop;
         _requiredResources = new Dictionary<Item, int>() {
             {Item.Wood, 50}
         };
