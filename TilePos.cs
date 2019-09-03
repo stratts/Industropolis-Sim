@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 
 public struct TilePos {
     public int X { get; set; }
@@ -38,7 +39,18 @@ public struct TilePos {
     }
 
     public bool WithinBounds(int width, int height) {
-        return (X > 0 && Y > 0 && X < width && Y < height);
+        return (X >= 0 && Y >= 0 && X < width && Y < height);
+    }
+
+    public IEnumerable<TilePos> Neighbours {
+        get {
+            for (int x = -1; x <= 1; x++) {
+                for (int y = -1; y <= 1; y++) {
+                    if (x == 0 && y == 0) continue;
+                    yield return new TilePos(X + x, Y + y);
+                }
+            }
+        }
     }
 
     public float Distance(TilePos dest) {

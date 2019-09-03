@@ -5,6 +5,7 @@ public interface MapInfo {
     int Width { get; }
     int Height { get; }
     Building GetBuilding(int x, int y);
+    Building GetBuilding(TilePos pos);
     IEnumerable<T> GetEntities<T>() where T: Entity;
     void AddEntity(Entity entity);
     void RemoveEntity(Entity entity);

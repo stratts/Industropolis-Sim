@@ -46,33 +46,56 @@ public class Route : MapObject {
     public void Pathfind() {
         _path.Clear();
 
-        TilePos curr = Source;
-        _path.Add(Source);
+        var visited = new HashSet<TilePos>();
+        var dist = new Dictionary<TilePos, float>();
+        var queue = new List<TilePos>();
 
-        while (curr != Dest) {
-            TilePos next = curr;
-            float minDist = -1;
-            // Find next valid tile with shortest distance to dest
-            for (int x = -1; x <= 1 && curr != Dest; x++) {
-                for (int y = -1; y <= 1 && curr != Dest; y++) {
-                    if (x == 0 && y == 0) continue;
-                    TilePos p = new TilePos(curr.X + x, curr.Y + y);
-                    Tile t = MapInfo.GetTile(p);
-                    if (p != Dest && (t == null || t.Building != null)) continue;
-                    float d = p.Distance(Dest);
-                    if (minDist == -1 || d < minDist) {
-                        minDist = d;
-                        next = p;
+        queue.Add(Source);
+        visited.Add(Source);
+        dist[Source] = 0;
+
+        while (!visited.Contains(Dest) && queue.Count > 0) {
+            TilePos tile = queue[0];
+            queue.RemoveAt(0);
+            float tileDist = dist[tile];
+            // Visit all neighbours
+            foreach (TilePos neighbour in tile.Neighbours) {         
+                if (!neighbour.WithinBounds(MapInfo.Width, MapInfo.Height)) continue;
+                var neighbourDist = tileDist + tile.Distance(neighbour);
+                if (visited.Contains(neighbour) && dist.ContainsKey(neighbour) &&
+                    neighbourDist >= dist[neighbour]) continue;
+                visited.Add(neighbour);
+                if (MapInfo.GetBuilding(neighbour) != null) continue;
+                dist[neighbour] = neighbourDist;
+                queue.Add(neighbour);
+            }
+            // Sort queue using distance heuristic
+            queue.Sort((a, b) => {
+                float distA = a.Distance(Dest) + a.Distance(Source);
+                float distB = b.Distance(Dest) + b.Distance(Source);
+                if (distA > distB) return 1;
+                else if (distA < distB) return -1;
+                return 0;
+            });
+        }
+
+        // Trace path back to source
+        if (visited.Contains(Dest)) {
+            TilePos tile = Dest;
+            _path.Add(Dest);
+            while (tile != Source) {
+                float min = float.MaxValue;
+                foreach (TilePos neighbour in tile.Neighbours) {
+                    if (!dist.ContainsKey(neighbour)) continue;
+                    if (dist[neighbour] < min) {
+                        min = dist[neighbour];
+                        tile = neighbour;
                     }
                 }
+                _path.Add(tile);
             }
-            _path.Add(next);
-            // Infinite loops possible, so break if too long
-            if (_path.Count >= Source.Distance(Dest) * 2) {
-                _path.Clear();
-                return;
-            }
-            curr = next;
+
+            _path.Reverse();
         }
     }
 
