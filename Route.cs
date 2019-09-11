@@ -48,6 +48,7 @@ public class Route : MapObject {
 
         var visited = new HashSet<TilePos>();
         var dist = new Dictionary<TilePos, float>();
+        var destDist = new Dictionary<TilePos, float>();
         var queue = new List<TilePos>();
 
         queue.Add(Source);
@@ -61,7 +62,9 @@ public class Route : MapObject {
             // Visit all neighbours
             foreach (TilePos neighbour in tile.Neighbours) {         
                 if (!neighbour.WithinBounds(MapInfo.Width, MapInfo.Height)) continue;
-                var neighbourDist = tileDist + tile.Distance(neighbour);
+                Tile t = MapInfo.GetTile(neighbour);
+                var neighbourDist = tileDist + (tile.Distance(neighbour) / t.SpeedMultiplier);
+                destDist[neighbour] = neighbour.Distance(Dest) / t.SpeedMultiplier;
                 if (visited.Contains(neighbour) && dist.ContainsKey(neighbour) &&
                     neighbourDist >= dist[neighbour]) continue;
                 visited.Add(neighbour);
@@ -71,8 +74,8 @@ public class Route : MapObject {
             }
             // Sort queue using distance heuristic
             queue.Sort((a, b) => {
-                float distA = a.Distance(Dest) + a.Distance(Source);
-                float distB = b.Distance(Dest) + b.Distance(Source);
+                float distA = destDist[a] + dist[a];
+                float distB = destDist[b] + dist[b];
                 if (distA > distB) return 1;
                 else if (distA < distB) return -1;
                 return 0;

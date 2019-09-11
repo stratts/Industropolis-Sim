@@ -8,6 +8,7 @@ public class Hauler : Entity {
     private float moveInterval = 1;
     private bool followingRoute = false;
     private Item _item = Item.None;
+    private Tile _currentTile;
  
     public int Inventory { get; set; } = 0;
     public int MaxInventory { get; set; } = 5;
@@ -22,7 +23,7 @@ public class Hauler : Entity {
     }
     
     public Hauler(MapInfo map, int x, int y) : base(map, x, y) {
-
+        _currentTile = map.GetTile(new TilePos(x, y));
     }
 
     public void Haul() {
@@ -56,7 +57,7 @@ public class Hauler : Entity {
             if (Pickup(Route.SourceOutput)) return;
         }   
 
-        if (timeSinceMove >= moveInterval) {
+        if (timeSinceMove >= moveInterval / _currentTile.SpeedMultiplier) {
             timeSinceMove = 0;
             TilePos target;
 
@@ -75,6 +76,8 @@ public class Hauler : Entity {
             else if (Pos.X > target.X) Pos.X -= 1;
             if (Pos.Y < target.Y) Pos.Y += 1;
             else if (Pos.Y > target.Y) Pos.Y -= 1;
+
+            _currentTile = MapInfo.GetTile(Pos);
         }
     }
 }
