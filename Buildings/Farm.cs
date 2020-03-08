@@ -9,5 +9,6 @@ public class Farm : ProductionBuilding {
         ProcessingTime = 2;
         Width = 2;
         Height = 2;
+        Cost = 50;
     }
 }

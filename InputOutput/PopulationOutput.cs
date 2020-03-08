@@ -1,5 +1,5 @@
 
-public class PopulationOutput : IProducer {
+/*public class PopulationOutput : IProducer {
     public Item Item => Item.None;
     public bool CanProduce => _population.Population < _population.MaxPopulation;
 
@@ -14,4 +14,4 @@ public class PopulationOutput : IProducer {
         _population.Population++;
         return true;
     }
-}
+}*/

@@ -9,10 +9,11 @@ public interface MapInfo {
     IEnumerable<T> GetEntities<T>() where T: Entity;
     void AddEntity(Entity entity);
     void RemoveEntity(Entity entity);
-    PopulationInfo Population { get; }
+    //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
     Tile GetTile(TilePos pos);
+    int CurrentMoney { get; set; }
 }
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
@@ -28,12 +29,22 @@ public class Map : MapInfo {
     private List<Entity> entities;
     private List<Building> buildings;
     private List<Route> routes;
+    private int _currentMoney = 0;
 
     public List<Entity> Entities => entities;
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
 
-    public PopulationInfo Population { get; } = new PopulationInfo();
+    //public PopulationInfo Population { get; } = new PopulationInfo();
+    public int CurrentMoney { 
+        get {
+            return _currentMoney;
+        }
+        set {
+            _currentMoney = value;
+            if (_currentMoney < 0) _currentMoney = 0;
+        }
+    }
 
     public event MapChangedEvent MapChanged;
 
@@ -76,7 +87,7 @@ public class Map : MapInfo {
         Building building = null;
         switch (type) {
             case BuildingType.Workshop: building = new Workshop(); break;
-            case BuildingType.House: building = new House(this.Population); break;
+            //case BuildingType.House: building = new House(this.Population); break;
             case BuildingType.Mine: building = new Mine(this, pos); break;
             case BuildingType.Farm: building = new Farm(this, pos); break;
         }
@@ -84,7 +95,7 @@ public class Map : MapInfo {
     }
 
     public void AddBuilding(Building building, TilePos pos) {
-        if (building.RequiredResources != null) {
+        /*if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
                 if (!HasResource(resource.Key, resource.Value)) {
                     Godot.GD.Print($"Not enough resources to build {building.GetType().Name}");
@@ -94,6 +105,13 @@ public class Map : MapInfo {
             foreach (var resource in building.RequiredResources) {
                 GetResource(resource.Key, resource.Value);
             }
+        }*/
+        if (CurrentMoney < building.Cost) {
+             Godot.GD.Print($"Not enough money to build {building.GetType().Name}");
+             return;
+        }
+        else {
+            CurrentMoney -= building.Cost;
         }
         building.Pos = pos;
         foreach (var tile in GetBuildingTiles(building)) {

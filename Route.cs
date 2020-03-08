@@ -103,7 +103,7 @@ public class Route : MapObject {
     }
 
     public void AddHauler() {
-        if (!MapInfo.Population.Use()) return;
+        //if (!MapInfo.Population.Use()) return;
         var hauler = new Hauler(MapInfo, Source.X, Source.Y);
         hauler.Route = this;
         hauler.Item = Item;
@@ -118,6 +118,6 @@ public class Route : MapObject {
         Haulers.RemoveAt(0);
         h.Route = null;
         MapInfo.RemoveEntity(h);
-        MapInfo.Population.Free();
+        //MapInfo.Population.Free();
     }
 }

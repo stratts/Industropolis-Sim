@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public enum BuildingType {
     None,
     Workshop,
-    House,
+    //House,
     Mine,
     Farm
 }
@@ -19,9 +19,11 @@ public class Building : GameObject {
     public int Width { get; protected set; } = 1;
     public int Height { get; protected set; } = 1;
 
-    public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
+    public int Cost { get; set; } = 0;
 
-    protected Dictionary<Item, int> _requiredResources = null;
+    //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
+
+    //protected Dictionary<Item, int> _requiredResources = null;
 
     public virtual void Update(float delta) {
         
