@@ -8,6 +8,8 @@ public class Route : MapObject {
     public TilePos Source { get; set; }
     public TilePos Dest { get; set; }
 
+    public Tile.SurfaceType SurfaceRestriction { get; set; } = Tile.SurfaceType.Base;
+
     public IDirectOutput SourceOutput { get; set; }
     public IDirectInput DestInput { get; set; }
 
@@ -69,6 +71,9 @@ public class Route : MapObject {
                     neighbourDist >= dist[neighbour]) continue;
                 visited.Add(neighbour);
                 if (MapInfo.GetBuilding(neighbour) != null) continue;
+                if (SurfaceRestriction != Tile.SurfaceType.Base &&
+                    t.Surface != SurfaceRestriction) 
+                    continue;
                 dist[neighbour] = neighbourDist;
                 queue.Add(neighbour);
             }
