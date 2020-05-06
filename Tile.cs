@@ -35,6 +35,7 @@ public class Tile {
             _resourceCount = value;
         }
     }
+    public PathNode Node { get; set; } = null;
 
     private void OnResourceExhausted() {
         if (ResourceExhausted != null) ResourceExhausted(this, null);
