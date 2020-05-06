@@ -49,6 +49,8 @@ public class Hauler : Entity {
         if (!Hauling || Route == null) return;
 
         timeSinceMove += elapsedTime;
+        LastMoveTime = timeSinceMove;
+        NextMoveTime = moveInterval / _currentTile.SpeedMultiplier;
 
         if (Pos == Route.Dest) {  
             if (Dropoff(Route.DestInput)) return;
