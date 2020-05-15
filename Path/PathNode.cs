@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class PathNode {
@@ -38,6 +39,8 @@ public class _Path {
     public IReadOnlyCollection<PathLane> Lanes => _lanes;
     private List<PathLane> _lanes;
 
+    public event EventHandler PathSplit;
+
     public _Path() {
         
     }
@@ -52,6 +55,18 @@ public class _Path {
         source.Connect(dest, this);
         dest.Connect(source, this);
     }
+
+    // Split path at given node, and return new paths 
+    public (_Path, _Path) Split(PathNode node) {
+        var path1 = (_Path)this.MemberwiseClone();
+        var path2 = (_Path)this.MemberwiseClone();
+        Source.Disconnect(Dest);
+        Dest.Disconnect(Source);
+        path1.Connect(Source, node);
+        path2.Connect(node, Dest);
+        if (PathSplit != null) PathSplit(this, null);
+        return (path1, path2);
+    } 
 }
 
 public class PathLane {
