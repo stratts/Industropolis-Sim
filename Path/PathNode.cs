@@ -67,7 +67,19 @@ public class _Path {
         if (PathSplit != null) PathSplit(this, null);
         return (path1, path2);
     } 
+
+    public bool OnPath(TilePos pos) {
+        if (pos == Source.Pos || pos == Dest.Pos) return true;
+        
+        TilePos pathDiff = Dest.Pos - Source.Pos;
+        TilePos posDiff = pos - Source.Pos;
+
+        if (pathDiff.IsMultipleOf(posDiff)) return true;
+        return false;
+    }
 }
+
+
 
 public class PathLane {
     public _Path Parent { get; private set; }

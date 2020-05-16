@@ -57,6 +57,21 @@ public struct TilePos {
         return (float)Math.Sqrt(Math.Pow(X - dest.X, 2) + Math.Pow(Y - dest.Y, 2));
     }
 
+    public bool IsMultipleOf(TilePos pos) {
+        int x, y;
+        if (pos.X == 0) x = 1;
+        else x = pos.X;
+        if (pos.Y == 0) y = 1;
+        else y = pos.Y;
+        var xMul = Math.Round((float)X / (float)pos.X, 1);
+        var yMul = Math.Round((float)Y / (float)pos.Y, 1);
+        if (X == 0 && pos.X == 0) xMul = yMul;
+        if (Y == 0 && pos.Y == 0) yMul = xMul;
+
+        if (xMul == yMul && xMul >= 1 && yMul >= 1) return true;
+        return false;
+    }
+
     public override int GetHashCode() {
         return X.GetHashCode() + Y.GetHashCode();
     }
