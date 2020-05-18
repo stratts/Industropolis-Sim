@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 // Shitty SortedList-based priority queue
@@ -41,14 +42,20 @@ public interface IPathfinder<T> {
 
 public abstract class AStarPathfinder<T> : IPathfinder<T> {
 
-    private Dictionary<T, float> visited = new Dictionary<T, float>();
-    private Dictionary<T, T> cameFrom = new Dictionary<T, T>();
+    private Dictionary<T, NodeData> visited = new Dictionary<T, NodeData>();
     private PriorityQueue<T, float> queue = new PriorityQueue<T, float>();
-    private Dictionary<T, float> fScore = new Dictionary<T, float>();
-
-    public IReadOnlyDictionary<T, float> Visited => visited; 
 
     protected float greed = 0.5f;
+
+    private class NodeData {
+        public T CameFrom;
+        public float Dist;
+
+        public NodeData(T cameFrom, float dist) {
+            CameFrom = cameFrom;
+            Dist = dist;
+        }
+    }
 
     public List<T> FindPath(T src, T dest) {
 
@@ -56,28 +63,30 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
 
         if (!Accessible(src, dest)) return null;
 
-        visited.Add(src, 0);
+        visited.Add(src, new NodeData(src, 0));
         queue.Enqueue(src, 0);
 
         while (!visited.ContainsKey(dest) && queue.Count > 0) {
             T node = queue.Dequeue();
-            float dist = visited[node];
+            float dist = visited[node].Dist;
 
             // Visit all neighbours
             foreach (T neighbour in GetNeighbours(node)) {
-                var g = dist + GetDistance(node, neighbour); 
-                if (visited.ContainsKey(neighbour) && visited[neighbour] <= g) continue;
-                visited[neighbour] = g;
-                cameFrom[neighbour] = node;
-                fScore[neighbour] = (1 - greed) * g + greed * CalcHeuristic(neighbour, dest);
-                queue.Enqueue(neighbour, fScore[neighbour]);
+                var g = dist + GetNeighbourDistance(node, neighbour); 
+                visited.TryGetValue(neighbour, out NodeData v);
+                if (v == null) visited[neighbour] = new NodeData(node, g);
+                else if (v.Dist <= g) continue; 
+                else {
+                    v.Dist = g;
+                    v.CameFrom = node;
+                }    
+                var f = (1 - greed) * g + greed * CalcHeuristic(neighbour, dest);
+                queue.Enqueue(neighbour, f);
             }
         }
 
         var path = ReconstructPath(src, dest);
 
-        cameFrom.Clear();
-        fScore.Clear();
         queue.Clear();
 
         return path;
@@ -91,7 +100,7 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
             T node = dest;
 
             while (!node.Equals(src)) {
-                node = cameFrom[node];
+                node = visited[node].CameFrom;
                 path.Add(node);
             }
 
@@ -103,7 +112,7 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
 
     protected abstract bool Accessible(T src, T dest);
     protected abstract IEnumerable<T> GetNeighbours(T node);
-    protected abstract float GetDistance(T src, T dest);
+    protected abstract float GetNeighbourDistance(T src, T dest);
     protected abstract float CalcHeuristic(T src, T dest);
 }
 
@@ -123,7 +132,11 @@ public class TilePathfinder : AStarPathfinder<TilePos>
 
     protected override float CalcHeuristic(TilePos src, TilePos dest) => src.Distance(dest);
 
-    protected override float GetDistance(TilePos src, TilePos dest) => src.Distance(dest);
+    protected override float GetNeighbourDistance(TilePos src, TilePos dest) {
+        TilePos diff = dest - src;
+        if (Math.Abs(diff.X) == Math.Abs(diff.Y)) return 1.4f;
+        else return 1;
+    }
 
     protected override IEnumerable<TilePos> GetNeighbours(TilePos pos) {
         foreach (var neighbour in pos.Neighbours) {
