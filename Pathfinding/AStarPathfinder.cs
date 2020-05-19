@@ -1,45 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-// Shitty SortedList-based priority queue
-public class PriorityQueue<T1, T2> {
-
-    private SortedList<T2, Queue<T1>> _data = new SortedList<T2, Queue<T1>>();
-    private int _count = 0;
-
-    public int Count => _count;
-
-    public void Enqueue(T1 item, T2 key) {
-        Queue<T1> entry;
-        _data.TryGetValue(key, out entry);
-        if (entry == null) {
-            entry = new Queue<T1>();
-            _data[key] = entry;
-        }
-        entry.Enqueue(item);
-        _count++;
-    }
-
-    public T1 Dequeue() {
-        if (_count > 0) {
-            var key = _data.Keys[0];
-            var entry = _data[key];
-            T1 item = entry.Dequeue();
-            _count--;
-            if (entry.Count == 0) _data.Remove(key);
-            return item;
-        }
-
-        return default(T1);
-    }
-
-    public void Clear() => _data.Clear();
-}
-
-public interface IPathfinder<T> {
-    List<T> FindPath(T src, T dest);
-}
-
 public abstract class AStarPathfinder<T> : IPathfinder<T> {
 
     private Dictionary<T, NodeData> visited = new Dictionary<T, NodeData>();
@@ -114,35 +75,4 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
     protected abstract IEnumerable<T> GetNeighbours(T node);
     protected abstract float GetNeighbourDistance(T src, T dest);
     protected abstract float CalcHeuristic(T src, T dest);
-}
-
-public class TilePathfinder : AStarPathfinder<TilePos>
-{
-    private MapInfo _map;
-
-    public TilePathfinder(MapInfo map) {
-        _map = map;
-        greed = 0.6f;
-    }
-
-    protected override bool Accessible(TilePos src, TilePos dest) {
-        if (_map.GetBuilding(dest) != null) return false;
-        return true;
-    }
-
-    protected override float CalcHeuristic(TilePos src, TilePos dest) => src.Distance(dest);
-
-    protected override float GetNeighbourDistance(TilePos src, TilePos dest) {
-        TilePos diff = dest - src;
-        if (Math.Abs(diff.X) == Math.Abs(diff.Y)) return 1.4f;
-        else return 1;
-    }
-
-    protected override IEnumerable<TilePos> GetNeighbours(TilePos pos) {
-        foreach (var neighbour in pos.Neighbours) {
-            if (!neighbour.WithinBounds(_map.Width, _map.Height)) continue;
-            if (_map.GetBuilding(neighbour) != null) continue;
-            yield return neighbour;
-        }
-    }
 }

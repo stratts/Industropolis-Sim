@@ -29,7 +29,7 @@ public class Map : MapInfo {
     private List<Entity> entities;
     private List<Building> buildings;
     private List<Route> routes;
-    private List<_Path> paths;
+    private List<Path> paths;
     private int _currentMoney = 0;
 
     public List<Entity> Entities => entities;
@@ -53,7 +53,7 @@ public class Map : MapInfo {
         entities = new List<Entity>();
         routes = new List<Route>();
         buildings = new List<Building>();
-        paths = new List<_Path>();
+        paths = new List<Path>();
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
@@ -197,18 +197,18 @@ public class Map : MapInfo {
         }
     }
 
-    public void AddPath(_Path path) {
+    public void AddPath(Path path) {
         this.paths.Add(path);
     }
 
-    public _Path GetPath(TilePos pos) {
-        foreach (_Path path in paths) {
+    public Path GetPath(TilePos pos) {
+        foreach (Path path in paths) {
             if (path.OnPath(pos)) return path;
         }
         return null;
     }
 
-    public void RemovePath(_Path path) {
+    public void RemovePath(Path path) {
         this.paths.Remove(path);
     }
 

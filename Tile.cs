@@ -9,21 +9,10 @@ public class Tile {
 
     private int _resourceCount = 0;
     private SurfaceType _surface;
-    private Path _path = null;
 
     public event EventHandler ResourceExhausted;
     public event EventHandler SurfaceChanged;
     public event EventHandler PathChanged;
-
-    public Path Path {
-        get {
-            return _path;
-        } 
-        set {
-            _path = value;
-            OnPathChanged();    
-        } 
-    }
 
     public Building Building { get; set; } = null;
     public int Nutrients = 0;
@@ -59,11 +48,6 @@ public class Tile {
         } 
     }
 
-    public float SpeedMultiplier {
-        get {
-            if (Path != null) return (float)Path.SpeedMultiplier;
-            else return 1;
-        }
-    }
+    public float SpeedMultiplier => 1;
     //public List<Entity> Entities { get; set; } = new List<Entity>();
 }
