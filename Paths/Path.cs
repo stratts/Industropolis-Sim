@@ -10,7 +10,7 @@ public class Path {
 	public IReadOnlyCollection<PathLane> Lanes => _lanes;
 	private List<PathLane> _lanes;
 
-	public event EventHandler PathSplit;
+	public event Action PathSplit;
 
 	public Path() {
 		
@@ -35,7 +35,7 @@ public class Path {
 		path.Dest.Disconnect(path.Source);
 		path1.Connect(path.Source, node);
 		path2.Connect(node, path.Dest);
-		if (path.PathSplit != null) path.PathSplit(path, null);
+		path.PathSplit?.Invoke();
 		return (path1, path2);
 	} 
 

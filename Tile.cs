@@ -10,9 +10,9 @@ public class Tile {
     private int _resourceCount = 0;
     private SurfaceType _surface;
 
-    public event EventHandler ResourceExhausted;
-    public event EventHandler SurfaceChanged;
-    public event EventHandler PathChanged;
+    public event Action ResourceExhausted;
+    public event Action SurfaceChanged;
+    public event Action PathChanged;
 
     public Building Building { get; set; } = null;
     public int Nutrients = 0;
@@ -20,23 +20,11 @@ public class Tile {
     public int ResourceCount {
         get => _resourceCount;
         set {
-            if (value <= 0) OnResourceExhausted();
+            if (value <= 0) ResourceExhausted?.Invoke();
             _resourceCount = value;
         }
     }
     public PathNode Node { get; set; } = null;
-
-    private void OnResourceExhausted() {
-        if (ResourceExhausted != null) ResourceExhausted(this, null);
-    }
-
-    private void OnSurfaceChanged() {
-        if (SurfaceChanged != null) SurfaceChanged(this, null);
-    }
-
-    private void OnPathChanged() {
-        if (PathChanged != null) PathChanged(this, null);
-    }
 
     public SurfaceType Surface { 
         get {
@@ -44,7 +32,7 @@ public class Tile {
         } 
         set {
             _surface = value;
-            OnSurfaceChanged();    
+            SurfaceChanged?.Invoke();   
         } 
     }
 

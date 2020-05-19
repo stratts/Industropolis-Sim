@@ -1,9 +1,9 @@
 using System;
 
 public class GameObject {
-    public event EventHandler Removed;
+    public event Action Removed;
 
     public void Remove() {
-        if (Removed != null) Removed(this, null);
+        Removed?.Invoke();
     }
 }
