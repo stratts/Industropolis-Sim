@@ -13,7 +13,7 @@ public class Route : MapObject {
     public IDirectOutput SourceOutput { get; set; }
     public IDirectInput DestInput { get; set; }
 
-    private TilePathfinder _pathfinder;
+    private IPathfinder<TilePos> _pathfinder;
 
     private Item _item = Item.None;
     public Item Item { 
@@ -33,7 +33,7 @@ public class Route : MapObject {
         _path = new List<TilePos>();
         Source = src;
         Dest = dest;
-        _pathfinder = new TilePathfinder(MapInfo);
+        _pathfinder = new AStarPathfinder<TilePos>();
     }
 
     public TilePos Next(TilePos current, Direction direction) {
@@ -49,7 +49,7 @@ public class Route : MapObject {
     }
 
     public void Pathfind() {
-        _path = _pathfinder.FindPath(Source, Dest);
+        _path = _pathfinder.FindPath(new MapGraph(MapInfo), Source, Dest);
         if (_path == null) _path = new List<TilePos>();
     }
 

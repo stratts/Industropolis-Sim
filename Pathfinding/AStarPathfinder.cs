@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 
-public abstract class AStarPathfinder<T> : IPathfinder<T> {
+public class AStarPathfinder<T> : IPathfinder<T> {
 
     private Dictionary<T, NodeData> visited = new Dictionary<T, NodeData>();
     private PriorityQueue<T, float> queue = new PriorityQueue<T, float>();
 
-    protected float greed = 0.5f;
+    private float greed = 0.5f;
 
     private class NodeData {
         public T CameFrom;
@@ -18,11 +18,13 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
         }
     }
 
-    public List<T> FindPath(T src, T dest) {
+    public AStarPathfinder(float greediness = 0.5f) {
+        greed = greediness;
+    }
 
-        visited.Clear();
+    public List<T> FindPath(IGraph<T> graph, T src, T dest) {
 
-        if (!Accessible(src, dest)) return null;
+        if (!graph.Accessible(src, dest)) return null;
 
         visited.Add(src, new NodeData(src, 0));
         queue.Enqueue(src, 0);
@@ -32,8 +34,8 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
             float dist = visited[node].Dist;
 
             // Visit all neighbours
-            foreach (T neighbour in GetNeighbours(node)) {
-                var g = dist + GetNeighbourDistance(node, neighbour); 
+            foreach (T neighbour in graph.GetConnections(node)) {
+                var g = dist + graph.CalculateCost(node, neighbour); 
                 visited.TryGetValue(neighbour, out NodeData v);
                 if (v == null) visited[neighbour] = new NodeData(node, g);
                 else if (v.Dist <= g) continue; 
@@ -41,7 +43,7 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
                     v.Dist = g;
                     v.CameFrom = node;
                 }    
-                var f = (1 - greed) * g + greed * CalcHeuristic(neighbour, dest);
+                var f = (1 - greed) * g + greed * graph.EstimateCost(neighbour, dest);
                 queue.Enqueue(neighbour, f);
             }
         }
@@ -49,6 +51,7 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
         var path = ReconstructPath(src, dest);
 
         queue.Clear();
+        visited.Clear();
 
         return path;
     }
@@ -70,9 +73,4 @@ public abstract class AStarPathfinder<T> : IPathfinder<T> {
         else path = null;
         return path;
     }
-
-    protected abstract bool Accessible(T src, T dest);
-    protected abstract IEnumerable<T> GetNeighbours(T node);
-    protected abstract float GetNeighbourDistance(T src, T dest);
-    protected abstract float CalcHeuristic(T src, T dest);
 }
