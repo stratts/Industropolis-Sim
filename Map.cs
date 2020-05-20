@@ -197,6 +197,15 @@ public class Map : MapInfo {
         }
     }
 
+    public PathNode GetNode(TilePos pos) {
+        foreach (var path in paths) {
+            if (path.Source.Pos == pos) return path.Source;
+            if (path.Dest.Pos == pos) return path.Dest;
+        }
+
+        return null;
+    }
+
     public void AddPath(Path path) {
         this.paths.Add(path);
     }
