@@ -49,6 +49,10 @@ public class Map : MapInfo {
 
     public event MapChangedEvent MapChanged;
 
+    public event Action<Path> PathAdded;
+    public event Action<Path> PathRemoved;
+    public event Action<PathNode> PathNodeAdded;
+
     public Map() {
         entities = new List<Entity>();
         routes = new List<Route>();
@@ -206,8 +210,37 @@ public class Map : MapInfo {
         return null;
     }
 
+    private PathNode AddPathNode(TilePos pos) {
+        PathNode n = GetNode(pos);
+        if (n == null) {
+            n = new PathNode(pos);
+            Path p = GetPath(pos);
+            if (p != null) {
+                var (path1, path2) = Path.Split(p, n);
+                AddPath(path1);
+                AddPath(path2);
+                RemovePath(p);
+            }
+            PathNodeAdded?.Invoke(n);
+        }
+        return n;
+    }
+
+    public Path BuildPath<T>(TilePos source, TilePos dest) where T : Path, new() {
+        PathNode s = AddPathNode(source);
+        PathNode d = AddPathNode(dest);
+        Path path = new T();
+        path.Connect(s, d);
+        AddPath(path);
+        return path;
+    }
+
     public void AddPath(Path path) {
         this.paths.Add(path);
+        path.PathSplit += () => {
+            RemovePath(path);
+        };
+        PathAdded?.Invoke(path);
     }
 
     public Path GetPath(TilePos pos) {
@@ -219,6 +252,7 @@ public class Map : MapInfo {
 
     public void RemovePath(Path path) {
         this.paths.Remove(path);
+        PathRemoved?.Invoke(path);
     }
 
     public int GetResourceAmount(Item item) {
