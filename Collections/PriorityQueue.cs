@@ -32,5 +32,8 @@ public class PriorityQueue<T1, T2> {
         return default(T1);
     }
 
-    public void Clear() => _data.Clear();
+    public void Clear() {
+        _data.Clear();
+        _count = 0;
+    }
 }
