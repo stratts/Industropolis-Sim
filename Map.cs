@@ -217,6 +217,8 @@ public class Map : MapInfo {
             Path p = GetPath(pos);
             if (p != null) {
                 var (path1, path2) = Path.Split(p, n);
+                path1.Connect();
+                path2.Connect();
                 AddPath(path1);
                 AddPath(path2);
                 RemovePath(p);
@@ -230,9 +232,38 @@ public class Map : MapInfo {
         PathNode s = AddPathNode(source);
         PathNode d = AddPathNode(dest);
         Path path = new T();
-        path.Connect(s, d);
+        path.SetNodes(s, d);
+        path.Connect();
         AddPath(path);
+        if (s.Connections.Count == 2) TryMergeNode(s);
+        if (d.Connections.Count == 2) TryMergeNode(d);
         return path;
+    }
+
+    private void TryMergeNode(PathNode node) {
+        Path path1 = null;
+        Path path2 = null;
+        foreach (Path p in node.Connections.Values) {
+            if (path1 == null) {
+                path1 = p; continue;
+            }
+            else if (path2 == null) {
+                path2 = p; continue;
+            }
+            else break;
+        }
+
+        if (!(path1.Direction == path2.Direction || 
+            path1.Direction == -path2.Direction)) return;
+
+        Path newPath = Path.Merge(path1, path2);
+        path1.Disconnect();
+        path2.Disconnect();
+        RemovePath(path1);
+        RemovePath(path2);
+        newPath.Connect();
+        AddPath(newPath);
+        // Remove node
     }
 
     public void AddPath(Path path) {

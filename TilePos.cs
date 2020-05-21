@@ -27,6 +27,10 @@ public struct TilePos {
         return new TilePos(a.X - b.X, a.Y - b.Y);
     }
 
+    public static TilePos operator- (TilePos a) {
+        return new TilePos(-a.X, -a.Y);
+    }
+
     public override bool Equals(object obj) {
         if (obj is TilePos p) {
             return this == p;
