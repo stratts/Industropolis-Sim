@@ -20,11 +20,11 @@ namespace OpenSimplex
 
         private static double[] gradients2D = new double[]
         {
-		     5,  2,    2,  5,
-		    -5,  2,   -2,  5,
-		     5, -2,    2, -5,
-		    -5, -2,   -2, -5,
-	    };
+             5,  2,    2,  5,
+            -5,  2,   -2,  5,
+             5, -2,    2, -5,
+            -5, -2,   -2, -5,
+        };
 
         private static Contribution2[] lookup2D;
         
