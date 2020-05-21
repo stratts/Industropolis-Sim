@@ -228,7 +228,22 @@ public class Map : MapInfo {
         return n;
     }
 
-    public Path BuildPath<T>(TilePos source, TilePos dest) where T : Path, new() {
+    public void BuildPath<T>(TilePos source, TilePos dest) where T : Path, new() {
+        var dir = source.Direction(dest);
+        TilePos inc = new TilePos(dir.x, dir.y);
+        TilePos prev = source;
+        TilePos cur = source + inc;
+     
+        for (int i = 0; i < source.Distance(dest); i++) {
+            if (cur == dest || GetPath(cur) != null || GetNode(cur) != null) {
+                BuildPathSegment<T>(prev, cur);
+                prev = cur;
+            }
+            cur += inc;
+        }
+    }
+
+    public void BuildPathSegment<T>(TilePos source, TilePos dest) where T : Path, new() {
         PathNode s = AddPathNode(source);
         PathNode d = AddPathNode(dest);
         Path path = new T();
@@ -237,7 +252,6 @@ public class Map : MapInfo {
         AddPath(path);
         if (s.Connections.Count == 2) TryMergeNode(s);
         if (d.Connections.Count == 2) TryMergeNode(d);
-        return path;
     }
 
     private void TryMergeNode(PathNode node) {

@@ -57,6 +57,13 @@ public struct TilePos {
         }
     }
 
+    public (int x, int y) Direction(TilePos dest) {
+        if (dest == this) return (0, 0);
+        TilePos diff = dest - this;
+		int max = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
+		return (diff.X / max, diff.Y / max);
+    }
+
     public float Distance(TilePos dest) {
         return (float)Math.Sqrt(Math.Pow(X - dest.X, 2) + Math.Pow(Y - dest.Y, 2));
     }

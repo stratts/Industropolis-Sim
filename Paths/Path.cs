@@ -23,9 +23,8 @@ public class Path {
 		Source = source;
 		Dest = dest;
 		Length = Source.Pos.Distance(Dest.Pos);
-		TilePos diff = Dest.Pos - Source.Pos;
-		int max = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
-		Direction = new TilePos(diff.X / max, diff.Y / max);
+		var dir = Source.Pos.Direction(Dest.Pos);
+		Direction = new TilePos(dir.x, dir.y);
 	}
 
 	public void Connect() {
