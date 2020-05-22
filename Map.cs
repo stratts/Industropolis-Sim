@@ -231,14 +231,24 @@ public class Map : MapInfo {
     public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new() {
         IntVector inc = source.Direction(dest);
         IntVector prev = source;
-        IntVector cur = source + inc;
+        IntVector cur = source;
+        bool onPath = false;
      
-        for (int i = 0; i < source.Distance(dest); i++) {
-            if (cur == dest || GetPath(cur) != null || GetNode(cur) != null) {
-                BuildPathSegment<T>(prev, cur);
+        while (cur != dest) {
+            cur += inc;
+            Path p = GetPath(cur);
+            PathNode n = GetNode(cur);
+            if (p != null && p.Direction.IsParallelTo(inc)) {
+                onPath = true;
+            }
+            else if (onPath && n != null) {
+                onPath = false;
                 prev = cur;
             }
-            cur += inc;
+            else if (!onPath && (cur == dest || p != null || n != null)) {
+                BuildPathSegment<T>(prev, cur);
+                prev = cur;
+            }     
         }
     }
 
@@ -288,7 +298,9 @@ public class Map : MapInfo {
 
     public Path GetPath(IntVector pos) {
         foreach (Path path in paths) {
-            if (path.OnPath(pos)) return path;
+            if (path.OnPath(pos) && GetNode(pos) == null) {
+                return path;
+            }        
         }
         return null;
     }
