@@ -1,6 +1,6 @@
 
 public class Farm : ProductionBuilding {
-    public Farm(MapInfo map, TilePos pos) {
+    public Farm(MapInfo map, IntVector pos) {
         Type = BuildingType.Farm;
         Consumer = new NutrientInput(map, pos, 3);
         var producer = new DirectProducer(5, 1, Item.Food);

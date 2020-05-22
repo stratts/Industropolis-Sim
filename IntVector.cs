@@ -2,37 +2,39 @@
 using System;
 using System.Collections.Generic;
 
-public struct TilePos {
+public struct IntVector {
     public int X { get; set; }
     public int Y { get; set; }
 
-    public TilePos(int x, int y) {
+    public static IntVector Zero => new IntVector(0, 0);
+
+    public IntVector(int x, int y) {
         X = x;
         Y = y;
     }
 
-    public static TilePos operator+ (TilePos a, TilePos b) {
-        return new TilePos(a.X + b.X, a.Y + b.Y);
+    public static IntVector operator+ (IntVector a, IntVector b) {
+        return new IntVector(a.X + b.X, a.Y + b.Y);
     }
 
-    public static bool operator== (TilePos a, TilePos b) {
+    public static bool operator== (IntVector a, IntVector b) {
         return a.X == b.X && a.Y == b.Y;
     }
 
-    public static bool operator!= (TilePos a, TilePos b) {
+    public static bool operator!= (IntVector a, IntVector b) {
         return a.X != b.X || a.Y != b.Y;
     }
 
-    public static TilePos operator- (TilePos a, TilePos b) {
-        return new TilePos(a.X - b.X, a.Y - b.Y);
+    public static IntVector operator- (IntVector a, IntVector b) {
+        return new IntVector(a.X - b.X, a.Y - b.Y);
     }
 
-    public static TilePos operator- (TilePos a) {
-        return new TilePos(-a.X, -a.Y);
+    public static IntVector operator- (IntVector a) {
+        return new IntVector(-a.X, -a.Y);
     }
 
     public override bool Equals(object obj) {
-        if (obj is TilePos p) {
+        if (obj is IntVector p) {
             return this == p;
         }
         else return false;
@@ -46,29 +48,35 @@ public struct TilePos {
         return (X >= 0 && Y >= 0 && X < width && Y < height);
     }
 
-    public IEnumerable<TilePos> Neighbours {
+    public IEnumerable<IntVector> Neighbours {
         get {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     if (x == 0 && y == 0) continue;
-                    yield return new TilePos(X + x, Y + y);
+                    yield return new IntVector(X + x, Y + y);
                 }
             }
         }
     }
 
-    public (int x, int y) Direction(TilePos dest) {
-        if (dest == this) return (0, 0);
-        TilePos diff = dest - this;
+    public IntVector Direction(IntVector dest) {
+        if (dest == this) return Zero;
+        IntVector diff = dest - this;
 		int max = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
-		return (diff.X / max, diff.Y / max);
+		return new IntVector(diff.X / max, diff.Y / max);
     }
 
-    public float Distance(TilePos dest) {
+    public float Distance(IntVector dest) {
         return (float)Math.Sqrt(Math.Pow(X - dest.X, 2) + Math.Pow(Y - dest.Y, 2));
     }
 
-    public bool IsMultipleOf(TilePos pos) {
+    public bool IsParallelTo(IntVector vector) {
+        if (this == vector || this == -vector) return true;
+        if (this.IsMultipleOf(vector) || vector.IsMultipleOf(this)) return true;
+        return false;
+    }
+
+    public bool IsMultipleOf(IntVector pos) {
         int x, y;
         if (pos.X == 0) x = 1;
         else x = pos.X;

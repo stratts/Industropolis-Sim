@@ -6,7 +6,7 @@ public class Path {
 	public PathNode Source { get; private set; }
 	public PathNode Dest { get; private set; }
 	public float Length { get; private set; }
-	public TilePos Direction { get; private set; }
+	public IntVector Direction { get; private set; }
 
 	public IReadOnlyCollection<PathLane> Lanes => _lanes;
 	private List<PathLane> _lanes;
@@ -23,8 +23,7 @@ public class Path {
 		Source = source;
 		Dest = dest;
 		Length = Source.Pos.Distance(Dest.Pos);
-		var dir = Source.Pos.Direction(Dest.Pos);
-		Direction = new TilePos(dir.x, dir.y);
+		Direction = Source.Pos.Direction(Dest.Pos);
 	}
 
 	public void Connect() {
@@ -78,11 +77,11 @@ public class Path {
 		return path;
 	}
 
-	public bool OnPath(TilePos pos) {
+	public bool OnPath(IntVector pos) {
 		if (pos == Source.Pos || pos == Dest.Pos) return true;
 		
-		TilePos pathDiff = Dest.Pos - Source.Pos;
-		TilePos posDiff = pos - Source.Pos;
+		IntVector pathDiff = Dest.Pos - Source.Pos;
+		IntVector posDiff = pos - Source.Pos;
 
 		if (pathDiff.IsMultipleOf(posDiff)) return true;
 		return false;

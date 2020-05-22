@@ -1,13 +1,13 @@
 
 public abstract class BaseTileInput : IConsumer
 {
-    protected TilePos pos;
+    protected IntVector pos;
     protected MapInfo map;
     protected int size;
 
     private Tile currentTile = null;
 
-    public BaseTileInput(MapInfo map, TilePos pos, int size) {
+    public BaseTileInput(MapInfo map, IntVector pos, int size) {
         this.map = map;
         this.pos = pos;
         this.size = size;
@@ -34,7 +34,7 @@ public abstract class BaseTileInput : IConsumer
         int s = size / 2;
         for (int x = -s; x <= s; x++) {
             for (int y = -s; y <= s; y++) {
-                Tile t = map.GetTile(new TilePos(pos.X + x, pos.Y + y));
+                Tile t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
                 if (t != null) {
                     if (HasResource(t)) 
                         return t;
@@ -54,7 +54,7 @@ public class ResourceInput : BaseTileInput
 {
     private Item resource;
 
-    public ResourceInput(MapInfo map, TilePos pos, int size, Item resource) : base(map, pos, size) {
+    public ResourceInput(MapInfo map, IntVector pos, int size, Item resource) : base(map, pos, size) {
         this.resource = resource;
     }
 
@@ -69,7 +69,7 @@ public class ResourceInput : BaseTileInput
 
 public class NutrientInput : BaseTileInput
 {
-    public NutrientInput(MapInfo map, TilePos pos, int size) : base(map, pos, size) {
+    public NutrientInput(MapInfo map, IntVector pos, int size) : base(map, pos, size) {
 
     }
 

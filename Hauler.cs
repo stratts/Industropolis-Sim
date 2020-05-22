@@ -23,7 +23,7 @@ public class Hauler : Entity {
     }
     
     public Hauler(MapInfo map, int x, int y) : base(map, x, y) {
-        _currentTile = map.GetTile(new TilePos(x, y));
+        _currentTile = map.GetTile(new IntVector(x, y));
     }
 
     public void Haul() {
@@ -61,7 +61,7 @@ public class Hauler : Entity {
 
         if (timeSinceMove >= moveInterval / _currentTile.SpeedMultiplier) {
             timeSinceMove = 0;
-            TilePos target;
+            IntVector target;
 
             if (followingRoute) {
                 if (Inventory > 0) {

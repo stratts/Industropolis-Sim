@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 
 public class PathNode {
-	public TilePos Pos { get; private set; }
+	public IntVector Pos { get; private set; }
 	public IReadOnlyDictionary<PathNode, Path> Connections => _connections;
 	private Dictionary<PathNode, Path> _connections;
 
-	public PathNode(TilePos pos) {
+	public PathNode(IntVector pos) {
 		Pos = pos;
 		_connections =new Dictionary<PathNode, Path>();
 	}

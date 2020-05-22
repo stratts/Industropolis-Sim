@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 
 public class Route : MapObject {
-    private List<TilePos> _path;
+    private List<IntVector> _path;
     
-    public IReadOnlyList<TilePos> Path => _path;
-    public TilePos Source { get; set; }
-    public TilePos Dest { get; set; }
+    public IReadOnlyList<IntVector> Path => _path;
+    public IntVector Source { get; set; }
+    public IntVector Dest { get; set; }
 
     public Tile.SurfaceType SurfaceRestriction { get; set; } = Tile.SurfaceType.Base;
 
     public IDirectOutput SourceOutput { get; set; }
     public IDirectInput DestInput { get; set; }
 
-    private IPathfinder<TilePos> _pathfinder;
+    private IPathfinder<IntVector> _pathfinder;
 
     private Item _item = Item.None;
     public Item Item { 
@@ -29,14 +29,14 @@ public class Route : MapObject {
 
     public enum Direction { Forwards, Backwards };
 
-    public Route(MapInfo info, TilePos src, TilePos dest) : base(info) {
-        _path = new List<TilePos>();
+    public Route(MapInfo info, IntVector src, IntVector dest) : base(info) {
+        _path = new List<IntVector>();
         Source = src;
         Dest = dest;
-        _pathfinder = new AStarPathfinder<TilePos>();
+        _pathfinder = new AStarPathfinder<IntVector>();
     }
 
-    public TilePos Next(TilePos current, Direction direction) {
+    public IntVector Next(IntVector current, Direction direction) {
         int shift = 0;
         var curr = _path.IndexOf(current);
 
@@ -50,7 +50,7 @@ public class Route : MapObject {
 
     public void Pathfind() {
         _path = _pathfinder.FindPath(new MapGraph(MapInfo), Source, Dest);
-        if (_path == null) _path = new List<TilePos>();
+        if (_path == null) _path = new List<IntVector>();
     }
 
     public void AddHauler() {

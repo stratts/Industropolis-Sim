@@ -10,7 +10,7 @@ public enum BuildingType {
 }
 
 public class Building : GameObject { 
-    public TilePos Pos { get; set; }
+    public IntVector Pos { get; set; }
     public BuildingType Type { get; protected set; }
 
     public IDirectInput Input { get; set; } = null;

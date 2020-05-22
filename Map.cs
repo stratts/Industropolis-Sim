@@ -5,14 +5,14 @@ public interface MapInfo {
     int Width { get; }
     int Height { get; }
     Building GetBuilding(int x, int y);
-    Building GetBuilding(TilePos pos);
+    Building GetBuilding(IntVector pos);
     IEnumerable<T> GetEntities<T>() where T: Entity;
     void AddEntity(Entity entity);
     void RemoveEntity(Entity entity);
     //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
-    Tile GetTile(TilePos pos);
+    Tile GetTile(IntVector pos);
     int CurrentMoney { get; set; }
 }
 
@@ -75,7 +75,7 @@ public class Map : MapInfo {
         entities.Remove(entity);
     }
 
-    public Entity GetEntity(TilePos pos) {
+    public Entity GetEntity(IntVector pos) {
         foreach (Entity e in entities) {
             if (e.Pos == pos) return e;
         }
@@ -89,7 +89,7 @@ public class Map : MapInfo {
         }
     }
 
-    public void CreateBuilding(BuildingType type, TilePos pos) {
+    public void CreateBuilding(BuildingType type, IntVector pos) {
         Building building = null;
         switch (type) {
             case BuildingType.Workshop: building = new Workshop(); break;
@@ -100,7 +100,7 @@ public class Map : MapInfo {
         AddBuilding(building, pos);
     }
 
-    public void AddBuilding(Building building, TilePos pos) {
+    public void AddBuilding(Building building, IntVector pos) {
         /*if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
                 if (!HasResource(resource.Key, resource.Value)) {
@@ -134,21 +134,21 @@ public class Map : MapInfo {
     }
 
     public void AddBuilding(Building building, int x, int y) {
-        AddBuilding(building, new TilePos(x, y));
+        AddBuilding(building, new IntVector(x, y));
     }
 
     public Building GetBuilding(int x, int y) {
         return tiles[x, y].Building;
     }
 
-    public Building GetBuilding(TilePos pos) {
+    public Building GetBuilding(IntVector pos) {
         return tiles[pos.X, pos.Y].Building;
     }
 
-    public IEnumerable<TilePos> GetBuildingTiles(Building building) {
+    public IEnumerable<IntVector> GetBuildingTiles(Building building) {
         for (int x = 0; x < building.Width; x++) {
             for (int y = 0; y < building.Height; y++) {
-                yield return building.Pos + new TilePos(x, y);
+                yield return building.Pos + new IntVector(x, y);
             }
         }
     }
@@ -166,7 +166,7 @@ public class Map : MapInfo {
         foreach (Building b in buildings) b.Update(delta);
     }
 
-    public Route AddRoute(TilePos start, TilePos dest, Item item) {
+    public Route AddRoute(IntVector start, IntVector dest, Item item) {
         var route = new Route(this, start, dest);
         route.Item = item;
         route.SourceOutput = GetBuilding(start).Output;
@@ -181,9 +181,9 @@ public class Map : MapInfo {
         return route;
     }
 
-    public Route GetRoute(TilePos pos) {
+    public Route GetRoute(IntVector pos) {
         foreach (Route r in routes) {
-            foreach (TilePos t in r.Path) {
+            foreach (IntVector t in r.Path) {
                 if (t == pos) return r;
             }
         }
@@ -201,7 +201,7 @@ public class Map : MapInfo {
         }
     }
 
-    public PathNode GetNode(TilePos pos) {
+    public PathNode GetNode(IntVector pos) {
         foreach (var path in paths) {
             if (path.Source.Pos == pos) return path.Source;
             if (path.Dest.Pos == pos) return path.Dest;
@@ -210,7 +210,7 @@ public class Map : MapInfo {
         return null;
     }
 
-    private PathNode AddPathNode(TilePos pos) {
+    private PathNode AddPathNode(IntVector pos) {
         PathNode n = GetNode(pos);
         if (n == null) {
             n = new PathNode(pos);
@@ -228,11 +228,10 @@ public class Map : MapInfo {
         return n;
     }
 
-    public void BuildPath<T>(TilePos source, TilePos dest) where T : Path, new() {
-        var dir = source.Direction(dest);
-        TilePos inc = new TilePos(dir.x, dir.y);
-        TilePos prev = source;
-        TilePos cur = source + inc;
+    public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new() {
+        IntVector inc = source.Direction(dest);
+        IntVector prev = source;
+        IntVector cur = source + inc;
      
         for (int i = 0; i < source.Distance(dest); i++) {
             if (cur == dest || GetPath(cur) != null || GetNode(cur) != null) {
@@ -243,7 +242,7 @@ public class Map : MapInfo {
         }
     }
 
-    public void BuildPathSegment<T>(TilePos source, TilePos dest) where T : Path, new() {
+    public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new() {
         PathNode s = AddPathNode(source);
         PathNode d = AddPathNode(dest);
         Path path = new T();
@@ -267,8 +266,7 @@ public class Map : MapInfo {
             else break;
         }
 
-        if (!(path1.Direction == path2.Direction || 
-            path1.Direction == -path2.Direction)) return;
+        if (!path1.Direction.IsParallelTo(path2.Direction)) return;
 
         Path newPath = Path.Merge(path1, path2);
         path1.Disconnect();
@@ -288,7 +286,7 @@ public class Map : MapInfo {
         PathAdded?.Invoke(path);
     }
 
-    public Path GetPath(TilePos pos) {
+    public Path GetPath(IntVector pos) {
         foreach (Path path in paths) {
             if (path.OnPath(pos)) return path;
         }
@@ -332,7 +330,7 @@ public class Map : MapInfo {
         }
     }
 
-    public Tile GetTile(TilePos pos) {
+    public Tile GetTile(IntVector pos) {
         int x = pos.X;
         int y = pos.Y;
 
@@ -343,7 +341,7 @@ public class Map : MapInfo {
     public void CreateResourcePatch(int x, int y, int size, Item resource, int amount) {
         for (int i = x; i < x + size; i++) {
             for (int j = y; j < y + size; j++) {
-                Tile t = GetTile(new TilePos(i, j));
+                Tile t = GetTile(new IntVector(i, j));
                 if (t != null) {
                     t.Resource = resource;
                     t.ResourceCount = amount;
