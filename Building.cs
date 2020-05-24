@@ -23,6 +23,7 @@ public class Building : GameObject {
 
     public bool HasEntrance { get; protected set; } = false;
     public IntVector EntranceLocation { get; protected set; }
+    public PathNode EntranceNode { get; set; }
 
     //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 

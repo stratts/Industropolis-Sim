@@ -145,8 +145,9 @@ public class Map : MapInfo {
         if (building.HasEntrance) {
             IntVector entrancePos = building.Pos + building.EntranceLocation;
             var pathPos = entrancePos + new IntVector(0, 1);
-            if (GetPath(pathPos) != null) {
+            if (GetPath(pathPos) != null || GetNode(pathPos) != null) {
                 BuildPath<Path>(entrancePos, pathPos);
+                building.EntranceNode = GetNode(entrancePos);
             }
         }
         if (MapChanged != null) {
@@ -179,6 +180,14 @@ public class Map : MapInfo {
         buildings.Remove(building);
         foreach (var pos in GetBuildingTiles(building)) {
             tiles[pos.X, pos.Y].Building = null;
+        }
+        if (building.HasEntrance) {
+            PathNode n = building.EntranceNode;
+            PathNode pathCon = GetNode(n.Pos + new IntVector(0, 1));
+            Path p = n.Connections[pathCon];
+            p.Disconnect();
+            RemovePath(p);
+            if (pathCon.Connections.Count == 2) TryMergeNode(pathCon);
         }
     }
 
