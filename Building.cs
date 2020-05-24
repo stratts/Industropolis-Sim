@@ -21,6 +21,9 @@ public class Building : GameObject {
 
     public int Cost { get; set; } = 0;
 
+    public bool HasEntrance { get; protected set; } = false;
+    public IntVector EntranceLocation { get; protected set; }
+
     //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 
     //protected Dictionary<Item, int> _requiredResources = null;

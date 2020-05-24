@@ -9,5 +9,7 @@ public class Mine : ProductionBuilding {
         ProcessingTime = 2;
         Width = 2;
         Height = 2;
+        HasEntrance = true;
+        EntranceLocation = new IntVector(0, 1);
     }
 }

@@ -100,6 +100,19 @@ public class Map : MapInfo {
         AddBuilding(building, pos);
     }
 
+    public bool CanBuild(Building building, IntVector pos) {
+        for (int x = 0; x < building.Width; x++) {
+            for (int y = 0; y < building.Height; y++) {
+                var p = new IntVector(pos.X + x, pos.Y + y);
+                if (GetPath(p) != null) return false;
+                if (GetNode(p) != null) return false;
+                if (GetBuilding(p) != null) return false;
+            }
+        }
+
+        return true;
+    }
+
     public void AddBuilding(Building building, IntVector pos) {
         /*if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
@@ -120,14 +133,22 @@ public class Map : MapInfo {
             CurrentMoney -= building.Cost;
         }
         building.Pos = pos;
-        foreach (var tile in GetBuildingTiles(building)) {
-            if (GetBuilding(tile) != null) return;
+        if (!CanBuild(building, pos)) {
+            Godot.GD.Print("Cannot build here");
+            return;
         }
         foreach (var tile in GetBuildingTiles(building)) {
             tiles[tile.X, tile.Y].Building = building;
         }
         building.Pos = pos;
         buildings.Add(building);
+        if (building.HasEntrance) {
+            IntVector entrancePos = building.Pos + building.EntranceLocation;
+            var pathPos = entrancePos + new IntVector(0, 1);
+            if (GetPath(pathPos) != null) {
+                BuildPath<Path>(entrancePos, pathPos);
+            }
+        }
         if (MapChanged != null) {
             MapChanged(this, new MapChangedEventArgs { Building = building });
         }
