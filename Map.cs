@@ -50,7 +50,6 @@ public class Map : MapInfo {
     public event MapChangedEvent MapChanged;
 
     public event Action<Path> PathAdded;
-    public event Action<Path> PathRemoved;
     public event Action<PathNode> PathNodeAdded;
 
     public Map() {
@@ -187,6 +186,7 @@ public class Map : MapInfo {
             Path p = n.Connections[pathCon];
             p.Disconnect();
             RemovePath(p);
+            RemoveNode(n);
             if (pathCon.Connections.Count == 2) TryMergeNode(pathCon);
         }
     }
@@ -256,6 +256,10 @@ public class Map : MapInfo {
             PathNodeAdded?.Invoke(n);
         }
         return n;
+    }
+
+    public void RemoveNode(PathNode node) {
+        node.Remove();
     }
 
     public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new() {
@@ -337,7 +341,7 @@ public class Map : MapInfo {
 
     public void RemovePath(Path path) {
         this.paths.Remove(path);
-        PathRemoved?.Invoke(path);
+        path.Remove();
     }
 
     public int GetResourceAmount(Item item) {

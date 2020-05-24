@@ -9,7 +9,7 @@ public enum BuildingType {
     Farm
 }
 
-public class Building : GameObject { 
+public class Building : MapObject { 
     public IntVector Pos { get; set; }
     public BuildingType Type { get; protected set; }
 

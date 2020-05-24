@@ -4,6 +4,7 @@ using Godot;
 public abstract class Entity : MapObject {
     public ref IntVector Pos => ref _pos;
     private IntVector _pos;
+    public MapInfo MapInfo { get; set; }
 
     public ref IntVector NextPos => ref _nextPos;
     private IntVector _nextPos;
@@ -14,7 +15,8 @@ public abstract class Entity : MapObject {
     private static int id = 0;
     public int Id { get; set; }
 
-    public Entity(MapInfo info, int x, int y) : base(info) {
+    public Entity(MapInfo info, int x, int y) {
+        MapInfo = info;
         this._pos = new IntVector(x, y);
         id++;
         Id = id;

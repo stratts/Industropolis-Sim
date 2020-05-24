@@ -7,6 +7,7 @@ public class Route : MapObject {
     public IReadOnlyList<IntVector> Path => _path;
     public IntVector Source { get; set; }
     public IntVector Dest { get; set; }
+    public MapInfo MapInfo { get; private set; }
 
     public Tile.SurfaceType SurfaceRestriction { get; set; } = Tile.SurfaceType.Base;
 
@@ -29,7 +30,8 @@ public class Route : MapObject {
 
     public enum Direction { Forwards, Backwards };
 
-    public Route(MapInfo info, IntVector src, IntVector dest) : base(info) {
+    public Route(MapInfo info, IntVector src, IntVector dest) {
+        MapInfo = info;
         _path = new List<IntVector>();
         Source = src;
         Dest = dest;

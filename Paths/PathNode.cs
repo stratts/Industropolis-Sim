@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class PathNode {
+public class PathNode : MapObject {
 	public IntVector Pos { get; private set; }
 	public IReadOnlyDictionary<PathNode, Path> Connections => _connections;
 	private Dictionary<PathNode, Path> _connections;

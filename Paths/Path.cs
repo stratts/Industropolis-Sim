@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 
-public class Path {
+public class Path : MapObject {
 	public PathNode Source { get; private set; }
 	public PathNode Dest { get; private set; }
 	public float Length { get; private set; }

@@ -1,8 +1,10 @@
+using System;
 
-public abstract class MapObject : GameObject {
-    protected MapInfo MapInfo { get; set; }
+// Represents an entity that exists on the map
+public class MapObject {
+    public event Action Removed;
 
-    public MapObject(MapInfo mapInfo) {
-        this.MapInfo = mapInfo;
+    public void Remove() {
+        Removed?.Invoke();
     }
 }
