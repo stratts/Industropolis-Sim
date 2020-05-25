@@ -30,6 +30,7 @@ public class Map : MapInfo {
     private List<Building> buildings;
     private List<Route> routes;
     private List<Path> paths;
+    private List<PathNode> nodes;
     private int _currentMoney = 0;
 
     public List<Entity> Entities => entities;
@@ -57,6 +58,7 @@ public class Map : MapInfo {
         routes = new List<Route>();
         buildings = new List<Building>();
         paths = new List<Path>();
+        nodes = new List<PathNode>();
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
@@ -232,12 +234,16 @@ public class Map : MapInfo {
     }
 
     public PathNode GetNode(IntVector pos) {
-        foreach (var path in paths) {
-            if (path.Source.Pos == pos) return path.Source;
-            if (path.Dest.Pos == pos) return path.Dest;
+        foreach (PathNode node in nodes) {
+            if (node.Pos == pos) return node;
         }
 
         return null;
+    }
+
+    public void AddNode(PathNode node) {
+        nodes.Add(node);
+        PathNodeAdded?.Invoke(node);
     }
 
     private PathNode AddPathNode(IntVector pos) {
@@ -253,12 +259,18 @@ public class Map : MapInfo {
                 AddPath(path2);
                 RemovePath(p);
             }
-            PathNodeAdded?.Invoke(n);
+            AddNode(n);
         }
         return n;
     }
 
     public void RemoveNode(PathNode node) {
+        var paths = new List<Path>(node.Connections.Values);
+        foreach (Path path in paths) {
+            path.Disconnect();
+            RemovePath(path);
+        } 
+        nodes.Remove(node);
         node.Remove();
     }
 
@@ -319,7 +331,7 @@ public class Map : MapInfo {
         RemovePath(path2);
         newPath.Connect();
         AddPath(newPath);
-        // Remove node
+        RemoveNode(node);
     }
 
     public void AddPath(Path path) {
@@ -337,6 +349,28 @@ public class Map : MapInfo {
             }        
         }
         return null;
+    }
+
+    public void DeletePathSegment(IntVector pos) {
+        Path p = GetPath(pos);
+        PathNode n = GetNode(pos);
+        if (p == null && n == null) {
+            throw new ArgumentException($"Position {pos} does not contain a path to delete");
+        }
+        if (p != null) {
+            AddPathNode(pos + p.Direction);
+            AddPathNode(pos - p.Direction);
+            var newPath = GetPath(pos);
+            newPath.Disconnect();
+            RemovePath(newPath);
+        }
+        else if (n != null) {
+            var connections = new List<PathNode>(n.Connections.Keys);
+            foreach (PathNode connection in connections) {
+                AddPathNode(n.Pos + n.Pos.Direction(connection.Pos));
+            }
+            RemoveNode(n);
+        }
     }
 
     public void RemovePath(Path path) {
