@@ -143,14 +143,7 @@ public class Map : MapInfo {
         }
         building.Pos = pos;
         buildings.Add(building);
-        if (building.HasEntrance) {
-            IntVector entrancePos = building.Pos + building.EntranceLocation;
-            var pathPos = entrancePos + new IntVector(0, 1);
-            if (GetPath(pathPos) != null || GetNode(pathPos) != null) {
-                BuildPath<Path>(entrancePos, pathPos);
-                building.EntranceNode = GetNode(entrancePos);
-            }
-        }
+        if (building.HasEntrance) ConnectBuilding(building);
         if (MapChanged != null) {
             MapChanged(this, new MapChangedEventArgs { Building = building });
         }
@@ -176,21 +169,31 @@ public class Map : MapInfo {
         }
     }
 
+    public void ConnectBuilding(Building building) {
+        var entrance = building.Entrance;
+        if (GetPath(entrance.ConnectionPos) != null || GetNode(entrance.ConnectionPos) != null) {
+            var node = new BuildingNode(entrance.Pos, building);
+            entrance.Connect(node);
+            AddNode(entrance.Node);
+            BuildPath<Path>(entrance.Pos, entrance.ConnectionPos);
+        }
+    }
+
+    public void DisconnectBuilding(Building building) {
+        PathNode n = building.Entrance.Node;
+        PathNode pathCon = GetNode(n.Pos + new IntVector(0, 1));
+        RemoveNode(n);
+        if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
+        building.Entrance.Disconnect();
+    }
+
     public void RemoveBuilding(Building building) {
         building.Remove();
         buildings.Remove(building);
         foreach (var pos in GetBuildingTiles(building)) {
             tiles[pos.X, pos.Y].Building = null;
         }
-        if (building.HasEntrance) {
-            PathNode n = building.EntranceNode;
-            PathNode pathCon = GetNode(n.Pos + new IntVector(0, 1));
-            Path p = n.Connections[pathCon];
-            p.Disconnect();
-            RemovePath(p);
-            RemoveNode(n);
-            if (pathCon.Connections.Count == 2) TryMergeNode(pathCon);
-        }
+        if (building.HasEntrance) DisconnectBuilding(building);
     }
 
     public void Update(float delta) {
@@ -279,6 +282,7 @@ public class Map : MapInfo {
         IntVector prev = source;
         IntVector cur = source;
         bool onPath = false;
+        var toConnect = new List<Building>();
      
         while (cur != dest) {
             cur += inc;
@@ -295,7 +299,15 @@ public class Map : MapInfo {
                 BuildPathSegment<T>(prev, cur);
                 prev = cur;
             }     
+            foreach (var building in buildings) {
+                if (building.HasEntrance && building.Entrance.ConnectionPos == cur
+                    && !building.Entrance.Connected) {
+                    toConnect.Add(building);
+                }
+            }
         }
+
+        foreach (var building in toConnect) ConnectBuilding(building);
     }
 
     public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new() {

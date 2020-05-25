@@ -10,6 +10,6 @@ public class Mine : ProductionBuilding {
         Width = 2;
         Height = 2;
         HasEntrance = true;
-        EntranceLocation = new IntVector(0, 1);
+        Entrance = new BuildingEntrance(this, new IntVector(0, 1));
     }
 }

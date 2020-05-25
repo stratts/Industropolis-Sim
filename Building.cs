@@ -9,6 +9,24 @@ public enum BuildingType {
     Farm
 }
 
+public class BuildingEntrance {
+    private Building _parent;
+
+    public IntVector Location { get; }
+    public PathNode Node { get; private set; }
+    public IntVector Pos => _parent.Pos + Location;
+    public IntVector ConnectionPos => Pos + new IntVector(0, 1);
+    public bool Connected => Node != null;
+
+    public BuildingEntrance(Building parent, IntVector location) {
+        Location = location;
+        _parent = parent;
+    }
+
+    public void Connect(PathNode node) => Node = node;
+    public void Disconnect() => Node = null;
+}
+
 public class Building : MapObject { 
     public IntVector Pos { get; set; }
     public BuildingType Type { get; protected set; }
@@ -22,8 +40,7 @@ public class Building : MapObject {
     public int Cost { get; set; } = 0;
 
     public bool HasEntrance { get; protected set; } = false;
-    public IntVector EntranceLocation { get; protected set; }
-    public PathNode EntranceNode { get; set; }
+    public BuildingEntrance Entrance { get; protected set; }
 
     //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 
