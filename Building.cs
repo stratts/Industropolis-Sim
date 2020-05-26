@@ -6,7 +6,9 @@ public enum BuildingType {
     Workshop,
     //House,
     Mine,
-    Farm
+    Farm,
+    TestProducer,
+    TestConsumer
 }
 
 public class BuildingEntrance {

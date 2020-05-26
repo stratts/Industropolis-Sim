@@ -90,15 +90,17 @@ public class Map : MapInfo {
         }
     }
 
-    public void CreateBuilding(BuildingType type, IntVector pos) {
+    public Building CreateBuilding(BuildingType type, IntVector pos) {
         Building building = null;
         switch (type) {
             case BuildingType.Workshop: building = new Workshop(); break;
             //case BuildingType.House: building = new House(this.Population); break;
             case BuildingType.Mine: building = new Mine(this, pos); break;
             case BuildingType.Farm: building = new Farm(this, pos); break;
+            case BuildingType.TestConsumer: building = new TestConsumer(); break;
+            case BuildingType.TestProducer: building = new TestProducer(); break;
         }
-        AddBuilding(building, pos);
+       return building;
     }
 
     public bool CanBuild(Building building, IntVector pos) {
