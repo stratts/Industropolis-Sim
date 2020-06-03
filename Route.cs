@@ -49,7 +49,10 @@ public class Route : MapObject {
 
     public void Pathfind() {
         _path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
-        if (_path == null) _path = new List<PathNode>();
+        if (_path == null) {
+            Godot.GD.Print("No path found! :(");
+            _path = new List<PathNode>();
+        }
     }
 
     public void AddHauler() {

@@ -34,6 +34,7 @@ public class Map : MapInfo {
     private int _currentMoney = 0;
 
     public List<Entity> Entities => entities;
+    public List<Vehicle> Vehicles = new List<Vehicle>();
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
 
@@ -201,6 +202,7 @@ public class Map : MapInfo {
     public void Update(float delta) {
         foreach (Entity e in entities) e.Update(delta);
         foreach (Building b in buildings) b.Update(delta);
+        foreach (Vehicle v in Vehicles) v.Update(delta);
     }
 
     public Route AddRoute(BuildingNode start, BuildingNode dest, Item item) {
