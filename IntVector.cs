@@ -2,11 +2,15 @@
 using System;
 using System.Collections.Generic;
 
+public static class IntExtensions {
+    public static bool IsMultipleOf(this int a, int b) => (a == 0 && b == 0) || a % b == 0;
+}
+
 public struct IntVector {
     public int X { get; set; }
     public int Y { get; set; }
 
-    public static IntVector Zero => new IntVector(0, 0);
+    public static readonly IntVector Zero = new IntVector(0, 0);
 
     public IntVector(int x, int y) {
         X = x;
@@ -61,10 +65,12 @@ public struct IntVector {
 
     public IntVector Direction(IntVector dest) {
         if (dest == this) return Zero;
-        IntVector diff = dest - this;
-		int max = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
-		return new IntVector(diff.X / max, diff.Y / max);
+        IntVector dirVector = VectorTo(dest);
+		int max = Math.Max(Math.Abs(dirVector.X), Math.Abs(dirVector.Y));
+		return new IntVector(dirVector.X / max, dirVector.Y / max);
     }
+
+    public IntVector VectorTo(IntVector dest) => dest - this;
 
     public float Distance(IntVector dest) {
         return (float)Math.Sqrt(Math.Pow(X - dest.X, 2) + Math.Pow(Y - dest.Y, 2));
@@ -77,18 +83,7 @@ public struct IntVector {
     }
 
     public bool IsMultipleOf(IntVector pos) {
-        int x, y;
-        if (pos.X == 0) x = 1;
-        else x = pos.X;
-        if (pos.Y == 0) y = 1;
-        else y = pos.Y;
-        var xMul = Math.Round((float)X / (float)pos.X, 1);
-        var yMul = Math.Round((float)Y / (float)pos.Y, 1);
-        if (X == 0 && pos.X == 0) xMul = yMul;
-        if (Y == 0 && pos.Y == 0) yMul = xMul;
-
-        if (xMul == yMul && xMul >= 1 && yMul >= 1) return true;
-        return false;
+        return (X.IsMultipleOf(pos.X) && Y.IsMultipleOf(pos.Y));
     }
 
     public override int GetHashCode() {

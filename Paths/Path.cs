@@ -80,10 +80,10 @@ public class Path : MapObject {
 	public bool OnPath(IntVector pos) {
 		if (pos == Source.Pos || pos == Dest.Pos) return true;
 		
-		IntVector pathDiff = Dest.Pos - Source.Pos;
-		IntVector posDiff = pos - Source.Pos;
+		IntVector pathVector = Source.Pos.VectorTo(Dest.Pos);
+		IntVector posVector = Source.Pos.VectorTo(pos);
 
-		if (pathDiff.IsMultipleOf(posDiff)) return true;
+		if (pathVector.IsMultipleOf(posVector)) return true;
 		return false;
 	}
 }
