@@ -2,19 +2,17 @@ using System;
 using System.Collections.Generic;
 
 public class Route : MapObject {
-    private List<IntVector> _path;
+    private List<PathNode> _path = new List<PathNode>();
     
-    public IReadOnlyList<IntVector> Path => _path;
-    public IntVector Source { get; set; }
-    public IntVector Dest { get; set; }
+    public IReadOnlyList<PathNode> Path => _path;
+    public PathNode Source { get; set; }
+    public PathNode Dest { get; set; }
     public MapInfo MapInfo { get; private set; }
-
-    public Tile.SurfaceType SurfaceRestriction { get; set; } = Tile.SurfaceType.Base;
 
     public IDirectOutput SourceOutput { get; set; }
     public IDirectInput DestInput { get; set; }
 
-    private IPathfinder<IntVector> _pathfinder;
+    private IPathfinder<PathNode> _pathfinder;
 
     private Item _item = Item.None;
     public Item Item { 
@@ -30,15 +28,14 @@ public class Route : MapObject {
 
     public enum Direction { Forwards, Backwards };
 
-    public Route(MapInfo info, IntVector src, IntVector dest) {
+    public Route(MapInfo info, PathNode src, PathNode dest) {
         MapInfo = info;
-        _path = new List<IntVector>();
         Source = src;
         Dest = dest;
-        _pathfinder = new AStarPathfinder<IntVector>();
+        _pathfinder = new AStarPathfinder<PathNode>();
     }
 
-    public IntVector Next(IntVector current, Direction direction) {
+    public PathNode Next(PathNode current, Direction direction) {
         int shift = 0;
         var curr = _path.IndexOf(current);
 
@@ -51,18 +48,18 @@ public class Route : MapObject {
     }
 
     public void Pathfind() {
-        _path = _pathfinder.FindPath(new MapGraph(MapInfo), Source, Dest);
-        if (_path == null) _path = new List<IntVector>();
+        _path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
+        if (_path == null) _path = new List<PathNode>();
     }
 
     public void AddHauler() {
         //if (!MapInfo.Population.Use()) return;
-        var hauler = new Hauler(MapInfo, Source.X, Source.Y);
+        /*var hauler = new Hauler(MapInfo, Source.X, Source.Y);
         hauler.Route = this;
         hauler.Item = Item;
         Haulers.Add(hauler);
         hauler.Haul();
-        MapInfo.AddEntity(hauler);
+        MapInfo.AddEntity(hauler);*/
     }
 
     public void RemoveHauler() {

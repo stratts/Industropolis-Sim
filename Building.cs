@@ -15,7 +15,7 @@ public class BuildingEntrance {
     private Building _parent;
 
     public IntVector Location { get; }
-    public PathNode Node { get; private set; }
+    public BuildingNode Node { get; private set; }
     public IntVector Pos => _parent.Pos + Location;
     public IntVector ConnectionPos => Pos + new IntVector(0, 1);
     public bool Connected => Node != null;
@@ -25,7 +25,7 @@ public class BuildingEntrance {
         _parent = parent;
     }
 
-    public void Connect(PathNode node) => Node = node;
+    public void Connect(BuildingNode node) => Node = node;
     public void Disconnect() => Node = null;
 }
 

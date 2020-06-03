@@ -203,11 +203,11 @@ public class Map : MapInfo {
         foreach (Building b in buildings) b.Update(delta);
     }
 
-    public Route AddRoute(IntVector start, IntVector dest, Item item) {
+    public Route AddRoute(BuildingNode start, BuildingNode dest, Item item) {
         var route = new Route(this, start, dest);
         route.Item = item;
-        route.SourceOutput = GetBuilding(start).Output;
-        route.DestInput = GetBuilding(dest).Input;
+        route.SourceOutput = start.Building.Output;
+        route.DestInput = start.Building.Input;
         route.Pathfind();
         routes.Add(route);
 
@@ -219,11 +219,11 @@ public class Map : MapInfo {
     }
 
     public Route GetRoute(IntVector pos) {
-        foreach (Route r in routes) {
-            foreach (IntVector t in r.Path) {
+        /*foreach (Route r in routes) {
+            foreach (PathNode t in r.Path) {
                 if (t == pos) return r;
             }
-        }
+        }*/
 
         return null;
     }

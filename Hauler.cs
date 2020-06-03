@@ -46,7 +46,7 @@ public class Hauler : Entity {
     }
 
     public override void Update(float elapsedTime) {
-        if (!Hauling || Route == null) return;
+        /*if (!Hauling || Route == null) return;
 
         timeSinceMove += elapsedTime;
         LastMoveTime = timeSinceMove;
@@ -80,6 +80,6 @@ public class Hauler : Entity {
             else if (Pos.Y > target.Y) Pos.Y -= 1;
 
             _currentTile = MapInfo.GetTile(Pos);
-        }
+        }*/
     }
 }
