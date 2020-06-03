@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 
 
-public enum BuildingType {
+public enum BuildingType
+{
     None,
     Workshop,
     //House,
@@ -11,7 +12,8 @@ public enum BuildingType {
     TestConsumer
 }
 
-public class BuildingEntrance {
+public class BuildingEntrance
+{
     private Building _parent;
 
     public IntVector Location { get; }
@@ -20,7 +22,8 @@ public class BuildingEntrance {
     public IntVector ConnectionPos => Pos + new IntVector(0, 1);
     public bool Connected => Node != null;
 
-    public BuildingEntrance(Building parent, IntVector location) {
+    public BuildingEntrance(Building parent, IntVector location)
+    {
         Location = location;
         _parent = parent;
     }
@@ -29,7 +32,8 @@ public class BuildingEntrance {
     public void Disconnect() => Node = null;
 }
 
-public class Building : MapObject { 
+public class Building : MapObject
+{
     public IntVector Pos { get; set; }
     public BuildingType Type { get; protected set; }
 
@@ -48,12 +52,14 @@ public class Building : MapObject {
 
     //protected Dictionary<Item, int> _requiredResources = null;
 
-    public virtual void Update(float delta) {
-        
+    public virtual void Update(float delta)
+    {
+
     }
 }
 
-public class ProductionBuilding : Building {
+public class ProductionBuilding : Building
+{
     public float ProcessingTime { get; set; } = 0;
     public bool Processing { get; private set; } = false;
 
@@ -62,17 +68,22 @@ public class ProductionBuilding : Building {
 
     private float lastProcess = 0;
 
-    public override void Update(float delta) {
+    public override void Update(float delta)
+    {
         if (Consumer == null || Producer == null) return;
-        if (Producer.CanProduce) {
-            if (Consumer.CanConsume && !Processing) {
+        if (Producer.CanProduce)
+        {
+            if (Consumer.CanConsume && !Processing)
+            {
                 Consumer.Consume();
                 Processing = true;
                 lastProcess = 0;
             }
-            else if (Processing) {
+            else if (Processing)
+            {
                 lastProcess += delta;
-                if (lastProcess >= ProcessingTime) {
+                if (lastProcess >= ProcessingTime)
+                {
                     Processing = false;
                     Producer.Produce();
                 }

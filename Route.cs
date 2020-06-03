@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-public class Route : MapObject {
+public class Route : MapObject
+{
     private List<PathNode> _path = new List<PathNode>();
-    
+
     public IReadOnlyList<PathNode> Path => _path;
     public PathNode Source { get; set; }
     public PathNode Dest { get; set; }
@@ -15,9 +16,11 @@ public class Route : MapObject {
     private IPathfinder<PathNode> _pathfinder;
 
     private Item _item = Item.None;
-    public Item Item { 
+    public Item Item
+    {
         get => _item;
-        set {
+        set
+        {
             _item = value;
             foreach (var h in Haulers) h.Item = value;
         }
@@ -28,14 +31,16 @@ public class Route : MapObject {
 
     public enum Direction { Forwards, Backwards };
 
-    public Route(MapInfo info, PathNode src, PathNode dest) {
+    public Route(MapInfo info, PathNode src, PathNode dest)
+    {
         MapInfo = info;
         Source = src;
         Dest = dest;
         _pathfinder = new AStarPathfinder<PathNode>();
     }
 
-    public PathNode Next(PathNode current, Direction direction) {
+    public PathNode Next(PathNode current, Direction direction)
+    {
         int shift = 0;
         var curr = _path.IndexOf(current);
 
@@ -47,15 +52,18 @@ public class Route : MapObject {
         else return current;
     }
 
-    public void Pathfind() {
+    public void Pathfind()
+    {
         _path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
-        if (_path == null) {
+        if (_path == null)
+        {
             Godot.GD.Print("No path found! :(");
             _path = new List<PathNode>();
         }
     }
 
-    public void AddHauler() {
+    public void AddHauler()
+    {
         //if (!MapInfo.Population.Use()) return;
         /*var hauler = new Hauler(MapInfo, Source.X, Source.Y);
         hauler.Route = this;
@@ -65,7 +73,8 @@ public class Route : MapObject {
         MapInfo.AddEntity(hauler);*/
     }
 
-    public void RemoveHauler() {
+    public void RemoveHauler()
+    {
         if (Haulers.Count == 0) return;
         Hauler h = Haulers[0];
         Haulers.RemoveAt(0);

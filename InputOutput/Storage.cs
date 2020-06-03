@@ -42,10 +42,12 @@ public class Storage : IDirectInput, IDirectOutput
         return true;
     }
 
-    public ItemBuffer GetBuffer(Item item) {
+    public ItemBuffer GetBuffer(Item item)
+    {
         _buffers.TryGetValue(item, out ItemBuffer buffer);
 
-        if (buffer == null) {
+        if (buffer == null)
+        {
             buffer = new ItemBuffer(1000, item);
             _buffers[item] = buffer;
         }
@@ -53,7 +55,8 @@ public class Storage : IDirectInput, IDirectOutput
         return buffer;
     }
 
-    public int AmountOf(Item item) {
+    public int AmountOf(Item item)
+    {
         _buffers.TryGetValue(item, out ItemBuffer buffer);
         if (buffer != null) return buffer.Buffer;
         return 0;

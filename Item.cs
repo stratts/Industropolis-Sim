@@ -1,5 +1,6 @@
 
-public enum Item {
+public enum Item
+{
     None,
     Stone,
     Wood,

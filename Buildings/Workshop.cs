@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 
-public class Workshop : ProductionBuilding {
-    public Recipe Recipe {
-        get {
+public class Workshop : ProductionBuilding
+{
+    public Recipe Recipe
+    {
+        get
+        {
             return _recipe;
         }
-        set {
+        set
+        {
             _recipe = value;
             LoadRecipe(value);
         }
@@ -13,14 +17,17 @@ public class Workshop : ProductionBuilding {
 
     private Recipe _recipe;
 
-    public Workshop() {
+    public Workshop()
+    {
         Type = BuildingType.Workshop;
         Recipe = Recipes.GetRecipe("None");
     }
 
-    private void LoadRecipe(Recipe recipe) {
+    private void LoadRecipe(Recipe recipe)
+    {
         var input = new DirectConsumer();
-        foreach (RecipeInput i in recipe.Input) {
+        foreach (RecipeInput i in recipe.Input)
+        {
             input.AddItem(i.Count * 2, i.Count, i.Item);
         }
         Input = input;

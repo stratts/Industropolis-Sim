@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-public interface MapInfo {
+public interface MapInfo
+{
     int Width { get; }
     int Height { get; }
     Building GetBuilding(int x, int y);
     Building GetBuilding(IntVector pos);
-    IEnumerable<T> GetEntities<T>() where T: Entity;
+    IEnumerable<T> GetEntities<T>() where T : Entity;
     void AddEntity(Entity entity);
     void RemoveEntity(Entity entity);
     //PopulationInfo Population { get; }
@@ -18,13 +19,15 @@ public interface MapInfo {
 
 public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
 
-public class MapChangedEventArgs : EventArgs {
+public class MapChangedEventArgs : EventArgs
+{
     public Building Building { get; set; } = null;
     public Entity Entity { get; set; } = null;
     public Route Route { get; set; } = null;
 }
 
-public class Map : MapInfo {
+public class Map : MapInfo
+{
     private Tile[,] tiles;
     private List<Entity> entities;
     private List<Building> buildings;
@@ -39,11 +42,14 @@ public class Map : MapInfo {
     public int Height => tiles.GetLength(1);
 
     //public PopulationInfo Population { get; } = new PopulationInfo();
-    public int CurrentMoney { 
-        get {
+    public int CurrentMoney
+    {
+        get
+        {
             return _currentMoney;
         }
-        set {
+        set
+        {
             _currentMoney = value;
             if (_currentMoney < 0) _currentMoney = 0;
         }
@@ -54,7 +60,8 @@ public class Map : MapInfo {
     public event Action<Path> PathAdded;
     public event Action<PathNode> PathNodeAdded;
 
-    public Map() {
+    public Map()
+    {
         entities = new List<Entity>();
         routes = new List<Route>();
         buildings = new List<Building>();
@@ -65,35 +72,44 @@ public class Map : MapInfo {
         tiles = MapGenerator.GenerateTiles(size, size, 1);
     }
 
-    public void AddEntity(Entity entity) {
+    public void AddEntity(Entity entity)
+    {
         entities.Add(entity);
-        if (MapChanged != null) {
+        if (MapChanged != null)
+        {
             MapChanged(this, new MapChangedEventArgs { Entity = entity });
         }
     }
 
-    public void RemoveEntity(Entity entity) {
+    public void RemoveEntity(Entity entity)
+    {
         entity.Remove();
         entities.Remove(entity);
     }
 
-    public Entity GetEntity(IntVector pos) {
-        foreach (Entity e in entities) {
+    public Entity GetEntity(IntVector pos)
+    {
+        foreach (Entity e in entities)
+        {
             if (e.Pos == pos) return e;
         }
 
         return null;
     }
 
-    public IEnumerable<T> GetEntities<T>() where T : Entity {
-        foreach (Entity e in entities) {
+    public IEnumerable<T> GetEntities<T>() where T : Entity
+    {
+        foreach (Entity e in entities)
+        {
             if (e is T t) yield return t;
         }
     }
 
-    public Building CreateBuilding(BuildingType type, IntVector pos) {
+    public Building CreateBuilding(BuildingType type, IntVector pos)
+    {
         Building building = null;
-        switch (type) {
+        switch (type)
+        {
             case BuildingType.Workshop: building = new Workshop(); break;
             //case BuildingType.House: building = new House(this.Population); break;
             case BuildingType.Mine: building = new Mine(this, pos); break;
@@ -101,12 +117,15 @@ public class Map : MapInfo {
             case BuildingType.TestConsumer: building = new TestConsumer(); break;
             case BuildingType.TestProducer: building = new TestProducer(); break;
         }
-       return building;
+        return building;
     }
 
-    public bool CanBuild(Building building, IntVector pos) {
-        for (int x = 0; x < building.Width; x++) {
-            for (int y = 0; y < building.Height; y++) {
+    public bool CanBuild(Building building, IntVector pos)
+    {
+        for (int x = 0; x < building.Width; x++)
+        {
+            for (int y = 0; y < building.Height; y++)
+            {
                 var p = new IntVector(pos.X + x, pos.Y + y);
                 if (GetPath(p) != null) return false;
                 if (GetNode(p) != null) return false;
@@ -117,7 +136,8 @@ public class Map : MapInfo {
         return true;
     }
 
-    public void AddBuilding(Building building, IntVector pos) {
+    public void AddBuilding(Building building, IntVector pos)
+    {
         /*if (building.RequiredResources != null) {
             foreach (var resource in building.RequiredResources) {
                 if (!HasResource(resource.Key, resource.Value)) {
@@ -129,52 +149,65 @@ public class Map : MapInfo {
                 GetResource(resource.Key, resource.Value);
             }
         }*/
-        if (CurrentMoney < building.Cost) {
-             Godot.GD.Print($"Not enough money to build {building.GetType().Name}");
-             return;
+        if (CurrentMoney < building.Cost)
+        {
+            Godot.GD.Print($"Not enough money to build {building.GetType().Name}");
+            return;
         }
-        else {
+        else
+        {
             CurrentMoney -= building.Cost;
         }
         building.Pos = pos;
-        if (!CanBuild(building, pos)) {
+        if (!CanBuild(building, pos))
+        {
             Godot.GD.Print("Cannot build here");
             return;
         }
-        foreach (var tile in GetBuildingTiles(building)) {
+        foreach (var tile in GetBuildingTiles(building))
+        {
             tiles[tile.X, tile.Y].Building = building;
         }
         building.Pos = pos;
         buildings.Add(building);
         if (building.HasEntrance) ConnectBuilding(building);
-        if (MapChanged != null) {
+        if (MapChanged != null)
+        {
             MapChanged(this, new MapChangedEventArgs { Building = building });
         }
     }
 
-    public void AddBuilding(Building building, int x, int y) {
+    public void AddBuilding(Building building, int x, int y)
+    {
         AddBuilding(building, new IntVector(x, y));
     }
 
-    public Building GetBuilding(int x, int y) {
+    public Building GetBuilding(int x, int y)
+    {
         return tiles[x, y].Building;
     }
 
-    public Building GetBuilding(IntVector pos) {
+    public Building GetBuilding(IntVector pos)
+    {
         return tiles[pos.X, pos.Y].Building;
     }
 
-    public IEnumerable<IntVector> GetBuildingTiles(Building building) {
-        for (int x = 0; x < building.Width; x++) {
-            for (int y = 0; y < building.Height; y++) {
+    public IEnumerable<IntVector> GetBuildingTiles(Building building)
+    {
+        for (int x = 0; x < building.Width; x++)
+        {
+            for (int y = 0; y < building.Height; y++)
+            {
                 yield return building.Pos + new IntVector(x, y);
             }
         }
     }
 
-    public void ConnectBuilding(Building building) {
+    public void ConnectBuilding(Building building)
+    {
         var entrance = building.Entrance;
-        if (GetPath(entrance.ConnectionPos) != null || GetNode(entrance.ConnectionPos) != null) {
+        if (GetPath(entrance.ConnectionPos) != null || GetNode(entrance.ConnectionPos) != null)
+        {
             var node = new BuildingNode(entrance.Pos, building);
             entrance.Connect(node);
             AddNode(entrance.Node);
@@ -182,7 +215,8 @@ public class Map : MapInfo {
         }
     }
 
-    public void DisconnectBuilding(Building building) {
+    public void DisconnectBuilding(Building building)
+    {
         PathNode n = building.Entrance.Node;
         PathNode pathCon = GetNode(n.Pos + new IntVector(0, 1));
         RemoveNode(n);
@@ -190,22 +224,26 @@ public class Map : MapInfo {
         building.Entrance.Disconnect();
     }
 
-    public void RemoveBuilding(Building building) {
+    public void RemoveBuilding(Building building)
+    {
         building.Remove();
         buildings.Remove(building);
-        foreach (var pos in GetBuildingTiles(building)) {
+        foreach (var pos in GetBuildingTiles(building))
+        {
             tiles[pos.X, pos.Y].Building = null;
         }
         if (building.HasEntrance) DisconnectBuilding(building);
     }
 
-    public void Update(float delta) {
+    public void Update(float delta)
+    {
         foreach (Entity e in entities) e.Update(delta);
         foreach (Building b in buildings) b.Update(delta);
         foreach (Vehicle v in Vehicles) v.Update(delta);
     }
 
-    public Route AddRoute(BuildingNode start, BuildingNode dest, Item item) {
+    public Route AddRoute(BuildingNode start, BuildingNode dest, Item item)
+    {
         var route = new Route(this, start, dest);
         route.Item = item;
         route.SourceOutput = start.Building.Output;
@@ -213,14 +251,16 @@ public class Map : MapInfo {
         route.Pathfind();
         routes.Add(route);
 
-        if (MapChanged != null) {
+        if (MapChanged != null)
+        {
             MapChanged(this, new MapChangedEventArgs { Route = route });
         }
-        
+
         return route;
     }
 
-    public Route GetRoute(IntVector pos) {
+    public Route GetRoute(IntVector pos)
+    {
         /*foreach (Route r in routes) {
             foreach (PathNode t in r.Path) {
                 if (t == pos) return r;
@@ -230,35 +270,44 @@ public class Map : MapInfo {
         return null;
     }
 
-    public void RemoveRoute(Route route) {
+    public void RemoveRoute(Route route)
+    {
         routes.Remove(route);
         route.Remove();
-        foreach (Entity e in entities) {
-            if (e is Hauler h && h.Route == route) {
+        foreach (Entity e in entities)
+        {
+            if (e is Hauler h && h.Route == route)
+            {
                 h.Route = null;
             }
         }
     }
 
-    public PathNode GetNode(IntVector pos) {
-        foreach (PathNode node in nodes) {
+    public PathNode GetNode(IntVector pos)
+    {
+        foreach (PathNode node in nodes)
+        {
             if (node.Pos == pos) return node;
         }
 
         return null;
     }
 
-    public void AddNode(PathNode node) {
+    public void AddNode(PathNode node)
+    {
         nodes.Add(node);
         PathNodeAdded?.Invoke(node);
     }
 
-    private PathNode AddPathNode(IntVector pos) {
+    private PathNode AddPathNode(IntVector pos)
+    {
         PathNode n = GetNode(pos);
-        if (n == null) {
+        if (n == null)
+        {
             n = new PathNode(pos);
             Path p = GetPath(pos);
-            if (p != null) {
+            if (p != null)
+            {
                 var (path1, path2) = Path.Split(p, n);
                 path1.Connect();
                 path2.Connect();
@@ -271,41 +320,50 @@ public class Map : MapInfo {
         return n;
     }
 
-    public void RemoveNode(PathNode node) {
+    public void RemoveNode(PathNode node)
+    {
         var paths = new List<Path>(node.Connections.Values);
-        foreach (Path path in paths) {
+        foreach (Path path in paths)
+        {
             path.Disconnect();
             RemovePath(path);
-        } 
+        }
         nodes.Remove(node);
         node.Remove();
     }
 
-    public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new() {
+    public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new()
+    {
         IntVector inc = source.Direction(dest);
         IntVector prev = source;
         IntVector cur = source;
         bool onPath = false;
         var toConnect = new List<Building>();
-     
-        while (cur != dest) {
+
+        while (cur != dest)
+        {
             cur += inc;
             Path p = GetPath(cur);
             PathNode n = GetNode(cur);
-            if (p != null && p.Direction.IsParallelTo(inc)) {
+            if (p != null && p.Direction.IsParallelTo(inc))
+            {
                 onPath = true;
             }
-            else if (onPath && n != null) {
+            else if (onPath && n != null)
+            {
                 onPath = false;
                 prev = cur;
             }
-            else if (!onPath && (cur == dest || p != null || n != null)) {
+            else if (!onPath && (cur == dest || p != null || n != null))
+            {
                 BuildPathSegment<T>(prev, cur);
                 prev = cur;
-            }     
-            foreach (var building in buildings) {
+            }
+            foreach (var building in buildings)
+            {
                 if (building.HasEntrance && building.Entrance.ConnectionPos == cur
-                    && !building.Entrance.Connected) {
+                    && !building.Entrance.Connected)
+                {
                     toConnect.Add(building);
                 }
             }
@@ -314,7 +372,8 @@ public class Map : MapInfo {
         foreach (var building in toConnect) ConnectBuilding(building);
     }
 
-    public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new() {
+    public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new()
+    {
         PathNode s = AddPathNode(source);
         PathNode d = AddPathNode(dest);
         Path path = new T();
@@ -325,14 +384,18 @@ public class Map : MapInfo {
         if (d.Connections.Count == 2) TryMergeNode(d);
     }
 
-    private void TryMergeNode(PathNode node) {
+    private void TryMergeNode(PathNode node)
+    {
         Path path1 = null;
         Path path2 = null;
-        foreach (Path p in node.Connections.Values) {
-            if (path1 == null) {
+        foreach (Path p in node.Connections.Values)
+        {
+            if (path1 == null)
+            {
                 path1 = p; continue;
             }
-            else if (path2 == null) {
+            else if (path2 == null)
+            {
                 path2 = p; continue;
             }
             else break;
@@ -350,54 +413,69 @@ public class Map : MapInfo {
         RemoveNode(node);
     }
 
-    public void AddPath(Path path) {
+    public void AddPath(Path path)
+    {
         this.paths.Add(path);
-        path.PathSplit += () => {
+        path.PathSplit += () =>
+        {
             RemovePath(path);
         };
         PathAdded?.Invoke(path);
     }
 
-    public Path GetPath(IntVector pos) {
-        foreach (Path path in paths) {
-            if (path.OnPath(pos) && GetNode(pos) == null) {
+    public Path GetPath(IntVector pos)
+    {
+        foreach (Path path in paths)
+        {
+            if (path.OnPath(pos) && GetNode(pos) == null)
+            {
                 return path;
-            }        
+            }
         }
         return null;
     }
 
-    public void DeletePathSegment(IntVector pos) {
+    public void DeletePathSegment(IntVector pos)
+    {
         Path p = GetPath(pos);
         PathNode n = GetNode(pos);
-        if (p == null && n == null) {
+        if (p == null && n == null)
+        {
             throw new ArgumentException($"Position {pos} does not contain a path to delete");
         }
-        if (p != null) {
+        if (p != null)
+        {
             AddPathNode(pos + p.Direction);
             AddPathNode(pos - p.Direction);
             var newPath = GetPath(pos);
             newPath.Disconnect();
             RemovePath(newPath);
         }
-        else if (n != null) {
+        else if (n != null)
+        {
             var connections = new List<PathNode>(n.Connections.Keys);
-            foreach (PathNode connection in connections) {
+            foreach (PathNode connection in connections)
+            {
                 AddPathNode(n.Pos + n.Pos.Direction(connection.Pos));
             }
             RemoveNode(n);
         }
     }
 
-    public void RemovePath(Path path) {
+    public void RemovePath(Path path)
+    {
         this.paths.Remove(path);
         path.Remove();
     }
 
-    public int GetResourceAmount(Item item) {
-        foreach (Building b in buildings) {
-            if (b is Stockpile s) {
-                if (s.Output.Has(item)) {
+    public int GetResourceAmount(Item item)
+    {
+        foreach (Building b in buildings)
+        {
+            if (b is Stockpile s)
+            {
+                if (s.Output.Has(item))
+                {
                     return s.Output.AmountOf(item);
                 }
             }
@@ -406,19 +484,26 @@ public class Map : MapInfo {
         return 0;
     }
 
-    public bool HasResource(Item item, int amount) {
-        foreach (Building b in buildings) {
-            if (b is Stockpile s) {
+    public bool HasResource(Item item, int amount)
+    {
+        foreach (Building b in buildings)
+        {
+            if (b is Stockpile s)
+            {
                 if (s.HasItem(item, amount)) return true;
             }
         }
         return false;
     }
 
-    public void GetResource(Item item, int amount) {
-        foreach (Building b in buildings) {
-            if (b is Stockpile s) {
-                if (s.HasItem(item, amount)) {
+    public void GetResource(Item item, int amount)
+    {
+        foreach (Building b in buildings)
+        {
+            if (b is Stockpile s)
+            {
+                if (s.HasItem(item, amount))
+                {
                     s.RemoveItem(item, amount);
                     return;
                 }
@@ -426,7 +511,8 @@ public class Map : MapInfo {
         }
     }
 
-    public Tile GetTile(IntVector pos) {
+    public Tile GetTile(IntVector pos)
+    {
         int x = pos.X;
         int y = pos.Y;
 
@@ -434,11 +520,15 @@ public class Map : MapInfo {
         return tiles[pos.X, pos.Y];
     }
 
-    public void CreateResourcePatch(int x, int y, int size, Item resource, int amount) {
-        for (int i = x; i < x + size; i++) {
-            for (int j = y; j < y + size; j++) {
+    public void CreateResourcePatch(int x, int y, int size, Item resource, int amount)
+    {
+        for (int i = x; i < x + size; i++)
+        {
+            for (int j = y; j < y + size; j++)
+            {
                 Tile t = GetTile(new IntVector(i, j));
-                if (t != null) {
+                if (t != null)
+                {
                     t.Resource = resource;
                     t.ResourceCount = amount;
                 }

@@ -17,12 +17,15 @@ public class TilePathGraph : IGraph<IntVector>
     {
         PathNode n = _map.GetNode(pos);
         Path p = _map.GetPath(pos);
-        if (n != null) {
-            foreach (var connection in n.Connections.Keys) {
+        if (n != null)
+        {
+            foreach (var connection in n.Connections.Keys)
+            {
                 yield return pos + pos.Direction(connection.Pos);
             }
         }
-        if (p != null) {
+        if (p != null)
+        {
             yield return pos + pos.Direction(p.Source.Pos);
             yield return pos + pos.Direction(p.Dest.Pos);
         }

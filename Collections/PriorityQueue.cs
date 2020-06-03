@@ -1,17 +1,20 @@
 using System.Collections.Generic;
 
 // Shitty SortedList-based priority queue
-public class PriorityQueue<T1, T2> {
+public class PriorityQueue<T1, T2>
+{
 
     private SortedList<T2, Queue<T1>> _data = new SortedList<T2, Queue<T1>>();
     private int _count = 0;
 
     public int Count => _count;
 
-    public void Enqueue(T1 item, T2 key) {
+    public void Enqueue(T1 item, T2 key)
+    {
         Queue<T1> entry;
         _data.TryGetValue(key, out entry);
-        if (entry == null) {
+        if (entry == null)
+        {
             entry = new Queue<T1>();
             _data[key] = entry;
         }
@@ -19,8 +22,10 @@ public class PriorityQueue<T1, T2> {
         _count++;
     }
 
-    public T1 Dequeue() {
-        if (_count > 0) {
+    public T1 Dequeue()
+    {
+        if (_count > 0)
+        {
             var key = _data.Keys[0];
             var entry = _data[key];
             T1 item = entry.Dequeue();
@@ -32,7 +37,8 @@ public class PriorityQueue<T1, T2> {
         return default(T1);
     }
 
-    public void Clear() {
+    public void Clear()
+    {
         _data.Clear();
         _count = 0;
     }

@@ -27,7 +27,7 @@ namespace OpenSimplex
         };
 
         private static Contribution2[] lookup2D;
-        
+
         static OpenSimplexNoise()
         {
             var base2D = new int[][]
@@ -99,25 +99,27 @@ namespace OpenSimplex
                     r += (i + 1);
                 }
                 perm[i] = source[r];
-                perm2D[i] = (byte)(perm[i] & 0x0E);;
+                perm2D[i] = (byte)(perm[i] & 0x0E); ;
                 source[r] = source[i];
             }
         }
 
-        public double EvaluateOctave(double x, double y, int octaves, double persistence) {
+        public double EvaluateOctave(double x, double y, int octaves, double persistence)
+        {
             double total = 0;
             double frequency = 1;
             double amplitude = 1;
             double maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
 
-            for(int i = 0; i < octaves; i++) {
-                total += Evaluate(x * frequency, y * frequency) * amplitude;  
+            for (int i = 0; i < octaves; i++)
+            {
+                total += Evaluate(x * frequency, y * frequency) * amplitude;
                 maxValue += amplitude;
                 amplitude *= persistence;
                 frequency *= 2;
             }
-    
-            return total/maxValue;
+
+            return total / maxValue;
         }
 
         public double Evaluate(double x, double y)

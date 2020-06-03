@@ -1,6 +1,8 @@
 
-public class Mine : ProductionBuilding {
-    public Mine(MapInfo map, IntVector pos) {
+public class Mine : ProductionBuilding
+{
+    public Mine(MapInfo map, IntVector pos)
+    {
         Type = BuildingType.Mine;
         Consumer = new ResourceInput(map, pos, 5, Item.Stone);
         var output = new DirectProducer(5, 1, Item.Stone);

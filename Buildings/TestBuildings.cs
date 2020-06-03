@@ -1,7 +1,9 @@
 
 
-public class TestProducer : Building {
-    public TestProducer() {
+public class TestProducer : Building
+{
+    public TestProducer()
+    {
         Width = 3;
         Height = 3;
         Output = new InfiniteDirectOutput(Item.Wood);
@@ -10,8 +12,10 @@ public class TestProducer : Building {
     }
 }
 
-public class TestConsumer : Building {
-    public TestConsumer() {
+public class TestConsumer : Building
+{
+    public TestConsumer()
+    {
         Width = 2;
         Height = 2;
         Input = new InfiniteDirectInput();

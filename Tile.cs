@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-public class Tile {
-    public enum SurfaceType {
+public class Tile
+{
+    public enum SurfaceType
+    {
         Base,
         Path
     }
@@ -17,23 +19,28 @@ public class Tile {
     public Building Building { get; set; } = null;
     public int Nutrients = 0;
     public Item Resource { get; set; } = Item.None;
-    public int ResourceCount {
+    public int ResourceCount
+    {
         get => _resourceCount;
-        set {
+        set
+        {
             if (value <= 0) ResourceExhausted?.Invoke();
             _resourceCount = value;
         }
     }
     public PathNode Node { get; set; } = null;
 
-    public SurfaceType Surface { 
-        get {
+    public SurfaceType Surface
+    {
+        get
+        {
             return _surface;
-        } 
-        set {
+        }
+        set
+        {
             _surface = value;
-            SurfaceChanged?.Invoke();   
-        } 
+            SurfaceChanged?.Invoke();
+        }
     }
 
     public float SpeedMultiplier => 1;

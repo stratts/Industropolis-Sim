@@ -8,7 +8,8 @@ public class InfiniteDirectOutput : IDirectOutput
     private List<Item> _items;
     private Item _item;
 
-    public InfiniteDirectOutput(Item item) {
+    public InfiniteDirectOutput(Item item)
+    {
         _item = item;
         _items = new List<Item>();
         _items.Add(item);

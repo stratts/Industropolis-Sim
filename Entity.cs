@@ -1,7 +1,8 @@
 using System;
 using Godot;
 
-public abstract class Entity : MapObject {
+public abstract class Entity : MapObject
+{
     public ref IntVector Pos => ref _pos;
     private IntVector _pos;
     public MapInfo MapInfo { get; set; }
@@ -11,18 +12,20 @@ public abstract class Entity : MapObject {
 
     public float LastMoveTime { get; set; } = 0;
     public float NextMoveTime { get; set; } = 0;
-    
+
     private static int id = 0;
     public int Id { get; set; }
 
-    public Entity(MapInfo info, int x, int y) {
+    public Entity(MapInfo info, int x, int y)
+    {
         MapInfo = info;
         this._pos = new IntVector(x, y);
         id++;
         Id = id;
     }
 
-    public virtual void Update(float elapsedTime) {
+    public virtual void Update(float elapsedTime)
+    {
 
     }
 }
