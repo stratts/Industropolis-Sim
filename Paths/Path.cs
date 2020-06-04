@@ -91,11 +91,7 @@ public class Path : MapObject
     public bool OnPath(IntVector pos)
     {
         if (pos == Source.Pos || pos == Dest.Pos) return true;
-
-        IntVector pathVector = Source.Pos.VectorTo(Dest.Pos);
-        IntVector posVector = Source.Pos.VectorTo(pos);
-
-        if (pathVector.IsMultipleOf(posVector)) return true;
+        if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
         return false;
     }
 }

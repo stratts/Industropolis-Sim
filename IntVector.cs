@@ -2,9 +2,12 @@
 using System;
 using System.Collections.Generic;
 
-public static class IntExtensions
+public static class FloatTupleExtensions
 {
-    public static bool IsMultipleOf(this int a, int b) => (a == 0 && b == 0) || (b != 0 && a % b == 0);
+    public static (float x, float y) Negate(this (float x, float y) floats)
+    {
+        return (-floats.x, -floats.y);
+    }
 }
 
 public struct IntVector
@@ -79,12 +82,18 @@ public struct IntVector
         }
     }
 
-    public IntVector Direction(IntVector dest)
+    public (float x, float y) FloatDirection(IntVector dest)
     {
-        if (dest == this) return Zero;
+        if (dest == this) return (0, 0);
         IntVector dirVector = VectorTo(dest);
         int max = Math.Max(Math.Abs(dirVector.X), Math.Abs(dirVector.Y));
-        return new IntVector(dirVector.X / max, dirVector.Y / max);
+        return ((float)Math.Round((float)dirVector.X / max, 2), (float)Math.Round((float)dirVector.Y / max, 2));
+    }
+
+    public IntVector Direction(IntVector dest)
+    {
+        var dir = FloatDirection(dest);
+        return new IntVector((int)Math.Round(dir.x), (int)Math.Round(dir.y));
     }
 
     public IntVector VectorTo(IntVector dest) => dest - this;
@@ -97,23 +106,8 @@ public struct IntVector
     public bool IsParallelTo(IntVector vector)
     {
         if (this == vector || this == -vector) return true;
-        if (this.IsMultipleOf(vector) || vector.IsMultipleOf(this)) return true;
-        return false;
-    }
-
-    public bool IsMultipleOf(IntVector pos)
-    {
-        int x, y;
-        if (pos.X == 0) x = 1;
-        else x = pos.X;
-        if (pos.Y == 0) y = 1;
-        else y = pos.Y;
-        var xMul = Math.Round((float)X / (float)pos.X, 1);
-        var yMul = Math.Round((float)Y / (float)pos.Y, 1);
-        if (X == 0 && pos.X == 0) xMul = yMul;
-        if (Y == 0 && pos.Y == 0) yMul = xMul;
-
-        if (xMul == yMul && xMul >= 1 && yMul >= 1) return true;
+        if (IntVector.Zero.FloatDirection(this) == IntVector.Zero.FloatDirection(vector)) return true;
+        if (IntVector.Zero.FloatDirection(this) == IntVector.Zero.FloatDirection(-vector)) return true;
         return false;
     }
 
