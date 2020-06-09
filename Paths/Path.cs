@@ -32,8 +32,8 @@ public class Path : MapObject
     public void Connect()
     {
         _lanes = new List<PathLane>();
-        _lanes.Add(new PathLane(LaneDir.Source));
-        _lanes.Add(new PathLane(LaneDir.Dest));
+        _lanes.Add(new PathLane(this, LaneDir.Source));
+        _lanes.Add(new PathLane(this, LaneDir.Dest));
         Source.Connect(Dest, this);
         Dest.Connect(Source, this);
     }
@@ -43,6 +43,26 @@ public class Path : MapObject
         Source.Disconnect(Dest);
         Dest.Disconnect(Source);
         _lanes.Clear();
+    }
+
+    public PathLane GetLaneTo(PathNode node)
+    {
+        foreach (var lane in _lanes)
+        {
+            if (lane.Dest == node) return lane;
+        }
+
+        throw new ArgumentException("Path contains no lane to that node");
+    }
+
+    public PathLane GetLaneFrom(PathNode node)
+    {
+        foreach (var lane in _lanes)
+        {
+            if (lane.Source == node) return lane;
+        }
+
+        throw new ArgumentException("Path contains no lane to that node");
     }
 
     // Split path at given node, and return new paths 
@@ -100,12 +120,38 @@ public class Path : MapObject
 
 public class PathLane
 {
+    private List<Vehicle> _queue = new List<Vehicle>();
+
     public Path Parent { get; private set; }
     public LaneDir Direction { get; private set; }
+    public PathNode Source => Direction == LaneDir.Dest ? Parent.Source : Parent.Dest;
+    public PathNode Dest => Direction == LaneDir.Dest ? Parent.Dest : Parent.Source;
 
-    public PathLane(LaneDir direction)
+    public PathLane(Path parent, LaneDir direction)
     {
+        Parent = parent;
         Direction = direction;
+    }
+
+    public bool AtCapacity => _queue.Count >= Parent.Length;
+
+    public void Enter(Vehicle vehicle)
+    {
+        _queue.Add(vehicle);
+    }
+
+    public void Depart(Vehicle vehicle)
+    {
+        _queue.Remove(vehicle);
+    }
+
+    public Vehicle GetVehicleAhead(Vehicle vehicle)
+    {
+        for (int i = 1; i < _queue.Count; i++)
+        {
+            if (_queue[i] == vehicle) return _queue[i - 1];
+        }
+        return null;
     }
 }
 

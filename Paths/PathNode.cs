@@ -7,6 +7,8 @@ public class PathNode : MapObject
     public IReadOnlyDictionary<PathNode, Path> Connections => _connections;
     private Dictionary<PathNode, Path> _connections;
 
+    public bool Occupied { get; set; } = false;
+
     public PathNode(IntVector pos)
     {
         Pos = pos;
@@ -37,8 +39,8 @@ public class PathNode : MapObject
 
     public bool IsConnected(PathNode node) => _connections.ContainsKey(node);
 
-    public bool CanProceed(PathNode source, PathNode dest)
-    {
-        return true;
-    }
+    public bool CanProceed(PathNode source, PathNode dest) =>
+        !Occupied &&
+        (dest == this ||
+        !_connections[dest].GetLaneFrom(this).AtCapacity);
 }
