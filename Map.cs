@@ -7,9 +7,6 @@ public interface MapInfo
     int Height { get; }
     Building GetBuilding(int x, int y);
     Building GetBuilding(IntVector pos);
-    IEnumerable<T> GetEntities<T>() where T : Entity;
-    void AddEntity(Entity entity);
-    void RemoveEntity(Entity entity);
     //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
@@ -22,21 +19,18 @@ public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
 public class MapChangedEventArgs : EventArgs
 {
     public Building Building { get; set; } = null;
-    public Entity Entity { get; set; } = null;
     public Route Route { get; set; } = null;
 }
 
 public class Map : MapInfo
 {
     private Tile[,] tiles;
-    private List<Entity> entities;
     private List<Building> buildings;
     private List<Route> routes;
     private List<Path> paths;
     private List<PathNode> nodes;
     private int _currentMoney = 0;
 
-    public List<Entity> Entities => entities;
     public List<Vehicle> Vehicles = new List<Vehicle>();
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
@@ -62,7 +56,6 @@ public class Map : MapInfo
 
     public Map()
     {
-        entities = new List<Entity>();
         routes = new List<Route>();
         buildings = new List<Building>();
         paths = new List<Path>();
@@ -70,39 +63,6 @@ public class Map : MapInfo
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
-    }
-
-    public void AddEntity(Entity entity)
-    {
-        entities.Add(entity);
-        if (MapChanged != null)
-        {
-            MapChanged(this, new MapChangedEventArgs { Entity = entity });
-        }
-    }
-
-    public void RemoveEntity(Entity entity)
-    {
-        entity.Remove();
-        entities.Remove(entity);
-    }
-
-    public Entity GetEntity(IntVector pos)
-    {
-        foreach (Entity e in entities)
-        {
-            if (e.Pos == pos) return e;
-        }
-
-        return null;
-    }
-
-    public IEnumerable<T> GetEntities<T>() where T : Entity
-    {
-        foreach (Entity e in entities)
-        {
-            if (e is T t) yield return t;
-        }
     }
 
     public Building CreateBuilding(BuildingType type, IntVector pos)
@@ -237,7 +197,6 @@ public class Map : MapInfo
 
     public void Update(float delta)
     {
-        foreach (Entity e in entities) e.Update(delta);
         foreach (Building b in buildings) b.Update(delta);
         foreach (Vehicle v in Vehicles) v.Update(delta);
     }
@@ -274,13 +233,6 @@ public class Map : MapInfo
     {
         routes.Remove(route);
         route.Remove();
-        foreach (Entity e in entities)
-        {
-            if (e is Hauler h && h.Route == route)
-            {
-                h.Route = null;
-            }
-        }
     }
 
     public PathNode GetNode(IntVector pos)

@@ -22,12 +22,12 @@ public class Route : MapObject
         set
         {
             _item = value;
-            foreach (var h in Haulers) h.Item = value;
+            //foreach (var h in Haulers) h.Item = value;
         }
     }
-    public List<Hauler> Haulers { get; } = new List<Hauler>();
+    //public List<Hauler> Haulers { get; } = new List<Hauler>();
 
-    public int NumHaulers => Haulers.Count;
+    //public int NumHaulers => Haulers.Count;
 
     public enum Direction { Forwards, Backwards };
 
@@ -75,11 +75,11 @@ public class Route : MapObject
 
     public void RemoveHauler()
     {
-        if (Haulers.Count == 0) return;
-        Hauler h = Haulers[0];
-        Haulers.RemoveAt(0);
-        h.Route = null;
-        MapInfo.RemoveEntity(h);
+        /*if (Haulers.Count == 0) return;
+         Hauler h = Haulers[0];
+         Haulers.RemoveAt(0);
+         h.Route = null;
+         MapInfo.RemoveEntity(h);*/
         //MapInfo.Population.Free();
     }
 }
