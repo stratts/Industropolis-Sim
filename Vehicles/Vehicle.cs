@@ -1,8 +1,7 @@
 using System;
 
-public class Vehicle
+public abstract class Vehicle
 {
-
     private float _speed = 1; // Tiles per second
     private Route.Direction _direction;
 
@@ -14,17 +13,13 @@ public class Vehicle
     public PathNode NextNode { get; private set; }
     public PathNode Destination { get; private set; }
 
-    private Action _action;
-    private float _elapsedTime;
+    protected Action _action;
+    protected float _elapsedTime;
 
     public Vehicle(Route route)
     {
         Route = route;
-        _direction = Route.Direction.Forwards;
-        Destination = Route.Dest;
-        PrevNode = Route.Source;
-        NextNode = Route.Source;
-
+        SetDirection(Route.Direction.Forwards);
         GoNext();
     }
 
@@ -34,7 +29,7 @@ public class Vehicle
         _action();
     }
 
-    private void FollowPath()
+    protected void FollowPath()
     {
         if (PathPos < CurrentPath.Length - 1) Move();
         else if (CanGoNext())
@@ -44,7 +39,7 @@ public class Vehicle
         }
     }
 
-    private void CrossIntersection()
+    protected void CrossIntersection()
     {
         if (PathPos < CurrentPath.Length) Move();
         else if (NextNode != Destination)
@@ -52,17 +47,41 @@ public class Vehicle
             NextNode.Occupied = false;
             GoNext();
         }
+        else
+        {
+            NextNode.Occupied = false;
+            DestinationReached();
+        }
     }
 
-    private void Move()
+    protected void Move()
     {
         if (CurrentLane.GetVehicleAhead(this) is Vehicle v && v.PathPos - PathPos < 1) return;
         PathPos += _speed * _elapsedTime;
     }
 
-    private bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
+    protected void SetDirection(Route.Direction direction)
+    {
+        _direction = direction;
 
-    private void GoNext()
+        switch (direction)
+        {
+            case Route.Direction.Forwards:
+                Destination = Route.Dest;
+                PrevNode = Route.Source;
+                NextNode = Route.Source;
+                break;
+            case Route.Direction.Backwards:
+                Destination = Route.Source;
+                PrevNode = Route.Dest;
+                NextNode = Route.Dest;
+                break;
+        }
+    }
+
+    protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
+
+    protected void GoNext()
     {
         if (CurrentLane != null) CurrentLane.Depart(this);
         var current = NextNode;
@@ -77,4 +96,6 @@ public class Vehicle
 
         _action = FollowPath;
     }
+
+    protected abstract void DestinationReached();
 }
