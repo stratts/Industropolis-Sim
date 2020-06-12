@@ -10,7 +10,7 @@ public interface MapInfo
     //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
-    Tile? GetTile(IntVector pos);
+    Tile GetTile(IntVector pos);
     int CurrentMoney { get; set; }
 }
 
@@ -68,7 +68,7 @@ public class Map : MapInfo
         _pathBuilder = new PathBuilder(this);
     }
 
-    public Building? CreateBuilding(BuildingType type, IntVector pos)
+    public Building CreateBuilding(BuildingType type, IntVector pos)
     {
         switch (type)
         {
@@ -78,8 +78,8 @@ public class Map : MapInfo
             case BuildingType.Farm: return new Farm(this, pos);
             case BuildingType.TestConsumer: return new TestConsumer();
             case BuildingType.TestProducer: return new TestProducer();
+            default: return new TestProducer();
         }
-        return null;
     }
 
     public bool CanBuild(Building building, IntVector pos)
@@ -318,12 +318,12 @@ public class Map : MapInfo
         }
     }
 
-    public Tile? GetTile(IntVector pos)
+    public Tile GetTile(IntVector pos)
     {
         int x = pos.X;
         int y = pos.Y;
 
-        if (x < 0 || y < 0 || x >= Width || y >= Height) return null;
+        if (x < 0 || y < 0 || x >= Width || y >= Height) throw new ArgumentException("Invalid tile");
         return tiles[pos.X, pos.Y];
     }
 
