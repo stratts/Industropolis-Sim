@@ -12,10 +12,13 @@ public class Path : MapObject
     public IReadOnlyCollection<PathLane> Lanes => _lanes;
     private List<PathLane> _lanes;
 
-    public event Action PathSplit;
+    public event Action? PathSplit;
 
     public Path(PathNode source, PathNode dest)
     {
+        _lanes = new List<PathLane>();
+        Source = source;
+        Dest = dest;
         SetNodes(source, dest);
     }
 
@@ -29,7 +32,7 @@ public class Path : MapObject
 
     public void Connect()
     {
-        _lanes = new List<PathLane>();
+        _lanes.Clear();
         _lanes.Add(new PathLane(this, LaneDir.Source));
         _lanes.Add(new PathLane(this, LaneDir.Dest));
         Source.Connect(Dest, this);
@@ -66,11 +69,9 @@ public class Path : MapObject
     // Split path at given node, and return new paths 
     public static (Path, Path) Split(Path path, PathNode node)
     {
-        var path1 = (Path)Activator.CreateInstance(path.GetType());
-        var path2 = (Path)Activator.CreateInstance(path.GetType());
+        var path1 = (Path)Activator.CreateInstance(path.GetType(), path.Source, node);
+        var path2 = (Path)Activator.CreateInstance(path.GetType(), node, path.Dest);
         path.Disconnect();
-        path1.SetNodes(path.Source, node);
-        path2.SetNodes(node, path.Dest);
         path.PathSplit?.Invoke();
         return (path1, path2);
     }
@@ -143,7 +144,7 @@ public class PathLane
         _queue.Remove(vehicle);
     }
 
-    public Vehicle GetVehicleAhead(Vehicle vehicle)
+    public Vehicle? GetVehicleAhead(Vehicle vehicle)
     {
         for (int i = 1; i < _queue.Count; i++)
         {

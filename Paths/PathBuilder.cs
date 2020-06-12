@@ -15,22 +15,22 @@ public class PathBuilder
         _map = map;
     }
 
-    private Path MakePath(PathType type, PathNode source, PathNode dest)
+    public static Path MakePath(PathType type, PathNode source, PathNode dest)
     {
         switch (type)
         {
             case PathType.Path: return new Path(source, dest);
+            default: return new Path(source, dest);
         }
-        return null;
     }
 
     private PathNode AddPathNode(IntVector pos)
     {
-        PathNode n = _map.GetNode(pos);
+        PathNode? n = _map.GetNode(pos);
         if (n == null)
         {
             n = new PathNode(pos);
-            Path p = _map.GetPath(pos);
+            Path? p = _map.GetPath(pos);
             if (p != null)
             {
                 var (path1, path2) = Path.Split(p, n);
@@ -56,8 +56,8 @@ public class PathBuilder
         while (cur != dest)
         {
             cur += inc;
-            Path p = _map.GetPath(cur);
-            PathNode n = _map.GetNode(cur);
+            Path? p = _map.GetPath(cur);
+            PathNode? n = _map.GetNode(cur);
             if (p != null && p.Direction.IsParallelTo(inc))
             {
                 onPath = true;
@@ -74,7 +74,7 @@ public class PathBuilder
             }
             foreach (var building in _map.Buildings)
             {
-                if (building.HasEntrance && building.Entrance.ConnectionPos == cur
+                if (building.HasEntrance && building.Entrance != null && building.Entrance.ConnectionPos == cur
                     && !building.Entrance.Connected)
                 {
                     toConnect.Add(building);
@@ -98,8 +98,8 @@ public class PathBuilder
 
     public void DeletePathSegment(IntVector pos)
     {
-        Path p = _map.GetPath(pos);
-        PathNode n = _map.GetNode(pos);
+        Path? p = _map.GetPath(pos);
+        PathNode? n = _map.GetNode(pos);
         if (p == null && n == null)
         {
             throw new ArgumentException($"Position {pos} does not contain a path to delete");
@@ -109,6 +109,7 @@ public class PathBuilder
             AddPathNode(pos + p.Direction);
             AddPathNode(pos - p.Direction);
             var newPath = _map.GetPath(pos);
+            if (newPath == null) throw new Exception("No path found when deleting path segment");
             newPath.Disconnect();
             _map.RemovePath(newPath);
         }
@@ -125,8 +126,8 @@ public class PathBuilder
 
     private void TryMergeNode(PathNode node)
     {
-        Path path1 = null;
-        Path path2 = null;
+        Path? path1 = null;
+        Path? path2 = null;
         foreach (Path p in node.Connections.Values)
         {
             if (path1 == null)
@@ -156,10 +157,13 @@ public class PathBuilder
     public void ConnectBuilding(Building building)
     {
         var entrance = building.Entrance;
+        if (entrance == null)
+            throw new ArgumentException("Building does not have an entrance");
         if (_map.GetPath(entrance.ConnectionPos) != null || _map.GetNode(entrance.ConnectionPos) != null)
         {
             var node = new BuildingNode(entrance.Pos, building);
             entrance.Connect(node);
+            if (entrance.Node == null) throw new Exception("Could not connect entrance");
             _map.AddNode(entrance.Node);
             BuildPath(PathType.Path, entrance.Pos, entrance.ConnectionPos);
         }
@@ -167,8 +171,10 @@ public class PathBuilder
 
     public void DisconnectBuilding(Building building)
     {
+        if (building.Entrance == null || building.Entrance.Node == null)
+            throw new ArgumentException("Building does not have an entrance node");
         PathNode n = building.Entrance.Node;
-        PathNode pathCon = _map.GetNode(n.Pos + new IntVector(0, 1));
+        PathNode? pathCon = _map.GetNode(n.Pos + new IntVector(0, 1));
         _map.RemoveNode(n);
         if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
         building.Entrance.Disconnect();

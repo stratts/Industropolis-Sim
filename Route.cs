@@ -10,8 +10,8 @@ public class Route : MapObject
     public PathNode Dest { get; set; }
     public MapInfo MapInfo { get; private set; }
 
-    public IDirectOutput SourceOutput { get; set; }
-    public IDirectInput DestInput { get; set; }
+    public IDirectOutput? SourceOutput { get; set; }
+    public IDirectInput? DestInput { get; set; }
 
     private IPathfinder<PathNode> _pathfinder;
 
@@ -54,11 +54,13 @@ public class Route : MapObject
 
     public void Pathfind()
     {
-        _path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
-        if (_path == null)
+        var path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
+        if (path != null) _path = path;
+        else
         {
             Godot.GD.Print("No path found! :(");
             _path = new List<PathNode>();
+            return;
         }
     }
 

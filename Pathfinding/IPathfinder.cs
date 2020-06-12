@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public interface IPathfinder<T>
 {
-    List<T> FindPath(IGraph<T> graph, T src, T dest);
+    List<T>? FindPath(IGraph<T> graph, T src, T dest);
 }
 
 public interface IGraph<T>

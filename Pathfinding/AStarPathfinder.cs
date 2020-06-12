@@ -26,9 +26,8 @@ public class AStarPathfinder<T> : IPathfinder<T>
         greed = greediness;
     }
 
-    public List<T> FindPath(IGraph<T> graph, T src, T dest)
+    public List<T>? FindPath(IGraph<T> graph, T src, T dest)
     {
-
         if (!graph.Accessible(src, dest)) return null;
 
         visited.Add(src, new NodeData(src, 0));
@@ -64,9 +63,12 @@ public class AStarPathfinder<T> : IPathfinder<T>
         return path;
     }
 
-    private List<T> ReconstructPath(T src, T dest)
+    private List<T>? ReconstructPath(T src, T dest)
     {
+        if (dest == null || src == null) throw new ArgumentNullException("Source or dest cannot be null");
+
         List<T> path;
+
         if (visited.ContainsKey(dest))
         {
             path = new List<T>();
@@ -77,11 +79,12 @@ public class AStarPathfinder<T> : IPathfinder<T>
             {
                 node = visited[node].CameFrom;
                 path.Add(node);
+                if (node == null) return null;
             }
 
             path.Reverse();
         }
-        else path = null;
+        else return null;
         return path;
     }
 }

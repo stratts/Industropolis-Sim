@@ -1,6 +1,7 @@
 /* OpenSimplex Noise in C#
  * From https://gist.github.com/digitalshadow/134a3a02b67cecd72181/
  * with 3D and 4D variants stripped out */
+#nullable disable
 
 using System;
 using System.Collections.Generic;

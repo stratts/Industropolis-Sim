@@ -11,7 +11,6 @@ public class Mine : ProductionBuilding
         ProcessingTime = 2;
         Width = 2;
         Height = 2;
-        HasEntrance = true;
         Entrance = new BuildingEntrance(this, new IntVector(0, 1));
     }
 }

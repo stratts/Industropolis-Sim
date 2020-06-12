@@ -15,8 +15,8 @@ public class TilePathGraph : IGraph<IntVector>
 
     public IEnumerable<IntVector> GetConnections(IntVector pos)
     {
-        PathNode n = _map.GetNode(pos);
-        Path p = _map.GetPath(pos);
+        PathNode? n = _map.GetNode(pos);
+        Path? p = _map.GetPath(pos);
         if (n != null)
         {
             foreach (var connection in n.Connections.Keys)

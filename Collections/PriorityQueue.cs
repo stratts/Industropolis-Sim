@@ -33,8 +33,7 @@ public class PriorityQueue<T1, T2>
             if (entry.Count == 0) _data.Remove(key);
             return item;
         }
-
-        return default(T1);
+        else throw new System.InvalidOperationException("Queue is empty");
     }
 
     public void Clear()

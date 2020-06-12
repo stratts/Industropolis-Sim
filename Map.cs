@@ -5,12 +5,12 @@ public interface MapInfo
 {
     int Width { get; }
     int Height { get; }
-    Building GetBuilding(int x, int y);
-    Building GetBuilding(IntVector pos);
+    Building? GetBuilding(int x, int y);
+    Building? GetBuilding(IntVector pos);
     //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
     void GetResource(Item item, int amount);
-    Tile GetTile(IntVector pos);
+    Tile? GetTile(IntVector pos);
     int CurrentMoney { get; set; }
 }
 
@@ -18,8 +18,8 @@ public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
 
 public class MapChangedEventArgs : EventArgs
 {
-    public Building Building { get; set; } = null;
-    public Route Route { get; set; } = null;
+    public Building? Building { get; set; } = null;
+    public Route? Route { get; set; } = null;
 }
 
 public class Map : MapInfo
@@ -51,10 +51,10 @@ public class Map : MapInfo
         }
     }
 
-    public event MapChangedEvent MapChanged;
+    public event MapChangedEvent? MapChanged;
 
-    public event Action<Path> PathAdded;
-    public event Action<PathNode> PathNodeAdded;
+    public event Action<Path>? PathAdded;
+    public event Action<PathNode>? PathNodeAdded;
 
     public Map()
     {
@@ -68,7 +68,7 @@ public class Map : MapInfo
         _pathBuilder = new PathBuilder(this);
     }
 
-    public Building CreateBuilding(BuildingType type, IntVector pos)
+    public Building? CreateBuilding(BuildingType type, IntVector pos)
     {
         switch (type)
         {
@@ -144,12 +144,12 @@ public class Map : MapInfo
         AddBuilding(building, new IntVector(x, y));
     }
 
-    public Building GetBuilding(int x, int y)
+    public Building? GetBuilding(int x, int y)
     {
         return tiles[x, y].Building;
     }
 
-    public Building GetBuilding(IntVector pos)
+    public Building? GetBuilding(IntVector pos)
     {
         return tiles[pos.X, pos.Y].Building;
     }
@@ -199,7 +199,7 @@ public class Map : MapInfo
         return route;
     }
 
-    public Route GetRoute(IntVector pos)
+    public Route? GetRoute(IntVector pos)
     {
         /*foreach (Route r in routes) {
             foreach (PathNode t in r.Path) {
@@ -216,7 +216,7 @@ public class Map : MapInfo
         route.Remove();
     }
 
-    public PathNode GetNode(IntVector pos)
+    public PathNode? GetNode(IntVector pos)
     {
         foreach (PathNode node in nodes)
         {
@@ -254,7 +254,7 @@ public class Map : MapInfo
         PathAdded?.Invoke(path);
     }
 
-    public Path GetPath(IntVector pos)
+    public Path? GetPath(IntVector pos)
     {
         foreach (Path path in paths)
         {
@@ -280,6 +280,7 @@ public class Map : MapInfo
         {
             if (b is Stockpile s)
             {
+                if (s.Output == null) return 0;
                 if (s.Output.Has(item))
                 {
                     return s.Output.AmountOf(item);
@@ -317,7 +318,7 @@ public class Map : MapInfo
         }
     }
 
-    public Tile GetTile(IntVector pos)
+    public Tile? GetTile(IntVector pos)
     {
         int x = pos.X;
         int y = pos.Y;
@@ -332,7 +333,7 @@ public class Map : MapInfo
         {
             for (int j = y; j < y + size; j++)
             {
-                Tile t = GetTile(new IntVector(i, j));
+                Tile? t = GetTile(new IntVector(i, j));
                 if (t != null)
                 {
                     t.Resource = resource;

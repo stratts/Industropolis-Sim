@@ -17,7 +17,7 @@ public class BuildingEntrance
     private Building _parent;
 
     public IntVector Location { get; }
-    public BuildingNode Node { get; private set; }
+    public BuildingNode? Node { get; private set; }
     public IntVector Pos => _parent.Pos + Location;
     public IntVector ConnectionPos => Pos + new IntVector(0, 1);
     public bool Connected => Node != null;
@@ -37,16 +37,16 @@ public class Building : MapObject
     public IntVector Pos { get; set; }
     public BuildingType Type { get; protected set; }
 
-    public IDirectInput Input { get; set; } = null;
-    public IDirectOutput Output { get; set; } = null;
+    public IDirectInput? Input { get; protected set; }
+    public IDirectOutput? Output { get; protected set; }
 
     public int Width { get; protected set; } = 1;
     public int Height { get; protected set; } = 1;
 
     public int Cost { get; set; } = 0;
 
-    public bool HasEntrance { get; protected set; } = false;
-    public BuildingEntrance Entrance { get; protected set; }
+    public bool HasEntrance => Entrance != null;
+    public BuildingEntrance? Entrance { get; protected set; }
 
     //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
 
@@ -63,8 +63,8 @@ public class ProductionBuilding : Building
     public float ProcessingTime { get; set; } = 0;
     public bool Processing { get; private set; } = false;
 
-    public IConsumer Consumer { get; set; } = null;
-    public IProducer Producer { get; set; } = null;
+    public IConsumer? Consumer { get; set; } = null;
+    public IProducer? Producer { get; set; } = null;
 
     private float lastProcess = 0;
 

@@ -5,7 +5,7 @@ public abstract class BaseTileInput : IConsumer
     protected MapInfo map;
     protected int size;
 
-    private Tile currentTile = null;
+    private Tile? currentTile = null;
 
     public BaseTileInput(MapInfo map, IntVector pos, int size)
     {
@@ -18,13 +18,13 @@ public abstract class BaseTileInput : IConsumer
 
     public bool Consume()
     {
-        Tile t = GetCurrentTile();
+        Tile? t = GetCurrentTile();
         if (t == null) return false;
         ConsumeResource(t);
         return true;
     }
 
-    private Tile GetCurrentTile()
+    private Tile? GetCurrentTile()
     {
         if (currentTile == null || !HasResource(currentTile))
         {
@@ -33,14 +33,14 @@ public abstract class BaseTileInput : IConsumer
         return currentTile;
     }
 
-    private Tile NextTileWithResource()
+    private Tile? NextTileWithResource()
     {
         int s = size / 2;
         for (int x = -s; x <= s; x++)
         {
             for (int y = -s; y <= s; y++)
             {
-                Tile t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
+                Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
                 if (t != null)
                 {
                     if (HasResource(t))
