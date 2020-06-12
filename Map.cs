@@ -30,7 +30,9 @@ public class Map : MapInfo
     private List<Path> paths;
     private List<PathNode> nodes;
     private int _currentMoney = 0;
+    private PathBuilder _pathBuilder;
 
+    public IReadOnlyList<Building> Buildings => buildings;
     public List<Vehicle> Vehicles = new List<Vehicle>();
     public int Width => tiles.GetLength(0);
     public int Height => tiles.GetLength(1);
@@ -63,6 +65,7 @@ public class Map : MapInfo
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
+        _pathBuilder = new PathBuilder(this);
     }
 
     public Building CreateBuilding(BuildingType type, IntVector pos)
@@ -130,7 +133,7 @@ public class Map : MapInfo
         }
         building.Pos = pos;
         buildings.Add(building);
-        if (building.HasEntrance) ConnectBuilding(building);
+        if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);
         if (MapChanged != null)
         {
             MapChanged(this, new MapChangedEventArgs { Building = building });
@@ -163,27 +166,6 @@ public class Map : MapInfo
         }
     }
 
-    public void ConnectBuilding(Building building)
-    {
-        var entrance = building.Entrance;
-        if (GetPath(entrance.ConnectionPos) != null || GetNode(entrance.ConnectionPos) != null)
-        {
-            var node = new BuildingNode(entrance.Pos, building);
-            entrance.Connect(node);
-            AddNode(entrance.Node);
-            BuildPath<Path>(entrance.Pos, entrance.ConnectionPos);
-        }
-    }
-
-    public void DisconnectBuilding(Building building)
-    {
-        PathNode n = building.Entrance.Node;
-        PathNode pathCon = GetNode(n.Pos + new IntVector(0, 1));
-        RemoveNode(n);
-        if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
-        building.Entrance.Disconnect();
-    }
-
     public void RemoveBuilding(Building building)
     {
         building.Remove();
@@ -192,7 +174,7 @@ public class Map : MapInfo
         {
             tiles[pos.X, pos.Y].Building = null;
         }
-        if (building.HasEntrance) DisconnectBuilding(building);
+        if (building.HasEntrance) _pathBuilder.DisconnectBuilding(building);
     }
 
     public void Update(float delta)
@@ -251,27 +233,6 @@ public class Map : MapInfo
         PathNodeAdded?.Invoke(node);
     }
 
-    private PathNode AddPathNode(IntVector pos)
-    {
-        PathNode n = GetNode(pos);
-        if (n == null)
-        {
-            n = new PathNode(pos);
-            Path p = GetPath(pos);
-            if (p != null)
-            {
-                var (path1, path2) = Path.Split(p, n);
-                path1.Connect();
-                path2.Connect();
-                AddPath(path1);
-                AddPath(path2);
-                RemovePath(p);
-            }
-            AddNode(n);
-        }
-        return n;
-    }
-
     public void RemoveNode(PathNode node)
     {
         var paths = new List<Path>(node.Connections.Values);
@@ -282,87 +243,6 @@ public class Map : MapInfo
         }
         nodes.Remove(node);
         node.Remove();
-    }
-
-    public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new()
-    {
-        IntVector inc = source.Direction(dest);
-        IntVector prev = source;
-        IntVector cur = source;
-        bool onPath = false;
-        var toConnect = new List<Building>();
-
-        while (cur != dest)
-        {
-            cur += inc;
-            Path p = GetPath(cur);
-            PathNode n = GetNode(cur);
-            if (p != null && p.Direction.IsParallelTo(inc))
-            {
-                onPath = true;
-            }
-            else if (onPath && n != null)
-            {
-                onPath = false;
-                prev = cur;
-            }
-            else if (!onPath && (cur == dest || p != null || n != null))
-            {
-                BuildPathSegment<T>(prev, cur);
-                prev = cur;
-            }
-            foreach (var building in buildings)
-            {
-                if (building.HasEntrance && building.Entrance.ConnectionPos == cur
-                    && !building.Entrance.Connected)
-                {
-                    toConnect.Add(building);
-                }
-            }
-        }
-
-        foreach (var building in toConnect) ConnectBuilding(building);
-    }
-
-    public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new()
-    {
-        PathNode s = AddPathNode(source);
-        PathNode d = AddPathNode(dest);
-        Path path = new T();
-        path.SetNodes(s, d);
-        path.Connect();
-        AddPath(path);
-        if (s.Connections.Count == 2) TryMergeNode(s);
-        if (d.Connections.Count == 2) TryMergeNode(d);
-    }
-
-    private void TryMergeNode(PathNode node)
-    {
-        Path path1 = null;
-        Path path2 = null;
-        foreach (Path p in node.Connections.Values)
-        {
-            if (path1 == null)
-            {
-                path1 = p; continue;
-            }
-            else if (path2 == null)
-            {
-                path2 = p; continue;
-            }
-            else break;
-        }
-
-        if (!path1.Direction.IsParallelTo(path2.Direction)) return;
-
-        Path newPath = Path.Merge(path1, path2);
-        path1.Disconnect();
-        path2.Disconnect();
-        RemovePath(path1);
-        RemovePath(path2);
-        newPath.Connect();
-        AddPath(newPath);
-        RemoveNode(node);
     }
 
     public void AddPath(Path path)
@@ -387,38 +267,13 @@ public class Map : MapInfo
         return null;
     }
 
-    public void DeletePathSegment(IntVector pos)
-    {
-        Path p = GetPath(pos);
-        PathNode n = GetNode(pos);
-        if (p == null && n == null)
-        {
-            throw new ArgumentException($"Position {pos} does not contain a path to delete");
-        }
-        if (p != null)
-        {
-            AddPathNode(pos + p.Direction);
-            AddPathNode(pos - p.Direction);
-            var newPath = GetPath(pos);
-            newPath.Disconnect();
-            RemovePath(newPath);
-        }
-        else if (n != null)
-        {
-            var connections = new List<PathNode>(n.Connections.Keys);
-            foreach (PathNode connection in connections)
-            {
-                AddPathNode(n.Pos + n.Pos.Direction(connection.Pos));
-            }
-            RemoveNode(n);
-        }
-    }
-
     public void RemovePath(Path path)
     {
         this.paths.Remove(path);
         path.Remove();
     }
+
+    public void DeletePathSegment(IntVector pos) => _pathBuilder.DeletePathSegment(pos);
 
     public int GetResourceAmount(Item item)
     {
