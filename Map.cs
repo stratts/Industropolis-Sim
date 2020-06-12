@@ -70,17 +70,16 @@ public class Map : MapInfo
 
     public Building CreateBuilding(BuildingType type, IntVector pos)
     {
-        Building building = null;
         switch (type)
         {
-            case BuildingType.Workshop: building = new Workshop(); break;
+            case BuildingType.Workshop: return new Workshop();
             //case BuildingType.House: building = new House(this.Population); break;
-            case BuildingType.Mine: building = new Mine(this, pos); break;
-            case BuildingType.Farm: building = new Farm(this, pos); break;
-            case BuildingType.TestConsumer: building = new TestConsumer(); break;
-            case BuildingType.TestProducer: building = new TestProducer(); break;
+            case BuildingType.Mine: return new Mine(this, pos);
+            case BuildingType.Farm: return new Farm(this, pos);
+            case BuildingType.TestConsumer: return new TestConsumer();
+            case BuildingType.TestProducer: return new TestProducer();
         }
-        return building;
+        return null;
     }
 
     public bool CanBuild(Building building, IntVector pos)
