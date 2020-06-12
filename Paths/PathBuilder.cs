@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 
+public enum PathType
+{
+    Path
+}
 
 public class PathBuilder
 {
@@ -9,6 +13,15 @@ public class PathBuilder
     public PathBuilder(Map map)
     {
         _map = map;
+    }
+
+    private Path MakePath(PathType type, PathNode source, PathNode dest)
+    {
+        switch (type)
+        {
+            case PathType.Path: return new Path(source, dest);
+        }
+        return null;
     }
 
     private PathNode AddPathNode(IntVector pos)
@@ -32,7 +45,7 @@ public class PathBuilder
         return n;
     }
 
-    public void BuildPath<T>(IntVector source, IntVector dest) where T : Path, new()
+    public void BuildPath(PathType type, IntVector source, IntVector dest)
     {
         IntVector inc = source.Direction(dest);
         IntVector prev = source;
@@ -56,7 +69,7 @@ public class PathBuilder
             }
             else if (!onPath && (cur == dest || p != null || n != null))
             {
-                BuildPathSegment<T>(prev, cur);
+                BuildPathSegment(type, prev, cur);
                 prev = cur;
             }
             foreach (var building in _map.Buildings)
@@ -72,12 +85,11 @@ public class PathBuilder
         foreach (var building in toConnect) ConnectBuilding(building);
     }
 
-    public void BuildPathSegment<T>(IntVector source, IntVector dest) where T : Path, new()
+    public void BuildPathSegment(PathType type, IntVector source, IntVector dest)
     {
         PathNode s = AddPathNode(source);
         PathNode d = AddPathNode(dest);
-        Path path = new T();
-        path.SetNodes(s, d);
+        Path path = MakePath(type, s, d);
         path.Connect();
         _map.AddPath(path);
         if (s.Connections.Count == 2) TryMergeNode(s);
@@ -149,7 +161,7 @@ public class PathBuilder
             var node = new BuildingNode(entrance.Pos, building);
             entrance.Connect(node);
             _map.AddNode(entrance.Node);
-            BuildPath<Path>(entrance.Pos, entrance.ConnectionPos);
+            BuildPath(PathType.Path, entrance.Pos, entrance.ConnectionPos);
         }
     }
 

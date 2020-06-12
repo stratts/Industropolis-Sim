@@ -14,8 +14,6 @@ public class Path : MapObject
 
     public event Action PathSplit;
 
-    public Path() { }
-
     public Path(PathNode source, PathNode dest)
     {
         SetNodes(source, dest);
