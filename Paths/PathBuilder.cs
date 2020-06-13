@@ -45,11 +45,11 @@ public class PathBuilder
     private PathNode AddPathNode(PathCategory category, IntVector pos)
     {
         PathNode? n = _map.GetNode(pos);
-        if (n == null)
+        if (n == null || n.Category != category)
         {
             n = new PathNode(pos, category);
             Path? p = _map.GetPath(pos);
-            if (p != null)
+            if (p != null && p.Category == category)
             {
                 var (path1, path2) = Path.Split(p, n);
                 path1.Connect();
@@ -78,6 +78,7 @@ public class PathBuilder
             PathNode? n = _map.GetNode(cur);
             if (p != null && p.Direction.IsParallelTo(inc))
             {
+                if (p.Category != GetCategory(type)) return;
                 onPath = true;
             }
             else if (onPath && n != null)
@@ -92,8 +93,8 @@ public class PathBuilder
             }
             foreach (var building in _map.Buildings)
             {
-                if (building.HasEntrance && building.Entrance != null && building.Entrance.ConnectionPos == cur
-                    && !building.Entrance.Connected)
+                if (building.HasEntrance && building.Entrance != null &&
+                    building.Entrance.CanConnect(cur, GetCategory(type)))
                 {
                     toConnect.Add(building);
                 }
@@ -178,7 +179,9 @@ public class PathBuilder
         var entrance = building.Entrance;
         if (entrance == null)
             throw new ArgumentException("Building does not have an entrance");
-        if (_map.GetPath(entrance.ConnectionPos) != null || _map.GetNode(entrance.ConnectionPos) != null)
+        var p = _map.GetPath(entrance.ConnectionPos);
+        var n = _map.GetNode(entrance.ConnectionPos);
+        if ((p != null && p.Category == entrance.Category) || (n != null && n.Category == entrance.Category))
         {
             var node = new BuildingNode(entrance.Pos, building);
             entrance.Connect(node);

@@ -22,11 +22,18 @@ public class BuildingEntrance
     public IntVector ConnectionPos => Pos + new IntVector(0, 1);
     public bool Connected => Node != null;
 
+    public PathCategory Category => PathCategory.Road;
+
     public BuildingEntrance(Building parent, IntVector location)
     {
         Location = location;
         _parent = parent;
     }
+
+    public bool CanConnect(IntVector pos, PathCategory category) =>
+        pos == ConnectionPos &&
+        category == Category &&
+        !Connected;
 
     public void Connect(BuildingNode node) => Node = node;
     public void Disconnect() => Node = null;
