@@ -1,9 +1,16 @@
 using System;
 using System.Collections.Generic;
 
+public enum PathCategory
+{
+    Road,
+    Rail
+}
+
 public enum PathType
 {
-    Path
+    Road,
+    Rail
 }
 
 public class PathBuilder
@@ -19,17 +26,28 @@ public class PathBuilder
     {
         switch (type)
         {
-            case PathType.Path: return new Path(source, dest);
-            default: return new Path(source, dest);
+            case PathType.Road: return new Road(source, dest);
+            case PathType.Rail: return new Rail(source, dest);
+            default: return new Road(source, dest);
         }
     }
 
-    private PathNode AddPathNode(IntVector pos)
+    public static PathCategory GetCategory(PathType type)
+    {
+        switch (type)
+        {
+            case PathType.Road: return PathCategory.Road;
+            case PathType.Rail: return PathCategory.Rail;
+            default: return default(PathCategory);
+        }
+    }
+
+    private PathNode AddPathNode(PathCategory category, IntVector pos)
     {
         PathNode? n = _map.GetNode(pos);
         if (n == null)
         {
-            n = new PathNode(pos);
+            n = new PathNode(pos, category);
             Path? p = _map.GetPath(pos);
             if (p != null)
             {
@@ -87,8 +105,9 @@ public class PathBuilder
 
     public void BuildPathSegment(PathType type, IntVector source, IntVector dest)
     {
-        PathNode s = AddPathNode(source);
-        PathNode d = AddPathNode(dest);
+        var category = GetCategory(type);
+        PathNode s = AddPathNode(category, source);
+        PathNode d = AddPathNode(category, dest);
         Path path = MakePath(type, s, d);
         path.Connect();
         _map.AddPath(path);
@@ -106,8 +125,8 @@ public class PathBuilder
         }
         if (p != null)
         {
-            AddPathNode(pos + p.Direction);
-            AddPathNode(pos - p.Direction);
+            AddPathNode(p.Category, pos + p.Direction);
+            AddPathNode(p.Category, pos - p.Direction);
             var newPath = _map.GetPath(pos);
             if (newPath == null) throw new Exception("No path found when deleting path segment");
             newPath.Disconnect();
@@ -118,7 +137,7 @@ public class PathBuilder
             var connections = new List<PathNode>(n.Connections.Keys);
             foreach (PathNode connection in connections)
             {
-                AddPathNode(n.Pos + n.Pos.Direction(connection.Pos));
+                AddPathNode(n.Category, n.Pos + n.Pos.Direction(connection.Pos));
             }
             _map.RemoveNode(n);
         }
@@ -165,7 +184,7 @@ public class PathBuilder
             entrance.Connect(node);
             if (entrance.Node == null) throw new Exception("Could not connect entrance");
             _map.AddNode(entrance.Node);
-            BuildPath(PathType.Path, entrance.Pos, entrance.ConnectionPos);
+            BuildPath(PathType.Road, entrance.Pos, entrance.ConnectionPos);
         }
     }
 

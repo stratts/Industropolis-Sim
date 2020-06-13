@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 
 
-public class Path : MapObject
+public abstract class Path : MapObject
 {
+    public abstract PathCategory Category { get; }
+
     public PathNode Source { get; private set; }
     public PathNode Dest { get; private set; }
     public float Length { get; private set; }
@@ -103,7 +105,7 @@ public class Path : MapObject
             start = path2.Source;
             end = path1.Dest;
         }
-        var path = new Path(start, end);
+        var path = (Path)Activator.CreateInstance(path1.GetType(), start, end);
         return path;
     }
 
@@ -115,6 +117,19 @@ public class Path : MapObject
     }
 }
 
+public class Road : Path
+{
+    public Road(PathNode source, PathNode dest) : base(source, dest) { }
+
+    public override PathCategory Category => PathCategory.Road;
+}
+
+public class Rail : Path
+{
+    public Rail(PathNode source, PathNode dest) : base(source, dest) { }
+
+    public override PathCategory Category => PathCategory.Rail;
+}
 
 
 public class PathLane

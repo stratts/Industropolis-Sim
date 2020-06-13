@@ -3,14 +3,17 @@ using System.Collections.Generic;
 
 public class PathNode : MapObject
 {
+    public PathCategory Category { get; }
+
     public IntVector Pos { get; private set; }
     public IReadOnlyDictionary<PathNode, Path> Connections => _connections;
     private Dictionary<PathNode, Path> _connections;
 
     public bool Occupied { get; set; } = false;
 
-    public PathNode(IntVector pos)
+    public PathNode(IntVector pos, PathCategory category)
     {
+        Category = category;
         Pos = pos;
         _connections = new Dictionary<PathNode, Path>();
     }
