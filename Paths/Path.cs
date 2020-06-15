@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public abstract class Path : MapObject
 {
     public abstract PathCategory Category { get; }
+    public abstract PathType PathType { get; }
 
     public PathNode Source { get; private set; }
     public PathNode Dest { get; private set; }
@@ -122,6 +123,8 @@ public class Road : Path
     public Road(PathNode source, PathNode dest) : base(source, dest) { }
 
     public override PathCategory Category => PathCategory.Road;
+
+    public override PathType PathType => PathType.Road;
 }
 
 public class Rail : Path
@@ -129,6 +132,8 @@ public class Rail : Path
     public Rail(PathNode source, PathNode dest) : base(source, dest) { }
 
     public override PathCategory Category => PathCategory.Rail;
+
+    public override PathType PathType => PathType.Rail;
 }
 
 
