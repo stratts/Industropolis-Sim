@@ -5,7 +5,6 @@ public interface MapInfo
 {
     int Width { get; }
     int Height { get; }
-    Building? GetBuilding(int x, int y);
     Building? GetBuilding(IntVector pos);
     //PopulationInfo Population { get; }
     bool HasResource(Item item, int amount);
@@ -126,10 +125,6 @@ public class Map : MapInfo
             Godot.GD.Print("Cannot build here");
             return;
         }
-        foreach (var tile in GetBuildingTiles(building))
-        {
-            tiles[tile.X, tile.Y].Building = building;
-        }
         building.Pos = pos;
         buildings.Add(building);
         if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);
@@ -144,14 +139,16 @@ public class Map : MapInfo
         AddBuilding(building, new IntVector(x, y));
     }
 
-    public Building? GetBuilding(int x, int y)
-    {
-        return tiles[x, y].Building;
-    }
-
     public Building? GetBuilding(IntVector pos)
     {
-        return tiles[pos.X, pos.Y].Building;
+        foreach (var b in buildings)
+        {
+            foreach (var t in GetBuildingTiles(b))
+            {
+                if (t == pos) return b;
+            }
+        }
+        return null;
     }
 
     public IEnumerable<IntVector> GetBuildingTiles(Building building)
@@ -169,10 +166,6 @@ public class Map : MapInfo
     {
         building.Remove();
         buildings.Remove(building);
-        foreach (var pos in GetBuildingTiles(building))
-        {
-            tiles[pos.X, pos.Y].Building = null;
-        }
         if (building.HasEntrance) _pathBuilder.DisconnectBuilding(building);
     }
 
