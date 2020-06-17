@@ -11,6 +11,8 @@ public class PathNode : MapObject
 
     public bool Occupied { get; set; } = false;
 
+    public event Action<PathNode>? Changed;
+
     public PathNode(IntVector pos, PathCategory category)
     {
         Category = category;
@@ -29,6 +31,7 @@ public class PathNode : MapObject
             throw new System.ArgumentException("PathNode is already connected");
         }
         _connections.Add(node, path);
+        Changed?.Invoke(this);
     }
 
     public void Disconnect(PathNode node)
@@ -38,6 +41,7 @@ public class PathNode : MapObject
             throw new System.ArgumentException("Path is not contained in connections");
         }
         _connections.Remove(node);
+        Changed?.Invoke(this);
     }
 
     public bool IsConnected(PathNode node) => _connections.ContainsKey(node);

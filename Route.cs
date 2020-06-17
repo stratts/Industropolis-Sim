@@ -4,18 +4,19 @@ using System.Collections.Generic;
 public class Route : MapObject
 {
     private List<PathNode> _path = new List<PathNode>();
+    private IPathfinder<PathNode> _pathfinder;
+    private Item _item = Item.None;
+    private bool _reroute = false;
 
     public IReadOnlyList<PathNode> Path => _path;
     public PathNode Source { get; set; }
     public PathNode Dest { get; set; }
     public MapInfo MapInfo { get; private set; }
+    public event Action<Route>? Changed;
 
     public IDirectOutput? SourceOutput { get; set; }
     public IDirectInput? DestInput { get; set; }
 
-    private IPathfinder<PathNode> _pathfinder;
-
-    private Item _item = Item.None;
     public Item Item
     {
         get => _item;
@@ -55,13 +56,38 @@ public class Route : MapObject
     public void Pathfind()
     {
         var path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
-        if (path != null) _path = path;
+        if (path != null)
+        {
+            _path = path;
+            foreach (PathNode node in _path)
+            {
+                node.Changed += NodeChanged;
+                node.Removed += () => _reroute = true;
+            }
+        }
         else
         {
             Godot.GD.Print("No path found! :(");
             _path = new List<PathNode>();
             return;
         }
+    }
+
+    public void Update()
+    {
+        if (_reroute)
+        {
+            Pathfind();
+            Changed?.Invoke(this);
+            _reroute = false;
+        }
+    }
+
+    private void NodeChanged(PathNode node)
+    {
+        // Unsubscribe because the node may not be in the rerouted path
+        node.Changed -= NodeChanged;
+        _reroute = true;
     }
 
     public void AddHauler()

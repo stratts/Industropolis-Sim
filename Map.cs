@@ -171,6 +171,7 @@ public class Map : MapInfo
 
     public void Update(float delta)
     {
+        foreach (Route r in routes) r.Update();
         foreach (Building b in buildings) b.Update(delta);
         foreach (Vehicle v in Vehicles) v.Update(delta);
     }
