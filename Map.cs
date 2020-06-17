@@ -13,14 +13,6 @@ public interface MapInfo
     int CurrentMoney { get; set; }
 }
 
-public delegate void MapChangedEvent(Map map, MapChangedEventArgs e);
-
-public class MapChangedEventArgs : EventArgs
-{
-    public Building? Building { get; set; } = null;
-    public Route? Route { get; set; } = null;
-}
-
 public class Map : MapInfo
 {
     private Tile[,] tiles;
@@ -50,10 +42,11 @@ public class Map : MapInfo
         }
     }
 
-    public event MapChangedEvent? MapChanged;
-
     public event Action<Path>? PathAdded;
     public event Action<PathNode>? PathNodeAdded;
+    public event Action<Building>? BuildingAdded;
+    public event Action<Route>? RouteAdded;
+    public event Action<Vehicle>? VehicleAdded;
 
     public Map()
     {
@@ -128,15 +121,14 @@ public class Map : MapInfo
         building.Pos = pos;
         buildings.Add(building);
         if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);
-        if (MapChanged != null)
-        {
-            MapChanged(this, new MapChangedEventArgs { Building = building });
-        }
+        BuildingAdded?.Invoke(building);
     }
 
-    public void AddBuilding(Building building, int x, int y)
+    public void AddVehicle(Vehicle vehicle)
     {
-        AddBuilding(building, new IntVector(x, y));
+        Vehicles.Add(vehicle);
+        vehicle.Removed += () => Vehicles.Remove(vehicle);
+        VehicleAdded?.Invoke(vehicle);
     }
 
     public Building? GetBuilding(IntVector pos)
@@ -184,11 +176,7 @@ public class Map : MapInfo
         route.DestInput = start.Building.Input;
         route.Pathfind();
         routes.Add(route);
-
-        if (MapChanged != null)
-        {
-            MapChanged(this, new MapChangedEventArgs { Route = route });
-        }
+        RouteAdded?.Invoke(route);
 
         return route;
     }

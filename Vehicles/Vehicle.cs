@@ -1,6 +1,6 @@
 using System;
 
-public abstract class Vehicle
+public abstract class Vehicle : MapObject
 {
     private float _speed = 1; // Tiles per second
     private Route.Direction _direction;
