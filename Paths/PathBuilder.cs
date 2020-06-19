@@ -10,6 +10,7 @@ public enum PathCategory
 public enum PathType
 {
     Road,
+    OneWayRoad,
     Rail
 }
 
@@ -27,6 +28,7 @@ public class PathBuilder
         switch (type)
         {
             case PathType.Road: return new Road(source, dest);
+            case PathType.OneWayRoad: return new OneWayRoad(source, dest);
             case PathType.Rail: return new Rail(source, dest);
             default: return new Road(source, dest);
         }

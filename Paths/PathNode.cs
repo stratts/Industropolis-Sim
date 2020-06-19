@@ -46,6 +46,8 @@ public class PathNode : MapObject
 
     public bool IsConnected(PathNode node) => _connections.ContainsKey(node);
 
+    public bool HasPathTo(PathNode node) => IsConnected(node) && _connections[node].HasLaneTo(node);
+
     public bool CanProceed(PathNode source, PathNode dest) =>
         !Occupied &&
         (dest == this ||

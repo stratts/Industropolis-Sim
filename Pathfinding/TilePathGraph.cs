@@ -21,6 +21,7 @@ public class TilePathGraph : IGraph<IntVector>
         {
             foreach (var connection in n.Connections.Keys)
             {
+                if (!n.HasPathTo(connection)) continue;
                 yield return pos + pos.Direction(connection.Pos);
             }
         }

@@ -21,6 +21,9 @@ public class PathGraph : IGraph<PathNode>
 
     public IEnumerable<PathNode> GetConnections(PathNode node)
     {
-        return node.Connections.Keys;
+        foreach (var n in node.Connections.Keys)
+        {
+            if (node.HasPathTo(n)) yield return n;
+        }
     }
 }

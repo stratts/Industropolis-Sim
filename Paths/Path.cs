@@ -13,7 +13,7 @@ public abstract class Path : MapObject
     public IntVector Direction { get; private set; }
 
     public IReadOnlyCollection<PathLane> Lanes => _lanes;
-    private List<PathLane> _lanes;
+    protected List<PathLane> _lanes;
 
     public event Action? PathSplit;
 
@@ -36,8 +36,7 @@ public abstract class Path : MapObject
     public void Connect()
     {
         _lanes.Clear();
-        _lanes.Add(new PathLane(this, LaneDir.Source));
-        _lanes.Add(new PathLane(this, LaneDir.Dest));
+        AddLanes();
         Source.Connect(Dest, this);
         Dest.Connect(Source, this);
     }
@@ -47,6 +46,25 @@ public abstract class Path : MapObject
         Source.Disconnect(Dest);
         Dest.Disconnect(Source);
         _lanes.Clear();
+    }
+
+    protected virtual void AddLanes()
+    {
+        _lanes.Add(new PathLane(this, LaneDir.Source));
+        _lanes.Add(new PathLane(this, LaneDir.Dest));
+    }
+
+    public bool HasLaneTo(PathNode node)
+    {
+        try
+        {
+            GetLaneTo(node);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        return true;
     }
 
     public PathLane GetLaneTo(PathNode node)
@@ -125,6 +143,19 @@ public class Road : Path
     public override PathCategory Category => PathCategory.Road;
 
     public override PathType PathType => PathType.Road;
+}
+
+public class OneWayRoad : Road
+{
+    public OneWayRoad(PathNode source, PathNode dest) : base(source, dest) { }
+
+    public override PathType PathType => PathType.OneWayRoad;
+
+    protected override void AddLanes()
+    {
+        _lanes.Add(new PathLane(this, LaneDir.Dest));
+        _lanes.Add(new PathLane(this, LaneDir.Dest));
+    }
 }
 
 public class Rail : Path
