@@ -238,14 +238,19 @@ public class Map : MapInfo
 
     public Path? GetPath(IntVector pos)
     {
-        foreach (Path path in paths)
+        if (GetNode(pos) == null)
         {
-            if (path.OnPath(pos) && GetNode(pos) == null)
-            {
-                return path;
-            }
+            foreach (Path path in GetPaths(pos)) return path;
         }
         return null;
+    }
+
+    public IEnumerable<Path> GetPaths(IntVector pos)
+    {
+        foreach (Path path in paths)
+        {
+            if (path.OnPath(pos)) yield return path;
+        }
     }
 
     public void RemovePath(Path path)

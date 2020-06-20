@@ -28,7 +28,7 @@ public class PathNode : MapObject
         }
         if (_connections.ContainsKey(node))
         {
-            throw new System.ArgumentException("PathNode is already connected");
+            throw new System.ArgumentException($"PathNode {this} is already connected to {node}");
         }
         _connections.Add(node, path);
         Changed?.Invoke(this);
@@ -52,4 +52,6 @@ public class PathNode : MapObject
         !Occupied &&
         (dest == this ||
         !_connections[dest].GetLaneFrom(this).AtCapacity);
+
+    public override string ToString() => $"{this.Pos}";
 }

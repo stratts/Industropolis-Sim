@@ -165,7 +165,6 @@ public class PathBuilder
 
         if (path1 == null || path2 == null) return;
         if (!path1.Direction.IsParallelTo(path2.Direction)) return;
-
         Path newPath = Path.Merge(path1, path2);
         path1.Disconnect();
         path2.Disconnect();

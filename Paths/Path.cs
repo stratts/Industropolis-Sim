@@ -100,31 +100,13 @@ public abstract class Path : MapObject
     // Merge two paths into one, return new path
     public static Path Merge(Path path1, Path path2)
     {
-        PathNode start;
-        PathNode end;
+        var nodes1 = new HashSet<PathNode>(new[] { path1.Source, path1.Dest });
+        var nodes2 = new HashSet<PathNode>(new[] { path2.Source, path2.Dest });
 
-        // Todo: handle different path types
-        if (path1.Source == path2.Source)
-        {
-            start = path1.Dest;
-            end = path2.Dest;
-        }
-        else if (path1.Dest == path2.Dest)
-        {
-            start = path1.Source;
-            end = path2.Source;
-        }
-        else if (path1.Dest == path2.Source)
-        {
-            start = path1.Source;
-            end = path2.Dest;
-        }
-        else
-        {
-            start = path2.Source;
-            end = path1.Dest;
-        }
-        var path = (Path)Activator.CreateInstance(path1.GetType(), start, end);
+        nodes1.SymmetricExceptWith(nodes2);
+        var ends = new List<PathNode>(nodes1);
+
+        var path = (Path)Activator.CreateInstance(path1.GetType(), ends[0], ends[1]);
         return path;
     }
 
