@@ -67,36 +67,46 @@ public class PathBuilder
 
     public void BuildPath(PathType type, IntVector source, IntVector dest)
     {
+        if (source == dest) return;
+
         IntVector inc = source.Direction(dest);
-        IntVector prev = source;
-        IntVector cur = source;
-        bool onPath = false;
+        IntVector segmentStart = source;
+        IntVector current = source;
         var toConnect = new List<Building>();
 
-        while (cur != dest)
+        while (current != dest)
         {
-            cur += inc;
-            Path? p = _map.GetPath(cur);
-            PathNode? n = _map.GetNode(cur);
-            if (p != null && p.Direction.IsParallelTo(inc))
+            current += inc;
+            Path? path = _map.GetPath(current);
+            PathNode? node = _map.GetNode(current);
+
+            bool build = false;
+            bool setStart = false;
+
+            if (node != null)
             {
-                if (p.Category != GetCategory(type)) return;
-                onPath = true;
+                Path? startPath = _map.GetPath(segmentStart);
+                if (startPath != null && startPath.Direction.IsParallelTo(inc)) setStart = true;
+                else
+                {
+                    PathNode? startNode = _map.GetNode(segmentStart);
+                    if (startNode == null || !startNode.IsConnected(node)) build = true;
+                }
             }
-            else if (onPath && n != null)
+            else if (path != null)
             {
-                onPath = false;
-                prev = cur;
+                if (path.Direction.IsParallelTo(inc)) setStart = true;
+                else build = true;
             }
-            else if (!onPath && (cur == dest || p != null || n != null))
-            {
-                BuildPathSegment(type, prev, cur);
-                prev = cur;
-            }
+            else if (current == dest) build = true;
+
+            if (build) BuildPathSegment(type, segmentStart, current);
+            if (build || setStart) segmentStart = current;
+
             foreach (var building in _map.Buildings)
             {
                 if (building.HasEntrance && building.Entrance != null &&
-                    building.Entrance.CanConnect(cur, GetCategory(type)))
+                    building.Entrance.CanConnect(current, GetCategory(type)))
                 {
                     toConnect.Add(building);
                 }
