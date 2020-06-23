@@ -54,8 +54,8 @@ public class PathBuilder
             if (p != null && p.Category == category)
             {
                 var (path1, path2) = PathUtils.Split(p, n);
-                path1.Connect();
-                path2.Connect();
+                NodeUtils.Connect(path1.Source, path1.Dest, path1);
+                NodeUtils.Connect(path2.Source, path2.Dest, path2);
                 _map.AddPath(path1);
                 _map.AddPath(path2);
                 _map.RemovePath(p);
@@ -122,7 +122,7 @@ public class PathBuilder
         PathNode s = AddPathNode(category, source);
         PathNode d = AddPathNode(category, dest);
         Path path = MakePath(type, s, d);
-        path.Connect();
+        NodeUtils.Connect(path.Source, path.Dest, path);
         _map.AddPath(path);
         if (s.Connections.Count == 2) TryMergeNode(s);
         if (d.Connections.Count == 2) TryMergeNode(d);
@@ -142,7 +142,7 @@ public class PathBuilder
             AddPathNode(p.Category, pos - p.Direction);
             var newPath = _map.GetPath(pos);
             if (newPath == null) throw new Exception("No path found when deleting path segment");
-            newPath.Disconnect();
+            NodeUtils.Disconnect(newPath.Source, newPath.Dest);
             _map.RemovePath(newPath);
         }
         else if (n != null)
@@ -176,11 +176,11 @@ public class PathBuilder
         if (path1 == null || path2 == null) return;
         if (!path1.Direction.IsParallelTo(path2.Direction)) return;
         Path newPath = PathUtils.Merge<Path, PathNode>(path1, path2);
-        path1.Disconnect();
-        path2.Disconnect();
+        NodeUtils.Disconnect(path1.Source, path1.Dest);
+        NodeUtils.Disconnect(path2.Source, path2.Dest);
         _map.RemovePath(path1);
         _map.RemovePath(path2);
-        newPath.Connect();
+        NodeUtils.Connect(newPath.Source, newPath.Dest, newPath);
         _map.AddPath(newPath);
         _map.RemoveNode(node);
     }

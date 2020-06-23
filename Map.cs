@@ -219,7 +219,7 @@ public class Map : MapInfo
         var paths = new List<Path>(node.Connections.Values);
         foreach (Path path in paths)
         {
-            path.Disconnect();
+            NodeUtils.Disconnect(path.Source, path.Dest);
             RemovePath(path);
         }
         nodes.Remove(node);

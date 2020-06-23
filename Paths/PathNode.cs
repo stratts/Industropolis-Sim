@@ -6,7 +6,27 @@ public interface IPathNode
     IntVector Pos { get; }
 }
 
-public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode where TNode : BaseNode<TNode, TPath>
+public interface IPathNode<T> : IPathNode
+{
+    void Disconnect(T node);
+}
+
+public static class NodeUtils
+{
+    public static void Connect<TNode, TPath>(TNode source, TNode dest, TPath path) where TNode : BaseNode<TNode, TPath>
+    {
+        source.Connect(dest, path);
+        dest.Connect(source, path);
+    }
+
+    public static void Disconnect<TNode>(TNode source, TNode dest) where TNode : IPathNode<TNode>
+    {
+        source.Disconnect(dest);
+        dest.Disconnect(source);
+    }
+}
+
+public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode<TNode> where TNode : BaseNode<TNode, TPath>
 {
     public PathCategory Category { get; }
 
@@ -72,6 +92,4 @@ public class PathNode : BaseNode<PathNode, Path>
         !Occupied &&
         (dest == this ||
         !Connections[dest].GetLaneFrom(this).AtCapacity);
-
-    public override string ToString() => $"{this.Pos}";
 }

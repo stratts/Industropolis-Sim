@@ -64,21 +64,7 @@ public abstract class Path : BasePath<PathNode>
     public Path(PathNode source, PathNode dest) : base(source, dest)
     {
         _lanes = new List<PathLane>();
-    }
-
-    public void Connect()
-    {
-        _lanes.Clear();
         AddLanes();
-        Source.Connect(Dest, this);
-        Dest.Connect(Source, this);
-    }
-
-    public void Disconnect()
-    {
-        Source.Disconnect(Dest);
-        Dest.Disconnect(Source);
-        _lanes.Clear();
     }
 
     protected virtual void AddLanes()
