@@ -14,25 +14,29 @@ public enum PathType
     Rail
 }
 
-public class PathBuilder
+public interface IPathManager<TNode, TPath> where TNode : class where TPath : class
 {
-    private Map _map;
+    TNode? GetNode(IntVector pos);
+    void AddNode(TNode node);
+    void RemoveNode(TNode node);
+    TPath? GetPath(IntVector pos);
+    void AddPath(TPath path);
+    void RemovePath(TPath path);
+    IReadOnlyList<Building> Buildings { get; }
+}
 
-    public PathBuilder(Map map)
+public abstract class BasePathBuilder<TNode, TPath>
+    where TNode : BaseNode<TNode, TPath> where TPath : BasePath<TNode>
+{
+    protected IPathManager<TNode, TPath> _map;
+
+    public BasePathBuilder(IPathManager<TNode, TPath> map)
     {
         _map = map;
     }
 
-    public static Path MakePath(PathType type, PathNode source, PathNode dest)
-    {
-        switch (type)
-        {
-            case PathType.Road: return new Road(source, dest);
-            case PathType.OneWayRoad: return new OneWayRoad(source, dest);
-            case PathType.Rail: return new Rail(source, dest);
-            default: return new Road(source, dest);
-        }
-    }
+    public abstract TPath MakePath(PathType type, TNode source, TNode dest);
+    public abstract TNode MakeNode(IntVector pos, PathCategory category);
 
     public static PathCategory GetCategory(PathType type)
     {
@@ -44,13 +48,13 @@ public class PathBuilder
         }
     }
 
-    private PathNode AddPathNode(PathCategory category, IntVector pos)
+    private TNode AddPathNode(PathCategory category, IntVector pos)
     {
-        PathNode? n = _map.GetNode(pos);
+        TNode? n = _map.GetNode(pos);
         if (n == null || n.Category != category)
         {
-            n = new PathNode(pos, category);
-            Path? p = _map.GetPath(pos);
+            n = MakeNode(pos, category);
+            TPath? p = _map.GetPath(pos);
             if (p != null && p.Category == category)
             {
                 var (path1, path2) = PathUtils.Split(p, n);
@@ -65,7 +69,7 @@ public class PathBuilder
         return n;
     }
 
-    public void BuildPath(PathType type, IntVector source, IntVector dest)
+    public virtual void BuildPath(PathType type, IntVector source, IntVector dest)
     {
         if (source == dest) return;
 
@@ -77,19 +81,19 @@ public class PathBuilder
         while (current != dest)
         {
             current += inc;
-            Path? path = _map.GetPath(current);
-            PathNode? node = _map.GetNode(current);
+            TPath? path = _map.GetPath(current);
+            TNode? node = _map.GetNode(current);
 
             bool build = false;
             bool setStart = false;
 
             if (node != null)
             {
-                Path? startPath = _map.GetPath(segmentStart);
+                TPath? startPath = _map.GetPath(segmentStart);
                 if (startPath != null && startPath.Direction.IsParallelTo(inc)) setStart = true;
                 else
                 {
-                    PathNode? startNode = _map.GetNode(segmentStart);
+                    TNode? startNode = _map.GetNode(segmentStart);
                     if (startNode == null || !startNode.IsConnected(node)) build = true;
                 }
             }
@@ -102,26 +106,15 @@ public class PathBuilder
 
             if (build) BuildPathSegment(type, segmentStart, current);
             if (build || setStart) segmentStart = current;
-
-            foreach (var building in _map.Buildings)
-            {
-                if (building.HasEntrance && building.Entrance != null &&
-                    building.Entrance.CanConnect(current, GetCategory(type)))
-                {
-                    toConnect.Add(building);
-                }
-            }
         }
-
-        foreach (var building in toConnect) ConnectBuilding(building);
     }
 
     public void BuildPathSegment(PathType type, IntVector source, IntVector dest)
     {
         var category = GetCategory(type);
-        PathNode s = AddPathNode(category, source);
-        PathNode d = AddPathNode(category, dest);
-        Path path = MakePath(type, s, d);
+        TNode s = AddPathNode(category, source);
+        TNode d = AddPathNode(category, dest);
+        TPath path = MakePath(type, s, d);
         NodeUtils.Connect(path.Source, path.Dest, path);
         _map.AddPath(path);
         if (s.Connections.Count == 2) TryMergeNode(s);
@@ -130,8 +123,8 @@ public class PathBuilder
 
     public void DeletePathSegment(IntVector pos)
     {
-        Path? p = _map.GetPath(pos);
-        PathNode? n = _map.GetNode(pos);
+        TPath? p = _map.GetPath(pos);
+        TNode? n = _map.GetNode(pos);
         if (p == null && n == null)
         {
             throw new ArgumentException($"Position {pos} does not contain a path to delete");
@@ -147,8 +140,8 @@ public class PathBuilder
         }
         else if (n != null)
         {
-            var connections = new List<PathNode>(n.Connections.Keys);
-            foreach (PathNode connection in connections)
+            var connections = new List<TNode>(n.Connections.Keys);
+            foreach (TNode connection in connections)
             {
                 AddPathNode(n.Category, n.Pos + n.Pos.Direction(connection.Pos));
             }
@@ -156,11 +149,11 @@ public class PathBuilder
         }
     }
 
-    private void TryMergeNode(PathNode node)
+    protected void TryMergeNode(TNode node)
     {
-        Path? path1 = null;
-        Path? path2 = null;
-        foreach (Path p in node.Connections.Values)
+        TPath? path1 = null;
+        TPath? path2 = null;
+        foreach (TPath p in node.Connections.Values)
         {
             if (path1 == null)
             {
@@ -175,7 +168,7 @@ public class PathBuilder
 
         if (path1 == null || path2 == null) return;
         if (!path1.Direction.IsParallelTo(path2.Direction)) return;
-        Path newPath = PathUtils.Merge<Path, PathNode>(path1, path2);
+        TPath newPath = PathUtils.Merge<TPath, TNode>(path1, path2);
         NodeUtils.Disconnect(path1.Source, path1.Dest);
         NodeUtils.Disconnect(path2.Source, path2.Dest);
         _map.RemovePath(path1);
@@ -183,6 +176,49 @@ public class PathBuilder
         NodeUtils.Connect(newPath.Source, newPath.Dest, newPath);
         _map.AddPath(newPath);
         _map.RemoveNode(node);
+    }
+}
+
+public class PathBuilder : BasePathBuilder<PathNode, Path>
+{
+    public PathBuilder(IPathManager<PathNode, Path> map) : base(map) { }
+
+    public override Path MakePath(PathType type, PathNode source, PathNode dest)
+    {
+        switch (type)
+        {
+            case PathType.Road: return new Road(source, dest);
+            case PathType.OneWayRoad: return new OneWayRoad(source, dest);
+            case PathType.Rail: return new Rail(source, dest);
+            default: return new Road(source, dest);
+        }
+    }
+
+    public override PathNode MakeNode(IntVector pos, PathCategory category) => new PathNode(pos, category);
+
+    public override void BuildPath(PathType type, IntVector source, IntVector dest)
+    {
+        base.BuildPath(type, source, dest);
+        if (source == dest) return;
+
+        IntVector inc = source.Direction(dest);
+        IntVector current = source;
+        var toConnect = new List<Building>();
+
+        while (current != dest)
+        {
+            current += inc;
+            foreach (var building in _map.Buildings)
+            {
+                if (building.HasEntrance && building.Entrance != null &&
+                    building.Entrance.CanConnect(current, GetCategory(type)))
+                {
+                    toConnect.Add(building);
+                }
+            }
+        }
+
+        foreach (var building in toConnect) ConnectBuilding(building);
     }
 
     public void ConnectBuilding(Building building)

@@ -13,7 +13,7 @@ public interface MapInfo
     int CurrentMoney { get; set; }
 }
 
-public class Map : MapInfo
+public class Map : MapInfo, IPathManager<PathNode, Path>
 {
     private Tile[,] tiles;
     private List<Building> buildings;
