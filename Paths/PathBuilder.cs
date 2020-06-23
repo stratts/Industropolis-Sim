@@ -53,7 +53,7 @@ public class PathBuilder
             Path? p = _map.GetPath(pos);
             if (p != null && p.Category == category)
             {
-                var (path1, path2) = Path.Split(p, n);
+                var (path1, path2) = PathUtils.Split(p, n);
                 path1.Connect();
                 path2.Connect();
                 _map.AddPath(path1);
@@ -175,7 +175,7 @@ public class PathBuilder
 
         if (path1 == null || path2 == null) return;
         if (!path1.Direction.IsParallelTo(path2.Direction)) return;
-        Path newPath = Path.Merge(path1, path2);
+        Path newPath = PathUtils.Merge<Path, PathNode>(path1, path2);
         path1.Disconnect();
         path2.Disconnect();
         _map.RemovePath(path1);

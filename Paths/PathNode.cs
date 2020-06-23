@@ -1,26 +1,29 @@
 using System;
 using System.Collections.Generic;
 
-public class PathNode : MapObject
+public interface IPathNode
+{
+    IntVector Pos { get; }
+}
+
+public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode where TNode : BaseNode<TNode, TPath>
 {
     public PathCategory Category { get; }
 
     public IntVector Pos { get; private set; }
-    public IReadOnlyDictionary<PathNode, Path> Connections => _connections;
-    private Dictionary<PathNode, Path> _connections;
+    public IReadOnlyDictionary<TNode, TPath> Connections => _connections;
+    private Dictionary<TNode, TPath> _connections;
 
-    public bool Occupied { get; set; } = false;
+    public abstract event Action<TNode>? Changed;
 
-    public event Action<PathNode>? Changed;
-
-    public PathNode(IntVector pos, PathCategory category)
+    public BaseNode(IntVector pos, PathCategory category)
     {
         Category = category;
         Pos = pos;
-        _connections = new Dictionary<PathNode, Path>();
+        _connections = new Dictionary<TNode, TPath>();
     }
 
-    public void Connect(PathNode node, Path path)
+    public void Connect(TNode node, TPath path)
     {
         if (node == this)
         {
@@ -31,27 +34,44 @@ public class PathNode : MapObject
             throw new System.ArgumentException($"PathNode {this} is already connected to {node}");
         }
         _connections.Add(node, path);
-        Changed?.Invoke(this);
+        OnChange();
     }
 
-    public void Disconnect(PathNode node)
+    public void Disconnect(TNode node)
     {
         if (!_connections.ContainsKey(node))
         {
             throw new System.ArgumentException("Path is not contained in connections");
         }
         _connections.Remove(node);
-        Changed?.Invoke(this);
+        OnChange();
     }
 
-    public bool IsConnected(PathNode node) => _connections.ContainsKey(node);
+    public abstract void OnChange();
 
-    public bool HasPathTo(PathNode node) => IsConnected(node) && _connections[node].HasLaneTo(node);
+    public bool IsConnected(TNode node) => _connections.ContainsKey(node);
+
+    public override string ToString() => $"{this.Pos}";
+}
+
+public class PathNode : BaseNode<PathNode, Path>
+{
+    public bool Occupied { get; set; } = false;
+
+    public PathNode(IntVector pos, PathCategory category) : base(pos, category)
+    {
+    }
+
+    public override event Action<PathNode>? Changed;
+
+    public override void OnChange() => Changed?.Invoke(this);
+
+    public bool HasPathTo(PathNode node) => IsConnected(node) && Connections[node].HasLaneTo(node);
 
     public bool CanProceed(PathNode source, PathNode dest) =>
         !Occupied &&
         (dest == this ||
-        !_connections[dest].GetLaneFrom(this).AtCapacity);
+        !Connections[dest].GetLaneFrom(this).AtCapacity);
 
     public override string ToString() => $"{this.Pos}";
 }

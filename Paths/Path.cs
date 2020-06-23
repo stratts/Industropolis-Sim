@@ -1,36 +1,69 @@
 using System;
 using System.Collections.Generic;
 
+public static class PathUtils
+{
+    public static (TPath, TPath) Split<TPath, TNode>(TPath path, TNode node)
+        where TPath : BasePath<TNode> where TNode : IPathNode
+    {
+        var path1 = (TPath)Activator.CreateInstance(path.GetType(), path.Source, node);
+        var path2 = (TPath)Activator.CreateInstance(path.GetType(), node, path.Dest);
+        path.OnPathSplit();
+        return (path1, path2);
+    }
 
-public abstract class Path : MapObject
+    public static TPath Merge<TPath, TNode>(TPath path1, TPath path2)
+        where TPath : BasePath<TNode> where TNode : IPathNode
+    {
+        var nodes1 = new HashSet<TNode>(new[] { path1.Source, path1.Dest });
+        var nodes2 = new HashSet<TNode>(new[] { path2.Source, path2.Dest });
+
+        nodes1.SymmetricExceptWith(nodes2);
+        var ends = new List<TNode>(nodes1);
+
+        var path = (TPath)Activator.CreateInstance(path1.GetType(), ends[0], ends[1]);
+        return path;
+    }
+}
+
+public abstract class BasePath<T> : MapObject where T : IPathNode
 {
     public abstract PathCategory Category { get; }
     public abstract PathType PathType { get; }
 
-    public PathNode Source { get; private set; }
-    public PathNode Dest { get; private set; }
+    public T Source { get; private set; }
+    public T Dest { get; private set; }
     public float Length { get; private set; }
     public IntVector Direction { get; private set; }
 
-    public IReadOnlyCollection<PathLane> Lanes => _lanes;
-    protected List<PathLane> _lanes;
-
     public event Action? PathSplit;
 
-    public Path(PathNode source, PathNode dest)
-    {
-        _lanes = new List<PathLane>();
-        Source = source;
-        Dest = dest;
-        SetNodes(source, dest);
-    }
-
-    public void SetNodes(PathNode source, PathNode dest)
+    public BasePath(T source, T dest)
     {
         Source = source;
         Dest = dest;
         Length = Source.Pos.Distance(Dest.Pos);
         Direction = Source.Pos.Direction(Dest.Pos);
+    }
+
+    public bool OnPath(IntVector pos)
+    {
+        if (pos == Source.Pos || pos == Dest.Pos) return true;
+        if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
+        return false;
+    }
+
+    public void OnPathSplit() => PathSplit?.Invoke();
+}
+
+public abstract class Path : BasePath<PathNode>
+{
+    public IReadOnlyCollection<PathLane> Lanes => _lanes;
+    protected List<PathLane> _lanes;
+
+    public Path(PathNode source, PathNode dest) : base(source, dest)
+    {
+        _lanes = new List<PathLane>();
     }
 
     public void Connect()
@@ -85,36 +118,6 @@ public abstract class Path : MapObject
         }
 
         throw new ArgumentException("Path contains no lane to that node");
-    }
-
-    // Split path at given node, and return new paths 
-    public static (Path, Path) Split(Path path, PathNode node)
-    {
-        var path1 = (Path)Activator.CreateInstance(path.GetType(), path.Source, node);
-        var path2 = (Path)Activator.CreateInstance(path.GetType(), node, path.Dest);
-        path.Disconnect();
-        path.PathSplit?.Invoke();
-        return (path1, path2);
-    }
-
-    // Merge two paths into one, return new path
-    public static Path Merge(Path path1, Path path2)
-    {
-        var nodes1 = new HashSet<PathNode>(new[] { path1.Source, path1.Dest });
-        var nodes2 = new HashSet<PathNode>(new[] { path2.Source, path2.Dest });
-
-        nodes1.SymmetricExceptWith(nodes2);
-        var ends = new List<PathNode>(nodes1);
-
-        var path = (Path)Activator.CreateInstance(path1.GetType(), ends[0], ends[1]);
-        return path;
-    }
-
-    public bool OnPath(IntVector pos)
-    {
-        if (pos == Source.Pos || pos == Dest.Pos) return true;
-        if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
-        return false;
     }
 }
 
