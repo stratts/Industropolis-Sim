@@ -13,16 +13,15 @@ public interface MapInfo
     int CurrentMoney { get; set; }
 }
 
-public class Map : MapInfo, IPathManager<RoadNode, Road>
+public class Map : MapInfo
 {
     private Tile[,] tiles;
     private List<Building> buildings;
     private List<Route> routes;
-    private List<Road> paths;
-    private List<RoadNode> nodes;
     private int _currentMoney = 0;
     private RoadBuilder _pathBuilder;
 
+    public IPathContainer<RoadNode, Road> Roads { get; } = new PathContainer<RoadNode, Road>();
     public IReadOnlyList<Building> Buildings => buildings;
     public List<Vehicle> Vehicles = new List<Vehicle>();
     public int Width => tiles.GetLength(0);
@@ -52,8 +51,9 @@ public class Map : MapInfo, IPathManager<RoadNode, Road>
     {
         routes = new List<Route>();
         buildings = new List<Building>();
-        paths = new List<Road>();
-        nodes = new List<RoadNode>();
+
+        Roads.PathAdded += (Road road) => PathAdded?.Invoke(road);
+        Roads.NodeAdded += (RoadNode node) => PathNodeAdded?.Invoke(node);
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
@@ -198,67 +198,13 @@ public class Map : MapInfo, IPathManager<RoadNode, Road>
         route.Remove();
     }
 
-    public RoadNode? GetNode(IntVector pos)
-    {
-        foreach (RoadNode node in nodes)
-        {
-            if (node.Pos == pos) return node;
-        }
+    public void AddNode(RoadNode node) => Roads.AddNode(node);
+    public RoadNode? GetNode(IntVector pos) => Roads.GetNode(pos);
+    public void RemoveNode(RoadNode node) => Roads.RemoveNode(node);
 
-        return null;
-    }
-
-    public void AddNode(RoadNode node)
-    {
-        nodes.Add(node);
-        PathNodeAdded?.Invoke(node);
-    }
-
-    public void RemoveNode(RoadNode node)
-    {
-        var paths = new List<Road>(node.Connections.Values);
-        foreach (Road path in paths)
-        {
-            NodeUtils.Disconnect(path.Source, path.Dest);
-            RemovePath(path);
-        }
-        nodes.Remove(node);
-        node.Remove();
-    }
-
-    public void AddPath(Road path)
-    {
-        this.paths.Add(path);
-        path.PathSplit += () =>
-        {
-            RemovePath(path);
-        };
-        PathAdded?.Invoke(path);
-    }
-
-    public Road? GetPath(IntVector pos)
-    {
-        if (GetNode(pos) == null)
-        {
-            foreach (Road path in GetPaths(pos)) return path;
-        }
-        return null;
-    }
-
-    public IEnumerable<Road> GetPaths(IntVector pos)
-    {
-        foreach (Road path in paths)
-        {
-            if (path.OnPath(pos)) yield return path;
-        }
-    }
-
-    public void RemovePath(Road path)
-    {
-        this.paths.Remove(path);
-        path.Remove();
-    }
-
+    public void AddPath(Road path) => Roads.AddPath(path);
+    public Road? GetPath(IntVector pos) => Roads.GetPath(pos);
+    public void RemovePath(Road path) => Roads.RemovePath(path);
     public void DeletePathSegment(IntVector pos) => _pathBuilder.DeletePathSegment(pos);
 
     public int GetResourceAmount(Item item)

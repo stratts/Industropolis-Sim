@@ -3,7 +3,12 @@ using System.Collections.Generic;
 
 public class RoadBuilder : PathBuilder<RoadNode, Road>
 {
-    public RoadBuilder(IPathManager<RoadNode, Road> map) : base(map) { }
+    private Map _map;
+
+    public RoadBuilder(Map map) : base(map.Roads)
+    {
+        _map = map;
+    }
 
     public override Road MakePath(PathType type, RoadNode source, RoadNode dest)
     {
@@ -48,14 +53,14 @@ public class RoadBuilder : PathBuilder<RoadNode, Road>
         var entrance = building.Entrance;
         if (entrance == null)
             throw new ArgumentException("Building does not have an entrance");
-        var p = _map.GetPath(entrance.ConnectionPos);
-        var n = _map.GetNode(entrance.ConnectionPos);
+        var p = _manager.GetPath(entrance.ConnectionPos);
+        var n = _manager.GetNode(entrance.ConnectionPos);
         if ((p != null && p.Category == entrance.Category) || (n != null && n.Category == entrance.Category))
         {
             var node = new BuildingNode(entrance.Pos, building);
             entrance.Connect(node);
             if (entrance.Node == null) throw new Exception("Could not connect entrance");
-            _map.AddNode(entrance.Node);
+            _manager.AddNode(entrance.Node);
             BuildPath(PathType.SimpleRoad, entrance.Pos, entrance.ConnectionPos);
         }
     }
@@ -65,8 +70,8 @@ public class RoadBuilder : PathBuilder<RoadNode, Road>
         if (building.Entrance == null || building.Entrance.Node == null)
             throw new ArgumentException("Building does not have an entrance node");
         RoadNode n = building.Entrance.Node;
-        RoadNode? pathCon = _map.GetNode(n.Pos + new IntVector(0, 1));
-        _map.RemoveNode(n);
+        RoadNode? pathCon = _manager.GetNode(n.Pos + new IntVector(0, 1));
+        _manager.RemoveNode(n);
         if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
         building.Entrance.Disconnect();
     }

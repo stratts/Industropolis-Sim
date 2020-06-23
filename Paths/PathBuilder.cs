@@ -14,25 +14,14 @@ public enum PathType
     Rail
 }
 
-public interface IPathManager<TNode, TPath> where TNode : class where TPath : class
-{
-    TNode? GetNode(IntVector pos);
-    void AddNode(TNode node);
-    void RemoveNode(TNode node);
-    TPath? GetPath(IntVector pos);
-    void AddPath(TPath path);
-    void RemovePath(TPath path);
-    IReadOnlyList<Building> Buildings { get; }
-}
-
 public abstract class PathBuilder<TNode, TPath>
     where TNode : PathNode<TNode, TPath> where TPath : Path<TNode>
 {
-    protected IPathManager<TNode, TPath> _map;
+    protected IPathContainer<TNode, TPath> _manager;
 
-    public PathBuilder(IPathManager<TNode, TPath> map)
+    public PathBuilder(IPathContainer<TNode, TPath> manager)
     {
-        _map = map;
+        _manager = manager;
     }
 
     public abstract TPath MakePath(PathType type, TNode source, TNode dest);
@@ -50,21 +39,21 @@ public abstract class PathBuilder<TNode, TPath>
 
     private TNode AddPathNode(PathCategory category, IntVector pos)
     {
-        TNode? n = _map.GetNode(pos);
+        TNode? n = _manager.GetNode(pos);
         if (n == null || n.Category != category)
         {
             n = MakeNode(pos, category);
-            TPath? p = _map.GetPath(pos);
+            TPath? p = _manager.GetPath(pos);
             if (p != null && p.Category == category)
             {
                 var (path1, path2) = PathUtils.Split(p, n);
                 NodeUtils.Connect(path1.Source, path1.Dest, path1);
                 NodeUtils.Connect(path2.Source, path2.Dest, path2);
-                _map.AddPath(path1);
-                _map.AddPath(path2);
-                _map.RemovePath(p);
+                _manager.AddPath(path1);
+                _manager.AddPath(path2);
+                _manager.RemovePath(p);
             }
-            _map.AddNode(n);
+            _manager.AddNode(n);
         }
         return n;
     }
@@ -81,19 +70,19 @@ public abstract class PathBuilder<TNode, TPath>
         while (current != dest)
         {
             current += inc;
-            TPath? path = _map.GetPath(current);
-            TNode? node = _map.GetNode(current);
+            TPath? path = _manager.GetPath(current);
+            TNode? node = _manager.GetNode(current);
 
             bool build = false;
             bool setStart = false;
 
             if (node != null)
             {
-                TPath? startPath = _map.GetPath(segmentStart);
+                TPath? startPath = _manager.GetPath(segmentStart);
                 if (startPath != null && startPath.Direction.IsParallelTo(inc)) setStart = true;
                 else
                 {
-                    TNode? startNode = _map.GetNode(segmentStart);
+                    TNode? startNode = _manager.GetNode(segmentStart);
                     if (startNode == null || !startNode.IsConnected(node)) build = true;
                 }
             }
@@ -116,15 +105,15 @@ public abstract class PathBuilder<TNode, TPath>
         TNode d = AddPathNode(category, dest);
         TPath path = MakePath(type, s, d);
         NodeUtils.Connect(path.Source, path.Dest, path);
-        _map.AddPath(path);
+        _manager.AddPath(path);
         if (s.Connections.Count == 2) TryMergeNode(s);
         if (d.Connections.Count == 2) TryMergeNode(d);
     }
 
     public void DeletePathSegment(IntVector pos)
     {
-        TPath? p = _map.GetPath(pos);
-        TNode? n = _map.GetNode(pos);
+        TPath? p = _manager.GetPath(pos);
+        TNode? n = _manager.GetNode(pos);
         if (p == null && n == null)
         {
             throw new ArgumentException($"Position {pos} does not contain a path to delete");
@@ -133,10 +122,10 @@ public abstract class PathBuilder<TNode, TPath>
         {
             AddPathNode(p.Category, pos + p.Direction);
             AddPathNode(p.Category, pos - p.Direction);
-            var newPath = _map.GetPath(pos);
+            var newPath = _manager.GetPath(pos);
             if (newPath == null) throw new Exception("No path found when deleting path segment");
             NodeUtils.Disconnect(newPath.Source, newPath.Dest);
-            _map.RemovePath(newPath);
+            _manager.RemovePath(newPath);
         }
         else if (n != null)
         {
@@ -145,7 +134,7 @@ public abstract class PathBuilder<TNode, TPath>
             {
                 AddPathNode(n.Category, n.Pos + n.Pos.Direction(connection.Pos));
             }
-            _map.RemoveNode(n);
+            _manager.RemoveNode(n);
         }
     }
 
@@ -171,10 +160,10 @@ public abstract class PathBuilder<TNode, TPath>
         TPath newPath = PathUtils.Merge<TPath, TNode>(path1, path2);
         NodeUtils.Disconnect(path1.Source, path1.Dest);
         NodeUtils.Disconnect(path2.Source, path2.Dest);
-        _map.RemovePath(path1);
-        _map.RemovePath(path2);
+        _manager.RemovePath(path1);
+        _manager.RemovePath(path2);
         NodeUtils.Connect(newPath.Source, newPath.Dest, newPath);
-        _map.AddPath(newPath);
-        _map.RemoveNode(node);
+        _manager.AddPath(newPath);
+        _manager.RemoveNode(node);
     }
 }

@@ -54,7 +54,7 @@ public class SimpleRoad : Road
 {
     public SimpleRoad(RoadNode source, RoadNode dest) : base(source, dest) { }
 
-    public override PathType PathType => PathType.OneWayRoad;
+    public override PathType PathType => PathType.SimpleRoad;
 
     protected override void AddLanes()
     {
