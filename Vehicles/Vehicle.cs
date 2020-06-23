@@ -7,12 +7,12 @@ public abstract class Vehicle : MapObject
 
     // Set to null! as they are initialized when GoNext() is called in constructor
     public Route Route { get; }
-    public Path CurrentPath { get; private set; } = null!;
-    public PathLane CurrentLane { get; private set; } = null!;
+    public Road CurrentPath { get; private set; } = null!;
+    public RoadLane CurrentLane { get; private set; } = null!;
     public float PathPos { get; private set; }
-    public PathNode PrevNode { get; private set; } = null!;
-    public PathNode NextNode { get; private set; } = null!;
-    public PathNode Destination { get; private set; } = null!;
+    public RoadNode PrevNode { get; private set; } = null!;
+    public RoadNode NextNode { get; private set; } = null!;
+    public RoadNode Destination { get; private set; } = null!;
 
     protected Action? _action;
     protected float _elapsedTime;

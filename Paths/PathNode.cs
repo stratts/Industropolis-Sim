@@ -13,7 +13,7 @@ public interface IPathNode<T> : IPathNode
 
 public static class NodeUtils
 {
-    public static void Connect<TNode, TPath>(TNode source, TNode dest, TPath path) where TNode : BaseNode<TNode, TPath>
+    public static void Connect<TNode, TPath>(TNode source, TNode dest, TPath path) where TNode : PathNode<TNode, TPath>
     {
         source.Connect(dest, path);
         dest.Connect(source, path);
@@ -26,7 +26,7 @@ public static class NodeUtils
     }
 }
 
-public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode<TNode> where TNode : BaseNode<TNode, TPath>
+public abstract class PathNode<TNode, TPath> : MapObject, IPathNode<TNode> where TNode : PathNode<TNode, TPath>
 {
     public PathCategory Category { get; }
 
@@ -36,7 +36,7 @@ public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode<TNode> where
 
     public abstract event Action<TNode>? Changed;
 
-    public BaseNode(IntVector pos, PathCategory category)
+    public PathNode(IntVector pos, PathCategory category)
     {
         Category = category;
         Pos = pos;
@@ -72,24 +72,4 @@ public abstract class BaseNode<TNode, TPath> : MapObject, IPathNode<TNode> where
     public bool IsConnected(TNode node) => _connections.ContainsKey(node);
 
     public override string ToString() => $"{this.Pos}";
-}
-
-public class PathNode : BaseNode<PathNode, Path>
-{
-    public bool Occupied { get; set; } = false;
-
-    public PathNode(IntVector pos, PathCategory category) : base(pos, category)
-    {
-    }
-
-    public override event Action<PathNode>? Changed;
-
-    public override void OnChange() => Changed?.Invoke(this);
-
-    public bool HasPathTo(PathNode node) => IsConnected(node) && Connections[node].HasLaneTo(node);
-
-    public bool CanProceed(PathNode source, PathNode dest) =>
-        !Occupied &&
-        (dest == this ||
-        !Connections[dest].GetLaneFrom(this).AtCapacity);
 }

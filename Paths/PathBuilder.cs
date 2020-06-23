@@ -9,7 +9,7 @@ public enum PathCategory
 
 public enum PathType
 {
-    Road,
+    SimpleRoad,
     OneWayRoad,
     Rail
 }
@@ -25,12 +25,12 @@ public interface IPathManager<TNode, TPath> where TNode : class where TPath : cl
     IReadOnlyList<Building> Buildings { get; }
 }
 
-public abstract class BasePathBuilder<TNode, TPath>
-    where TNode : BaseNode<TNode, TPath> where TPath : BasePath<TNode>
+public abstract class PathBuilder<TNode, TPath>
+    where TNode : PathNode<TNode, TPath> where TPath : Path<TNode>
 {
     protected IPathManager<TNode, TPath> _map;
 
-    public BasePathBuilder(IPathManager<TNode, TPath> map)
+    public PathBuilder(IPathManager<TNode, TPath> map)
     {
         _map = map;
     }
@@ -42,7 +42,7 @@ public abstract class BasePathBuilder<TNode, TPath>
     {
         switch (type)
         {
-            case PathType.Road: return PathCategory.Road;
+            case PathType.SimpleRoad: return PathCategory.Road;
             case PathType.Rail: return PathCategory.Rail;
             default: return default(PathCategory);
         }
@@ -176,76 +176,5 @@ public abstract class BasePathBuilder<TNode, TPath>
         NodeUtils.Connect(newPath.Source, newPath.Dest, newPath);
         _map.AddPath(newPath);
         _map.RemoveNode(node);
-    }
-}
-
-public class PathBuilder : BasePathBuilder<PathNode, Path>
-{
-    public PathBuilder(IPathManager<PathNode, Path> map) : base(map) { }
-
-    public override Path MakePath(PathType type, PathNode source, PathNode dest)
-    {
-        switch (type)
-        {
-            case PathType.Road: return new Road(source, dest);
-            case PathType.OneWayRoad: return new OneWayRoad(source, dest);
-            case PathType.Rail: return new Rail(source, dest);
-            default: return new Road(source, dest);
-        }
-    }
-
-    public override PathNode MakeNode(IntVector pos, PathCategory category) => new PathNode(pos, category);
-
-    public override void BuildPath(PathType type, IntVector source, IntVector dest)
-    {
-        base.BuildPath(type, source, dest);
-        if (source == dest) return;
-
-        IntVector inc = source.Direction(dest);
-        IntVector current = source;
-        var toConnect = new List<Building>();
-
-        while (current != dest)
-        {
-            current += inc;
-            foreach (var building in _map.Buildings)
-            {
-                if (building.HasEntrance && building.Entrance != null &&
-                    building.Entrance.CanConnect(current, GetCategory(type)))
-                {
-                    toConnect.Add(building);
-                }
-            }
-        }
-
-        foreach (var building in toConnect) ConnectBuilding(building);
-    }
-
-    public void ConnectBuilding(Building building)
-    {
-        var entrance = building.Entrance;
-        if (entrance == null)
-            throw new ArgumentException("Building does not have an entrance");
-        var p = _map.GetPath(entrance.ConnectionPos);
-        var n = _map.GetNode(entrance.ConnectionPos);
-        if ((p != null && p.Category == entrance.Category) || (n != null && n.Category == entrance.Category))
-        {
-            var node = new BuildingNode(entrance.Pos, building);
-            entrance.Connect(node);
-            if (entrance.Node == null) throw new Exception("Could not connect entrance");
-            _map.AddNode(entrance.Node);
-            BuildPath(PathType.Road, entrance.Pos, entrance.ConnectionPos);
-        }
-    }
-
-    public void DisconnectBuilding(Building building)
-    {
-        if (building.Entrance == null || building.Entrance.Node == null)
-            throw new ArgumentException("Building does not have an entrance node");
-        PathNode n = building.Entrance.Node;
-        PathNode? pathCon = _map.GetNode(n.Pos + new IntVector(0, 1));
-        _map.RemoveNode(n);
-        if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
-        building.Entrance.Disconnect();
     }
 }

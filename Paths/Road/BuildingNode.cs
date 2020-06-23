@@ -1,5 +1,5 @@
 
-public class BuildingNode : PathNode
+public class BuildingNode : RoadNode
 {
     public Building Building { get; }
 

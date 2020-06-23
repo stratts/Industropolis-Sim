@@ -13,15 +13,15 @@ public interface MapInfo
     int CurrentMoney { get; set; }
 }
 
-public class Map : MapInfo, IPathManager<PathNode, Path>
+public class Map : MapInfo, IPathManager<RoadNode, Road>
 {
     private Tile[,] tiles;
     private List<Building> buildings;
     private List<Route> routes;
-    private List<Path> paths;
-    private List<PathNode> nodes;
+    private List<Road> paths;
+    private List<RoadNode> nodes;
     private int _currentMoney = 0;
-    private PathBuilder _pathBuilder;
+    private RoadBuilder _pathBuilder;
 
     public IReadOnlyList<Building> Buildings => buildings;
     public List<Vehicle> Vehicles = new List<Vehicle>();
@@ -42,8 +42,8 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
         }
     }
 
-    public event Action<Path>? PathAdded;
-    public event Action<PathNode>? PathNodeAdded;
+    public event Action<Road>? PathAdded;
+    public event Action<RoadNode>? PathNodeAdded;
     public event Action<Building>? BuildingAdded;
     public event Action<Route>? RouteAdded;
     public event Action<Vehicle>? VehicleAdded;
@@ -52,12 +52,12 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
     {
         routes = new List<Route>();
         buildings = new List<Building>();
-        paths = new List<Path>();
-        nodes = new List<PathNode>();
+        paths = new List<Road>();
+        nodes = new List<RoadNode>();
 
         int size = 50;
         tiles = MapGenerator.GenerateTiles(size, size, 1);
-        _pathBuilder = new PathBuilder(this);
+        _pathBuilder = new RoadBuilder(this);
     }
 
     public Building CreateBuilding(BuildingType type, IntVector pos)
@@ -198,9 +198,9 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
         route.Remove();
     }
 
-    public PathNode? GetNode(IntVector pos)
+    public RoadNode? GetNode(IntVector pos)
     {
-        foreach (PathNode node in nodes)
+        foreach (RoadNode node in nodes)
         {
             if (node.Pos == pos) return node;
         }
@@ -208,16 +208,16 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
         return null;
     }
 
-    public void AddNode(PathNode node)
+    public void AddNode(RoadNode node)
     {
         nodes.Add(node);
         PathNodeAdded?.Invoke(node);
     }
 
-    public void RemoveNode(PathNode node)
+    public void RemoveNode(RoadNode node)
     {
-        var paths = new List<Path>(node.Connections.Values);
-        foreach (Path path in paths)
+        var paths = new List<Road>(node.Connections.Values);
+        foreach (Road path in paths)
         {
             NodeUtils.Disconnect(path.Source, path.Dest);
             RemovePath(path);
@@ -226,7 +226,7 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
         node.Remove();
     }
 
-    public void AddPath(Path path)
+    public void AddPath(Road path)
     {
         this.paths.Add(path);
         path.PathSplit += () =>
@@ -236,24 +236,24 @@ public class Map : MapInfo, IPathManager<PathNode, Path>
         PathAdded?.Invoke(path);
     }
 
-    public Path? GetPath(IntVector pos)
+    public Road? GetPath(IntVector pos)
     {
         if (GetNode(pos) == null)
         {
-            foreach (Path path in GetPaths(pos)) return path;
+            foreach (Road path in GetPaths(pos)) return path;
         }
         return null;
     }
 
-    public IEnumerable<Path> GetPaths(IntVector pos)
+    public IEnumerable<Road> GetPaths(IntVector pos)
     {
-        foreach (Path path in paths)
+        foreach (Road path in paths)
         {
             if (path.OnPath(pos)) yield return path;
         }
     }
 
-    public void RemovePath(Path path)
+    public void RemovePath(Road path)
     {
         this.paths.Remove(path);
         path.Remove();

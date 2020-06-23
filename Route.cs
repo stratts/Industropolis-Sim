@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 public class Route : MapObject
 {
-    private List<PathNode> _path = new List<PathNode>();
-    private IPathfinder<PathNode> _pathfinder;
+    private List<RoadNode> _path = new List<RoadNode>();
+    private IPathfinder<RoadNode> _pathfinder;
     private Item _item = Item.None;
     private bool _reroute = false;
 
-    public IReadOnlyList<PathNode> Path => _path;
-    public PathNode Source { get; set; }
-    public PathNode Dest { get; set; }
+    public IReadOnlyList<RoadNode> Path => _path;
+    public RoadNode Source { get; set; }
+    public RoadNode Dest { get; set; }
     public MapInfo MapInfo { get; private set; }
     public event Action<Route>? Changed;
 
@@ -32,15 +32,15 @@ public class Route : MapObject
 
     public enum Direction { Forwards, Backwards };
 
-    public Route(MapInfo info, PathNode src, PathNode dest)
+    public Route(MapInfo info, RoadNode src, RoadNode dest)
     {
         MapInfo = info;
         Source = src;
         Dest = dest;
-        _pathfinder = new AStarPathfinder<PathNode>();
+        _pathfinder = new AStarPathfinder<RoadNode>();
     }
 
-    public PathNode Next(PathNode current, Direction direction)
+    public RoadNode Next(RoadNode current, Direction direction)
     {
         int shift = 0;
         var curr = _path.IndexOf(current);
@@ -59,7 +59,7 @@ public class Route : MapObject
         if (path != null)
         {
             _path = path;
-            foreach (PathNode node in _path)
+            foreach (RoadNode node in _path)
             {
                 node.Changed += NodeChanged;
                 node.Removed += () => _reroute = true;
@@ -68,7 +68,7 @@ public class Route : MapObject
         else
         {
             Godot.GD.Print("No path found! :(");
-            _path = new List<PathNode>();
+            _path = new List<RoadNode>();
             return;
         }
     }
@@ -83,7 +83,7 @@ public class Route : MapObject
         }
     }
 
-    private void NodeChanged(PathNode node)
+    private void NodeChanged(RoadNode node)
     {
         // Unsubscribe because the node may not be in the rerouted path
         node.Changed -= NodeChanged;
