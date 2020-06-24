@@ -21,6 +21,7 @@ public class Map : MapInfo
     private int _currentMoney = 0;
     private RoadBuilder _pathBuilder;
 
+    public IPathContainer<RailNode, Rail> Rails { get; } = new PathContainer<RailNode, Rail>();
     public IPathContainer<RoadNode, Road> Roads { get; } = new PathContainer<RoadNode, Road>();
     public IReadOnlyList<Building> Buildings => buildings;
     public List<Vehicle> Vehicles = new List<Vehicle>();

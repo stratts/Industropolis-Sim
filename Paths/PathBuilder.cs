@@ -14,7 +14,27 @@ public enum PathType
     Rail
 }
 
-public abstract class PathBuilder<TNode, TPath>
+
+public interface IPathBuilder
+{
+    void BuildPath(PathType type, IntVector source, IntVector dest);
+}
+
+public abstract class PathBuilder
+{
+    public static PathCategory GetCategory(PathType type)
+    {
+        switch (type)
+        {
+            case PathType.SimpleRoad: return PathCategory.Road;
+            case PathType.OneWayRoad: return PathCategory.Road;
+            case PathType.Rail: return PathCategory.Rail;
+            default: return default(PathCategory);
+        }
+    }
+}
+
+public abstract class PathBuilder<TNode, TPath> : PathBuilder, IPathBuilder
     where TNode : PathNode<TNode, TPath> where TPath : Path<TNode>
 {
     protected IPathContainer<TNode, TPath> _manager;
@@ -26,16 +46,6 @@ public abstract class PathBuilder<TNode, TPath>
 
     public abstract TPath MakePath(PathType type, TNode source, TNode dest);
     public abstract TNode MakeNode(IntVector pos, PathCategory category);
-
-    public static PathCategory GetCategory(PathType type)
-    {
-        switch (type)
-        {
-            case PathType.SimpleRoad: return PathCategory.Road;
-            case PathType.Rail: return PathCategory.Rail;
-            default: return default(PathCategory);
-        }
-    }
 
     private TNode AddPathNode(PathCategory category, IntVector pos)
     {

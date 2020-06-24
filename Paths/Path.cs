@@ -26,10 +26,25 @@ public static class PathUtils
     }
 }
 
-public abstract class Path<T> : MapObject where T : IPathNode
+public interface IPath
+{
+    PathCategory Category { get; }
+    PathType PathType { get; }
+    IPathNode SourceNode { get; }
+    IPathNode DestNode { get; }
+    float Length { get; }
+    IntVector Direction { get; }
+    bool OnPath(IntVector pos);
+    event Action? PathSplit;
+}
+
+public abstract class Path<T> : MapObject, IPath where T : IPathNode
 {
     public abstract PathCategory Category { get; }
     public abstract PathType PathType { get; }
+
+    public IPathNode SourceNode => Source;
+    public IPathNode DestNode => Dest;
 
     public T Source { get; private set; }
     public T Dest { get; private set; }

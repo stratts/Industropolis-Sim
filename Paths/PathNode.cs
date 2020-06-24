@@ -4,6 +4,7 @@ using System.Collections.Generic;
 public interface IPathNode
 {
     IntVector Pos { get; }
+    PathCategory Category { get; }
 }
 
 public interface IPathNode<T> : IPathNode
