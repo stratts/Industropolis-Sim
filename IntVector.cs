@@ -48,7 +48,7 @@ public struct IntVector
         return new IntVector(-a.X, -a.Y);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is IntVector p)
         {

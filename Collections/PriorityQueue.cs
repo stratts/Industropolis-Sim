@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+#nullable disable
+
 // Shitty SortedList-based priority queue
 public class PriorityQueue<T1, T2>
 {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class AStarPathfinder<T> : IPathfinder<T>
+public class AStarPathfinder<T> : IPathfinder<T> where T : notnull
 {
 
     private Dictionary<T, NodeData> visited = new Dictionary<T, NodeData>();
@@ -42,7 +42,7 @@ public class AStarPathfinder<T> : IPathfinder<T>
             foreach (T neighbour in graph.GetConnections(node))
             {
                 var g = dist + graph.CalculateCost(node, neighbour);
-                visited.TryGetValue(neighbour, out NodeData v);
+                visited.TryGetValue(neighbour, out NodeData? v);
                 if (v == null) visited[neighbour] = new NodeData(node, g);
                 else if (v.Dist <= g) continue;
                 else

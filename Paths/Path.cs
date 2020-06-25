@@ -6,8 +6,8 @@ public static class PathUtils
     public static (TPath, TPath) Split<TPath, TNode>(TPath path, TNode node)
         where TPath : Path<TNode> where TNode : IPathNode
     {
-        var path1 = (TPath)Activator.CreateInstance(path.GetType(), path.Source, node);
-        var path2 = (TPath)Activator.CreateInstance(path.GetType(), node, path.Dest);
+        var path1 = (TPath)Activator.CreateInstance(path.GetType(), path.Source, node)!;
+        var path2 = (TPath)Activator.CreateInstance(path.GetType(), node, path.Dest)!;
         path.OnPathSplit();
         return (path1, path2);
     }
@@ -21,7 +21,7 @@ public static class PathUtils
         nodes1.SymmetricExceptWith(nodes2);
         var ends = new List<TNode>(nodes1);
 
-        var path = (TPath)Activator.CreateInstance(path1.GetType(), ends[0], ends[1]);
+        var path = (TPath)Activator.CreateInstance(path1.GetType(), ends[0], ends[1])!;
         return path;
     }
 }

@@ -23,7 +23,7 @@ public class Storage : IDirectInput, IDirectOutput
 
     public bool Has(Item item)
     {
-        _buffers.TryGetValue(item, out ItemBuffer buffer);
+        _buffers.TryGetValue(item, out ItemBuffer? buffer);
         if (buffer == null) return false;
         return true;
     }
@@ -44,7 +44,7 @@ public class Storage : IDirectInput, IDirectOutput
 
     public ItemBuffer GetBuffer(Item item)
     {
-        _buffers.TryGetValue(item, out ItemBuffer buffer);
+        _buffers.TryGetValue(item, out ItemBuffer? buffer);
 
         if (buffer == null)
         {
@@ -57,7 +57,7 @@ public class Storage : IDirectInput, IDirectOutput
 
     public int AmountOf(Item item)
     {
-        _buffers.TryGetValue(item, out ItemBuffer buffer);
+        _buffers.TryGetValue(item, out ItemBuffer? buffer);
         if (buffer != null) return buffer.Buffer;
         return 0;
     }
