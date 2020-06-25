@@ -106,7 +106,7 @@ public class Map : MapInfo
         }*/
         if (CurrentMoney < building.Cost)
         {
-            Godot.GD.Print($"Not enough money to build {building.GetType().Name}");
+            Console.WriteLine($"Not enough money to build {building.GetType().Name}");
             return;
         }
         else
@@ -116,7 +116,7 @@ public class Map : MapInfo
         building.Pos = pos;
         if (!CanBuild(building, pos))
         {
-            Godot.GD.Print("Cannot build here");
+            Console.WriteLine("Cannot build here");
             return;
         }
         building.Pos = pos;

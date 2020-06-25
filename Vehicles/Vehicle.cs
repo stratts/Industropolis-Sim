@@ -93,7 +93,7 @@ public abstract class Vehicle : MapObject
         CurrentLane.Enter(this);
 
         PathPos = 0;
-        Godot.GD.Print($"Start moving to {NextNode.Pos}");
+        Console.WriteLine($"Start moving to {NextNode.Pos}");
 
         _action = FollowPath;
     }

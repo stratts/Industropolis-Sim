@@ -67,7 +67,7 @@ public class Route : MapObject
         }
         else
         {
-            Godot.GD.Print("No path found! :(");
+            Console.WriteLine("No path found! :(");
             _path = new List<RoadNode>();
             return;
         }
