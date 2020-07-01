@@ -18,6 +18,8 @@ public enum PathType
 public interface IPathBuilder
 {
     void BuildPath(PathType type, IntVector source, IntVector dest);
+    bool CanBuildPath(PathType type, IntVector source, IntVector dest);
+    bool CanBuildAt(PathType type, IntVector pos);
 }
 
 public abstract class PathBuilder
@@ -47,6 +49,17 @@ public abstract class PathBuilder<TNode, TPath> : PathBuilder, IPathBuilder
     public abstract TPath MakePath(PathType type, TNode source, TNode dest);
     public abstract TNode MakeNode(IntVector pos, PathCategory category);
 
+    public virtual bool CanBuildPath(PathType type, IntVector source, IntVector dest)
+    {
+        foreach (var pos in source.GetPointsBetween(dest))
+        {
+            if (!CanBuildAt(type, pos)) return false;
+        }
+        return true;
+    }
+
+    public abstract bool CanBuildAt(PathType type, IntVector pos);
+
     public virtual void BuildPath(PathType type, IntVector source, IntVector dest)
     {
         var category = GetCategory(type);
@@ -67,7 +80,7 @@ public abstract class PathBuilder<TNode, TPath> : PathBuilder, IPathBuilder
             }
             if (_manager.GetNode(pos) is TNode n && n != sourceNode)
             {
-                AddPath(type, prev, n);
+                if (!prev.Connections.ContainsKey(n)) AddPath(type, prev, n);
                 prev = n;
             }
         }

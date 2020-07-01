@@ -23,6 +23,13 @@ public class RoadBuilder : PathBuilder<RoadNode, Road>
 
     public override RoadNode MakeNode(IntVector pos, PathCategory category) => new RoadNode(pos, category);
 
+    public override bool CanBuildAt(PathType type, IntVector pos)
+    {
+        if (_map.GetBuilding(pos) != null) return false;
+        if (_map.Rails.GetPath(pos) != null || _map.Rails.GetNode(pos) != null) return false;
+        return true;
+    }
+
     public override void BuildPath(PathType type, IntVector source, IntVector dest)
     {
         base.BuildPath(type, source, dest);
