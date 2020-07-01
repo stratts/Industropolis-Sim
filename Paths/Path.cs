@@ -1,30 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-public static class PathUtils
-{
-    public static (TPath, TPath) Split<TPath, TNode>(TPath path, TNode node)
-        where TPath : Path<TNode> where TNode : IPathNode
-    {
-        var path1 = (TPath)Activator.CreateInstance(path.GetType(), path.Source, node)!;
-        var path2 = (TPath)Activator.CreateInstance(path.GetType(), node, path.Dest)!;
-        path.OnPathSplit();
-        return (path1, path2);
-    }
-
-    public static TPath Merge<TPath, TNode>(TPath path1, TPath path2)
-        where TPath : Path<TNode> where TNode : IPathNode
-    {
-        var nodes1 = new HashSet<TNode>(new[] { path1.Source, path1.Dest });
-        var nodes2 = new HashSet<TNode>(new[] { path2.Source, path2.Dest });
-
-        nodes1.SymmetricExceptWith(nodes2);
-        var ends = new List<TNode>(nodes1);
-
-        var path = (TPath)Activator.CreateInstance(path1.GetType(), ends[0], ends[1])!;
-        return path;
-    }
-}
 
 public interface IPath
 {
@@ -35,7 +11,6 @@ public interface IPath
     float Length { get; }
     IntVector Direction { get; }
     bool OnPath(IntVector pos);
-    event Action? PathSplit;
 }
 
 public abstract class Path<T> : MapObject, IPath where T : IPathNode
@@ -51,8 +26,6 @@ public abstract class Path<T> : MapObject, IPath where T : IPathNode
     public float Length { get; private set; }
     public IntVector Direction { get; private set; }
 
-    public event Action? PathSplit;
-
     public Path(T source, T dest)
     {
         Source = source;
@@ -67,6 +40,4 @@ public abstract class Path<T> : MapObject, IPath where T : IPathNode
         if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
         return false;
     }
-
-    public void OnPathSplit() => PathSplit?.Invoke();
 }

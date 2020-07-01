@@ -12,21 +12,6 @@ public interface IPathNode<T> : IPathNode
     void Disconnect(T node);
 }
 
-public static class NodeUtils
-{
-    public static void Connect<TNode, TPath>(TNode source, TNode dest, TPath path) where TNode : PathNode<TNode, TPath>
-    {
-        source.Connect(dest, path);
-        dest.Connect(source, path);
-    }
-
-    public static void Disconnect<TNode>(TNode source, TNode dest) where TNode : IPathNode<TNode>
-    {
-        source.Disconnect(dest);
-        dest.Disconnect(source);
-    }
-}
-
 public abstract class PathNode<TNode, TPath> : MapObject, IPathNode<TNode> where TNode : PathNode<TNode, TPath>
 {
     public PathCategory Category { get; }

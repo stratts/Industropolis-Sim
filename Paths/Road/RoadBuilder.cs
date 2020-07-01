@@ -72,7 +72,7 @@ public class RoadBuilder : PathBuilder<RoadNode, Road>
         RoadNode n = building.Entrance.Node;
         RoadNode? pathCon = _manager.GetNode(n.Pos + new IntVector(0, 1));
         _manager.RemoveNode(n);
-        if (pathCon != null && pathCon.Connections.Count == 2) TryMergeNode(pathCon);
+        if (pathCon != null && CanMergeNode(pathCon)) MergeNode(pathCon);
         building.Entrance.Disconnect();
     }
 }

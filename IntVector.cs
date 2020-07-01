@@ -82,6 +82,21 @@ public struct IntVector
         }
     }
 
+    public IEnumerable<IntVector> GetPointsBetween(IntVector dest)
+    {
+        if (dest == this) yield break;
+        var inc = Direction(dest);
+        var cur = this;
+
+        while (cur != dest)
+        {
+            yield return cur;
+            cur += inc;
+        }
+
+        yield return cur;
+    }
+
     public (float x, float y) FloatDirection(IntVector dest)
     {
         if (dest == this) return (0, 0);

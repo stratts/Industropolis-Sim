@@ -43,7 +43,6 @@ public class PathContainer<TNode, TPath> : IPathContainer<TNode, TPath>
         var _paths = new List<TPath>(node.Connections.Values);
         foreach (TPath path in _paths)
         {
-            NodeUtils.Disconnect(path.Source, path.Dest);
             RemovePath(path);
         }
         _nodes.Remove(node);
@@ -53,10 +52,6 @@ public class PathContainer<TNode, TPath> : IPathContainer<TNode, TPath>
     public void AddPath(TPath path)
     {
         this._paths.Add(path);
-        path.PathSplit += () =>
-        {
-            RemovePath(path);
-        };
         PathAdded?.Invoke(path);
     }
 
@@ -79,8 +74,9 @@ public class PathContainer<TNode, TPath> : IPathContainer<TNode, TPath>
 
     public void RemovePath(TPath path)
     {
+        path.Source.Disconnect(path.Dest);
+        path.Dest.Disconnect(path.Source);
         this._paths.Remove(path);
         path.Remove();
     }
-
 }
