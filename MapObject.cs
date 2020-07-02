@@ -1,12 +1,15 @@
 using System;
 
 // Represents an entity that exists on the map
-public class MapObject
+namespace Industropolis.Sim
 {
-    public event Action? Removed;
-
-    public void Remove()
+    public class MapObject
     {
-        Removed?.Invoke();
+        public event Action? Removed;
+
+        public void Remove()
+        {
+            Removed?.Invoke();
+        }
     }
 }

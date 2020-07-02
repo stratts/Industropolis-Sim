@@ -1,10 +1,13 @@
 
-public class BuildingNode : RoadNode
+namespace Industropolis.Sim
 {
-    public Building Building { get; }
-
-    public BuildingNode(IntVector pos, Building building) : base(pos, PathCategory.Road)
+    public class BuildingNode : RoadNode
     {
-        Building = building;
+        public Building Building { get; }
+
+        public BuildingNode(IntVector pos, Building building) : base(pos, PathCategory.Road)
+        {
+            Building = building;
+        }
     }
 }

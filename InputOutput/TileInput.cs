@@ -1,96 +1,99 @@
 
-public abstract class BaseTileInput : IConsumer
+namespace Industropolis.Sim
 {
-    protected IntVector pos;
-    protected MapInfo map;
-    protected int size;
-
-    private Tile? currentTile = null;
-
-    public BaseTileInput(MapInfo map, IntVector pos, int size)
+    public abstract class BaseTileInput : IConsumer
     {
-        this.map = map;
-        this.pos = pos;
-        this.size = size;
-    }
+        protected IntVector pos;
+        protected MapInfo map;
+        protected int size;
 
-    public bool CanConsume => GetCurrentTile() != null;
+        private Tile? currentTile = null;
 
-    public bool Consume()
-    {
-        Tile? t = GetCurrentTile();
-        if (t == null) return false;
-        ConsumeResource(t);
-        return true;
-    }
-
-    private Tile? GetCurrentTile()
-    {
-        if (currentTile == null || !HasResource(currentTile))
+        public BaseTileInput(MapInfo map, IntVector pos, int size)
         {
-            currentTile = NextTileWithResource();
+            this.map = map;
+            this.pos = pos;
+            this.size = size;
         }
-        return currentTile;
-    }
 
-    private Tile? NextTileWithResource()
-    {
-        int s = size / 2;
-        for (int x = -s; x <= s; x++)
+        public bool CanConsume => GetCurrentTile() != null;
+
+        public bool Consume()
         {
-            for (int y = -s; y <= s; y++)
+            Tile? t = GetCurrentTile();
+            if (t == null) return false;
+            ConsumeResource(t);
+            return true;
+        }
+
+        private Tile? GetCurrentTile()
+        {
+            if (currentTile == null || !HasResource(currentTile))
             {
-                Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
-                if (t != null)
+                currentTile = NextTileWithResource();
+            }
+            return currentTile;
+        }
+
+        private Tile? NextTileWithResource()
+        {
+            int s = size / 2;
+            for (int x = -s; x <= s; x++)
+            {
+                for (int y = -s; y <= s; y++)
                 {
-                    if (HasResource(t))
-                        return t;
+                    Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
+                    if (t != null)
+                    {
+                        if (HasResource(t))
+                            return t;
+                    }
                 }
             }
+
+            return null;
         }
 
-        return null;
+        protected abstract bool HasResource(Tile tile);
+
+        protected abstract void ConsumeResource(Tile tile);
     }
 
-    protected abstract bool HasResource(Tile tile);
-
-    protected abstract void ConsumeResource(Tile tile);
-}
-
-public class ResourceInput : BaseTileInput
-{
-    private Item resource;
-
-    public ResourceInput(MapInfo map, IntVector pos, int size, Item resource) : base(map, pos, size)
+    public class ResourceInput : BaseTileInput
     {
-        this.resource = resource;
+        private Item resource;
+
+        public ResourceInput(MapInfo map, IntVector pos, int size, Item resource) : base(map, pos, size)
+        {
+            this.resource = resource;
+        }
+
+        protected override bool HasResource(Tile tile)
+        {
+            return tile.Resource == resource && tile.ResourceCount > 0;
+        }
+
+        protected override void ConsumeResource(Tile tile)
+        {
+            tile.ResourceCount--;
+        }
     }
 
-    protected override bool HasResource(Tile tile)
+    public class NutrientInput : BaseTileInput
     {
-        return tile.Resource == resource && tile.ResourceCount > 0;
-    }
+        public NutrientInput(MapInfo map, IntVector pos, int size) : base(map, pos, size)
+        {
 
-    protected override void ConsumeResource(Tile tile)
-    {
-        tile.ResourceCount--;
-    }
-}
+        }
 
-public class NutrientInput : BaseTileInput
-{
-    public NutrientInput(MapInfo map, IntVector pos, int size) : base(map, pos, size)
-    {
+        protected override bool HasResource(Tile tile)
+        {
+            return tile.Nutrients > 0;
+        }
 
-    }
-
-    protected override bool HasResource(Tile tile)
-    {
-        return tile.Nutrients > 0;
-    }
-
-    protected override void ConsumeResource(Tile tile)
-    {
-        tile.Nutrients--;
+        protected override void ConsumeResource(Tile tile)
+        {
+            tile.Nutrients--;
+        }
     }
 }

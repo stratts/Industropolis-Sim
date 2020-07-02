@@ -1,16 +1,19 @@
 
-public class Farm : ProductionBuilding
+namespace Industropolis.Sim
 {
-    public Farm(MapInfo map, IntVector pos)
+    public class Farm : ProductionBuilding
     {
-        Type = BuildingType.Farm;
-        Consumer = new NutrientInput(map, pos, 3);
-        var producer = new DirectProducer(5, 1, Item.Food);
-        Producer = producer;
-        Output = producer;
-        ProcessingTime = 2;
-        Width = 2;
-        Height = 2;
-        Cost = 50;
+        public Farm(MapInfo map, IntVector pos)
+        {
+            Type = BuildingType.Farm;
+            Consumer = new NutrientInput(map, pos, 3);
+            var producer = new DirectProducer(5, 1, Item.Food);
+            Producer = producer;
+            Output = producer;
+            ProcessingTime = 2;
+            Width = 2;
+            Height = 2;
+            Cost = 50;
+        }
     }
 }

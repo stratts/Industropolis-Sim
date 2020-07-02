@@ -1,47 +1,50 @@
 
-public class Hauler : Vehicle
+namespace Industropolis.Sim
 {
-    public Item Item => Route.Item;
-
-    public int Carrying { get; private set; } = 0;
-    public int MaxCapacity { get; } = 50;
-
-    private Building? _building;
-
-    public Hauler(Route route) : base(route) { }
-
-    protected override void DestinationReached()
+    public class Hauler : Vehicle
     {
-        _building = ((BuildingNode)Destination).Building;
-        if (_building.Input != null) _action = Unload;
-        else if (_building.Output != null) _action = Load;
-    }
+        public Item Item => Route.Item;
 
-    private void Load()
-    {
-        if (Carrying < MaxCapacity)
-        {
-            _building!.Output!.Remove(Item);
-            Carrying++;
-        }
-        else
-        {
-            SetDirection(Route.Direction.Forwards);
-            GoNext();
-        }
-    }
+        public int Carrying { get; private set; } = 0;
+        public int MaxCapacity { get; } = 50;
 
-    private void Unload()
-    {
-        if (Carrying > 0)
+        private Building? _building;
+
+        public Hauler(Route route) : base(route) { }
+
+        protected override void DestinationReached()
         {
-            _building!.Input!.Insert(Item);
-            Carrying--;
+            _building = ((BuildingNode)Destination).Building;
+            if (_building.Input != null) _action = Unload;
+            else if (_building.Output != null) _action = Load;
         }
-        else
+
+        private void Load()
         {
-            SetDirection(Route.Direction.Backwards);
-            GoNext();
+            if (Carrying < MaxCapacity)
+            {
+                _building!.Output!.Remove(Item);
+                Carrying++;
+            }
+            else
+            {
+                SetDirection(Route.Direction.Forwards);
+                GoNext();
+            }
+        }
+
+        private void Unload()
+        {
+            if (Carrying > 0)
+            {
+                _building!.Input!.Insert(Item);
+                Carrying--;
+            }
+            else
+            {
+                SetDirection(Route.Direction.Backwards);
+                GoNext();
+            }
         }
     }
 }

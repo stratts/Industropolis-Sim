@@ -1,24 +1,27 @@
 using System;
 using System.Collections.Generic;
 
-public class Tile
+namespace Industropolis.Sim
 {
-    private int _resourceCount = 0;
-
-    public event Action? ResourceExhausted;
-
-    public int Nutrients = 0;
-    public Item Resource { get; set; } = Item.None;
-    public int ResourceCount
+    public class Tile
     {
-        get => _resourceCount;
-        set
-        {
-            if (value <= 0) ResourceExhausted?.Invoke();
-            _resourceCount = value;
-        }
-    }
+        private int _resourceCount = 0;
 
-    public float SpeedMultiplier => 1;
-    //public List<Entity> Entities { get; set; } = new List<Entity>();
+        public event Action? ResourceExhausted;
+
+        public int Nutrients = 0;
+        public Item Resource { get; set; } = Item.None;
+        public int ResourceCount
+        {
+            get => _resourceCount;
+            set
+            {
+                if (value <= 0) ResourceExhausted?.Invoke();
+                _resourceCount = value;
+            }
+        }
+
+        public float SpeedMultiplier => 1;
+        //public List<Entity> Entities { get; set; } = new List<Entity>();
+    }
 }

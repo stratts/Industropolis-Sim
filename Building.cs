@@ -1,98 +1,101 @@
 using System.Collections.Generic;
 
 
-public enum BuildingType
+namespace Industropolis.Sim
 {
-    None,
-    Workshop,
-    //House,
-    Mine,
-    Farm,
-    TestProducer,
-    TestConsumer
-}
-
-public class BuildingEntrance
-{
-    private Building _parent;
-
-    public IntVector Location { get; }
-    public BuildingNode? Node { get; private set; }
-    public IntVector Pos => _parent.Pos + Location;
-    public IntVector ConnectionPos => Pos + new IntVector(0, 1);
-    public bool Connected => Node != null;
-
-    public PathCategory Category => PathCategory.Road;
-
-    public BuildingEntrance(Building parent, IntVector location)
+    public enum BuildingType
     {
-        Location = location;
-        _parent = parent;
+        None,
+        Workshop,
+        //House,
+        Mine,
+        Farm,
+        TestProducer,
+        TestConsumer
     }
 
-    public bool CanConnect(IntVector pos, PathCategory category) =>
-        pos == ConnectionPos &&
-        category == Category &&
-        !Connected;
-
-    public void Connect(BuildingNode node) => Node = node;
-    public void Disconnect() => Node = null;
-}
-
-public class Building : MapObject
-{
-    public IntVector Pos { get; set; }
-    public BuildingType Type { get; protected set; }
-
-    public IDirectInput? Input { get; protected set; }
-    public IDirectOutput? Output { get; protected set; }
-
-    public int Width { get; protected set; } = 1;
-    public int Height { get; protected set; } = 1;
-
-    public int Cost { get; set; } = 0;
-
-    public bool HasEntrance => Entrance != null;
-    public BuildingEntrance? Entrance { get; protected set; }
-
-    //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
-
-    //protected Dictionary<Item, int> _requiredResources = null;
-
-    public virtual void Update(float delta)
+    public class BuildingEntrance
     {
+        private Building _parent;
 
-    }
-}
+        public IntVector Location { get; }
+        public BuildingNode? Node { get; private set; }
+        public IntVector Pos => _parent.Pos + Location;
+        public IntVector ConnectionPos => Pos + new IntVector(0, 1);
+        public bool Connected => Node != null;
 
-public class ProductionBuilding : Building
-{
-    public float ProcessingTime { get; set; } = 0;
-    public bool Processing { get; private set; } = false;
+        public PathCategory Category => PathCategory.Road;
 
-    public IConsumer? Consumer { get; set; } = null;
-    public IProducer? Producer { get; set; } = null;
-
-    private float lastProcess = 0;
-
-    public override void Update(float delta)
-    {
-        if (Consumer == null || Producer == null) return;
-        if (Producer.CanProduce)
+        public BuildingEntrance(Building parent, IntVector location)
         {
-            if (Consumer.CanConsume && !Processing)
+            Location = location;
+            _parent = parent;
+        }
+
+        public bool CanConnect(IntVector pos, PathCategory category) =>
+            pos == ConnectionPos &&
+            category == Category &&
+            !Connected;
+
+        public void Connect(BuildingNode node) => Node = node;
+        public void Disconnect() => Node = null;
+    }
+
+    public class Building : MapObject
+    {
+        public IntVector Pos { get; set; }
+        public BuildingType Type { get; protected set; }
+
+        public IDirectInput? Input { get; protected set; }
+        public IDirectOutput? Output { get; protected set; }
+
+        public int Width { get; protected set; } = 1;
+        public int Height { get; protected set; } = 1;
+
+        public int Cost { get; set; } = 0;
+
+        public bool HasEntrance => Entrance != null;
+        public BuildingEntrance? Entrance { get; protected set; }
+
+        //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
+
+        //protected Dictionary<Item, int> _requiredResources = null;
+
+        public virtual void Update(float delta)
+        {
+
+        }
+    }
+
+    public class ProductionBuilding : Building
+    {
+        public float ProcessingTime { get; set; } = 0;
+        public bool Processing { get; private set; } = false;
+
+        public IConsumer? Consumer { get; set; } = null;
+        public IProducer? Producer { get; set; } = null;
+
+        private float lastProcess = 0;
+
+        public override void Update(float delta)
+        {
+            if (Consumer == null || Producer == null) return;
+            if (Producer.CanProduce)
             {
-                Consumer.Consume();
-                Processing = true;
-                lastProcess = 0;
-            }
-            else if (Processing)
-            {
-                lastProcess += delta;
-                if (lastProcess >= ProcessingTime)
+                if (Consumer.CanConsume && !Processing)
                 {
-                    Processing = false;
-                    Producer.Produce();
+                    Consumer.Consume();
+                    Processing = true;
+                    lastProcess = 0;
+                }
+                else if (Processing)
+                {
+                    lastProcess += delta;
+                    if (lastProcess >= ProcessingTime)
+                    {
+                        Processing = false;
+                        Producer.Produce();
+                    }
                 }
             }
         }

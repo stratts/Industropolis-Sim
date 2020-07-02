@@ -1,23 +1,26 @@
 
 
-public class TestProducer : Building
+namespace Industropolis.Sim
 {
-    public TestProducer()
+    public class TestProducer : Building
     {
-        Width = 3;
-        Height = 3;
-        Output = new InfiniteDirectOutput(Item.Wood);
-        Entrance = new BuildingEntrance(this, new IntVector(1, 2));
+        public TestProducer()
+        {
+            Width = 3;
+            Height = 3;
+            Output = new InfiniteDirectOutput(Item.Wood);
+            Entrance = new BuildingEntrance(this, new IntVector(1, 2));
+        }
     }
-}
 
-public class TestConsumer : Building
-{
-    public TestConsumer()
+    public class TestConsumer : Building
     {
-        Width = 2;
-        Height = 2;
-        Input = new InfiniteDirectInput();
-        Entrance = new BuildingEntrance(this, new IntVector(0, 1));
+        public TestConsumer()
+        {
+            Width = 2;
+            Height = 2;
+            Input = new InfiniteDirectInput();
+            Entrance = new BuildingEntrance(this, new IntVector(0, 1));
+        }
     }
 }

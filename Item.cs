@@ -1,9 +1,12 @@
 
-public enum Item
+namespace Industropolis.Sim
 {
-    None,
-    Stone,
-    Wood,
-    Log,
-    Food
+    public enum Item
+    {
+        None,
+        Stone,
+        Wood,
+        Log,
+        Food
+    }
 }

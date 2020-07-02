@@ -2,28 +2,31 @@
 
 using System.Collections.Generic;
 
-public class PathGraph : IGraph<RoadNode>
+namespace Industropolis.Sim
 {
-    public bool Accessible(RoadNode src, RoadNode dest)
+    public class PathGraph : IGraph<RoadNode>
     {
-        return true;
-    }
-
-    public float CalculateCost(RoadNode src, RoadNode dest)
-    {
-        return src.Connections[dest].Length + 1; // Penalty for intersections
-    }
-
-    public float EstimateCost(RoadNode src, RoadNode dest)
-    {
-        return src.Pos.Distance(dest.Pos);
-    }
-
-    public IEnumerable<RoadNode> GetConnections(RoadNode node)
-    {
-        foreach (var n in node.Connections.Keys)
+        public bool Accessible(RoadNode src, RoadNode dest)
         {
-            if (node.HasPathTo(n)) yield return n;
+            return true;
+        }
+
+        public float CalculateCost(RoadNode src, RoadNode dest)
+        {
+            return src.Connections[dest].Length + 1; // Penalty for intersections
+        }
+
+        public float EstimateCost(RoadNode src, RoadNode dest)
+        {
+            return src.Pos.Distance(dest.Pos);
+        }
+
+        public IEnumerable<RoadNode> GetConnections(RoadNode node)
+        {
+            foreach (var n in node.Connections.Keys)
+            {
+                if (node.HasPathTo(n)) yield return n;
+            }
         }
     }
 }

@@ -1,34 +1,37 @@
 using System.Collections.Generic;
 
 // Less efficient pathfinder that follows paths along tiles, instead of nodes 
-public class TilePathGraph : IGraph<IntVector>
+namespace Industropolis.Sim
 {
-    Map _map;
-
-    public TilePathGraph(Map map) => _map = map;
-
-    public bool Accessible(IntVector src, IntVector dest) => true;
-
-    public float CalculateCost(IntVector src, IntVector dest) => src.Distance(dest);
-
-    public float EstimateCost(IntVector src, IntVector dest) => src.Distance(dest);
-
-    public IEnumerable<IntVector> GetConnections(IntVector pos)
+    public class TilePathGraph : IGraph<IntVector>
     {
-        RoadNode? n = _map.GetNode(pos);
-        Road? p = _map.GetPath(pos);
-        if (n != null)
+        Map _map;
+
+        public TilePathGraph(Map map) => _map = map;
+
+        public bool Accessible(IntVector src, IntVector dest) => true;
+
+        public float CalculateCost(IntVector src, IntVector dest) => src.Distance(dest);
+
+        public float EstimateCost(IntVector src, IntVector dest) => src.Distance(dest);
+
+        public IEnumerable<IntVector> GetConnections(IntVector pos)
         {
-            foreach (var connection in n.Connections.Keys)
+            RoadNode? n = _map.GetNode(pos);
+            Road? p = _map.GetPath(pos);
+            if (n != null)
             {
-                if (!n.HasPathTo(connection)) continue;
-                yield return pos + pos.Direction(connection.Pos);
+                foreach (var connection in n.Connections.Keys)
+                {
+                    if (!n.HasPathTo(connection)) continue;
+                    yield return pos + pos.Direction(connection.Pos);
+                }
             }
-        }
-        if (p != null)
-        {
-            yield return pos + pos.Direction(p.Source.Pos);
-            yield return pos + pos.Direction(p.Dest.Pos);
+            if (p != null)
+            {
+                yield return pos + pos.Direction(p.Source.Pos);
+                yield return pos + pos.Direction(p.Dest.Pos);
+            }
         }
     }
 }

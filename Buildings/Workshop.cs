@@ -1,40 +1,43 @@
 using System.Collections.Generic;
 
-public class Workshop : ProductionBuilding
+namespace Industropolis.Sim
 {
-    public Recipe Recipe
+    public class Workshop : ProductionBuilding
     {
-        get
+        public Recipe Recipe
         {
-            return _recipe;
+            get
+            {
+                return _recipe;
+            }
+            set
+            {
+                _recipe = value;
+                LoadRecipe(value);
+            }
         }
-        set
+
+        private Recipe _recipe;
+
+        public Workshop()
         {
-            _recipe = value;
-            LoadRecipe(value);
+            Type = BuildingType.Workshop;
+            Recipe = Recipes.GetRecipe("None");
         }
-    }
 
-    private Recipe _recipe;
-
-    public Workshop()
-    {
-        Type = BuildingType.Workshop;
-        Recipe = Recipes.GetRecipe("None");
-    }
-
-    private void LoadRecipe(Recipe recipe)
-    {
-        var input = new DirectConsumer();
-        foreach (RecipeInput i in recipe.Input)
+        private void LoadRecipe(Recipe recipe)
         {
-            input.AddItem(i.Count * 2, i.Count, i.Item);
+            var input = new DirectConsumer();
+            foreach (RecipeInput i in recipe.Input)
+            {
+                input.AddItem(i.Count * 2, i.Count, i.Item);
+            }
+            Input = input;
+            Consumer = input;
+            var producer = new DirectProducer(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
+            Producer = producer;
+            Output = producer;
+            ProcessingTime = recipe.ProcessingTime;
         }
-        Input = input;
-        Consumer = input;
-        var producer = new DirectProducer(recipe.OutputCount * 5, recipe.OutputCount, recipe.OutputItem);
-        Producer = producer;
-        Output = producer;
-        ProcessingTime = recipe.ProcessingTime;
     }
 }

@@ -1,29 +1,31 @@
 using System.Collections.Generic;
 
-public struct Recipe
+namespace Industropolis.Sim
 {
-    public string Name { get; set; }
-    public RecipeInput[] Input;
-    public Item OutputItem { get; set; }
-    public int OutputCount { get; set; }
-    public int ProcessingTime { get; set; }
-}
-
-public struct RecipeInput
-{
-    public Item Item { get; set; }
-    public int Count { get; set; }
-
-    public RecipeInput(Item item, int count)
+    public struct Recipe
     {
-        Item = item;
-        Count = count;
+        public string Name { get; set; }
+        public RecipeInput[] Input;
+        public Item OutputItem { get; set; }
+        public int OutputCount { get; set; }
+        public int ProcessingTime { get; set; }
     }
-}
 
-public static class Recipes
-{
-    public static Dictionary<string, Recipe> _recipes = new Dictionary<string, Recipe>() {
+    public struct RecipeInput
+    {
+        public Item Item { get; set; }
+        public int Count { get; set; }
+
+        public RecipeInput(Item item, int count)
+        {
+            Item = item;
+            Count = count;
+        }
+    }
+
+    public static class Recipes
+    {
+        public static Dictionary<string, Recipe> _recipes = new Dictionary<string, Recipe>() {
         {
             "None", new Recipe() {
                 Name = "None",
@@ -56,18 +58,19 @@ public static class Recipes
         }
     };
 
-    public static Recipe GetRecipe(string name)
-    {
-        return _recipes[name];
-    }
-
-    public static ICollection<Recipe> GetRecipes()
-    {
-        List<Recipe> recipeList = new List<Recipe>(_recipes.Values);
-        recipeList.Sort((a, b) =>
+        public static Recipe GetRecipe(string name)
         {
-            return a.OutputItem.CompareTo(b.OutputItem);
-        });
-        return recipeList;
+            return _recipes[name];
+        }
+
+        public static ICollection<Recipe> GetRecipes()
+        {
+            List<Recipe> recipeList = new List<Recipe>(_recipes.Values);
+            recipeList.Sort((a, b) =>
+            {
+                return a.OutputItem.CompareTo(b.OutputItem);
+            });
+            return recipeList;
+        }
     }
 }
