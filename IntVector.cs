@@ -86,17 +86,24 @@ namespace Industropolis.Sim
 
         public IEnumerable<IntVector> GetPointsBetween(IntVector dest)
         {
-            if (dest == this) yield break;
-            var inc = Direction(dest);
-            var cur = this;
-
-            while (cur != dest)
+            IntVector diff = dest - this;
+            if (diff.X == 0)
             {
-                yield return cur;
-                cur += inc;
+                for (int i = 0; i <= Math.Abs(diff.Y); i++)
+                {
+                    yield return new IntVector(X, Y + i * Math.Sign(diff.Y));
+                }
             }
-
-            yield return cur;
+            else
+            {
+                float slope = (float)diff.Y / (float)diff.X;
+                for (int i = 0; i <= Math.Abs(diff.X); i++)
+                {
+                    int x = i * Math.Sign(diff.X);
+                    int y = (int)Math.Round(slope * x);
+                    yield return new IntVector(x + X, y + Y);
+                }
+            }
         }
 
         public (float x, float y) FloatDirection(IntVector dest)

@@ -37,24 +37,17 @@ namespace Industropolis.Sim
             base.BuildPath(type, source, dest);
             if (source == dest) return;
 
-            IntVector inc = source.Direction(dest);
-            IntVector current = source;
-            var toConnect = new List<Building>();
-
-            while (current != dest)
+            foreach (var current in source.GetPointsBetween(dest))
             {
-                current += inc;
                 foreach (var building in _map.Buildings)
                 {
                     if (building.HasEntrance && building.Entrance != null &&
                         building.Entrance.CanConnect(current, GetCategory(type)))
                     {
-                        toConnect.Add(building);
+                        ConnectBuilding(building);
                     }
                 }
             }
-
-            foreach (var building in toConnect) ConnectBuilding(building);
         }
 
         public void ConnectBuilding(Building building)

@@ -40,6 +40,10 @@ namespace Industropolis.Sim
         {
             if (pos == Source.Pos || pos == Dest.Pos) return true;
             if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
+            foreach (var point in Source.Pos.GetPointsBetween(Dest.Pos))
+            {
+                if (point == pos) return true;
+            }
             return false;
         }
     }
