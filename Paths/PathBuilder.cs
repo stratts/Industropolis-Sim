@@ -70,7 +70,7 @@ namespace Industropolis.Sim
             var destNode = AddNode(category, dest);
 
             TNode prev = sourceNode;
-            var dir = source.Direction(dest);
+            var dir = source.Direction8(dest);
 
             // Build path between every node encountered
             foreach (var pos in source.GetPointsBetween(dest))
@@ -147,13 +147,13 @@ namespace Industropolis.Sim
             if (_manager.GetPath(pos) is TPath p)
             {
                 DeletePath(p);
-                BuildPath(p.PathType, p.Source.Pos, pos + pos.Direction(p.Source.Pos));
-                BuildPath(p.PathType, p.Dest.Pos, pos + pos.Direction(p.Dest.Pos));
+                BuildPath(p.PathType, p.Source.Pos, pos + pos.Direction8(p.Source.Pos));
+                BuildPath(p.PathType, p.Dest.Pos, pos + pos.Direction8(p.Dest.Pos));
             }
             if (_manager.GetNode(pos) is TNode n)
             {
                 var nodes = new List<TNode>(n.Connections.Keys);
-                foreach (var connection in nodes) AddNode(n.Category, pos + pos.Direction(connection.Pos));
+                foreach (var connection in nodes) AddNode(n.Category, pos + pos.Direction8(connection.Pos));
                 DeleteNode(n);
             }
         }

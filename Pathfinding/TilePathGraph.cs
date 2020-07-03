@@ -24,13 +24,13 @@ namespace Industropolis.Sim
                 foreach (var connection in n.Connections.Keys)
                 {
                     if (!n.HasPathTo(connection)) continue;
-                    yield return pos + pos.Direction(connection.Pos);
+                    yield return pos + pos.Direction8(connection.Pos);
                 }
             }
             if (p != null)
             {
-                yield return pos + pos.Direction(p.Source.Pos);
-                yield return pos + pos.Direction(p.Dest.Pos);
+                yield return pos + pos.Direction8(p.Source.Pos);
+                yield return pos + pos.Direction8(p.Dest.Pos);
             }
         }
     }

@@ -1,17 +1,10 @@
 
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public static class FloatTupleExtensions
-    {
-        public static (float x, float y) Negate(this (float x, float y) floats)
-        {
-            return (-floats.x, -floats.y);
-        }
-    }
-
     public struct IntVector
     {
         public int X { get; set; }
@@ -86,54 +79,41 @@ namespace Industropolis.Sim
 
         public IEnumerable<IntVector> GetPointsBetween(IntVector dest)
         {
-            IntVector diff = dest - this;
-            if (diff.X == 0)
+            var pos = new Vector2(X, Y);
+            var diff = new Vector2(dest.X - X, dest.Y - Y);
+            var len = Math.Max(Math.Abs(diff.X), Math.Abs(diff.Y));
+            var norm = diff / len;
+            for (int i = 0; i <= len; i++)
             {
-                for (int i = 0; i <= Math.Abs(diff.Y); i++)
-                {
-                    yield return new IntVector(X, Y + i * Math.Sign(diff.Y));
-                }
-            }
-            else
-            {
-                float slope = (float)diff.Y / (float)diff.X;
-                for (int i = 0; i <= Math.Abs(diff.X); i++)
-                {
-                    int x = i * Math.Sign(diff.X);
-                    int y = (int)Math.Round(slope * x);
-                    yield return new IntVector(x + X, y + Y);
-                }
+                yield return new IntVector((int)Math.Round(pos.X), (int)Math.Round(pos.Y));
+                pos += norm;
             }
         }
 
-        public (float x, float y) FloatDirection(IntVector dest)
+        public Vector2 Direction(IntVector dest)
         {
-            if (dest == this) return (0, 0);
-            IntVector dirVector = VectorTo(dest);
-            int max = Math.Max(Math.Abs(dirVector.X), Math.Abs(dirVector.Y));
-            return ((float)Math.Round((float)dirVector.X / max, 2), (float)Math.Round((float)dirVector.Y / max, 2));
+            var vec = (dest - this).ToVector2();
+            var norm = vec / vec.Length();
+            return new Vector2((float)Math.Round(norm.X, 2), (float)Math.Round(norm.Y, 2));
         }
 
-        public IntVector Direction(IntVector dest)
+        public IntVector Direction8(IntVector dest)
         {
-            var dir = FloatDirection(dest);
-            return new IntVector((int)Math.Round(dir.x), (int)Math.Round(dir.y));
+            var dir = Direction(dest);
+            return new IntVector((int)Math.Round(dir.X), (int)Math.Round(dir.Y));
         }
 
-        public IntVector VectorTo(IntVector dest) => dest - this;
-
-        public float Distance(IntVector dest)
-        {
-            return (float)Math.Sqrt(Math.Pow(X - dest.X, 2) + Math.Pow(Y - dest.Y, 2));
-        }
+        public float Distance(IntVector dest) => (dest - this).ToVector2().Length();
 
         public bool IsParallelTo(IntVector vector)
         {
             if (this == vector || this == -vector) return true;
-            if (IntVector.Zero.FloatDirection(this) == IntVector.Zero.FloatDirection(vector)) return true;
-            if (IntVector.Zero.FloatDirection(this) == IntVector.Zero.FloatDirection(-vector)) return true;
+            if (IntVector.Zero.Direction(this) == IntVector.Zero.Direction(vector)) return true;
+            if (IntVector.Zero.Direction(this) == IntVector.Zero.Direction(-vector)) return true;
             return false;
         }
+
+        public Vector2 ToVector2() => new Vector2(X, Y);
 
         public override int GetHashCode()
         {

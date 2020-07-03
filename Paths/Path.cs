@@ -33,13 +33,11 @@ namespace Industropolis.Sim
             Source = source;
             Dest = dest;
             Length = Source.Pos.Distance(Dest.Pos);
-            Direction = Source.Pos.Direction(Dest.Pos);
+            Direction = Source.Pos.Direction8(Dest.Pos);
         }
 
         public bool OnPath(IntVector pos)
         {
-            if (pos == Source.Pos || pos == Dest.Pos) return true;
-            if (Source.Pos.FloatDirection(pos) == Dest.Pos.FloatDirection(pos).Negate()) return true;
             foreach (var point in Source.Pos.GetPointsBetween(Dest.Pos))
             {
                 if (point == pos) return true;
