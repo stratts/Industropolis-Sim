@@ -23,7 +23,7 @@ namespace Industropolis.Sim
             }
         }
 
-        public override RoadNode MakeNode(IntVector pos, PathCategory category) => new RoadNode(pos, category);
+        public override RoadNode MakeNode(IntVector pos) => new RoadNode(pos);
 
         public override bool CanBuildAt(PathType type, IntVector pos)
         {

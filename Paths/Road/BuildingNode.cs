@@ -5,7 +5,7 @@ namespace Industropolis.Sim
     {
         public Building Building { get; }
 
-        public BuildingNode(IntVector pos, Building building) : base(pos, PathCategory.Road)
+        public BuildingNode(IntVector pos, Building building) : base(pos)
         {
             Building = building;
         }

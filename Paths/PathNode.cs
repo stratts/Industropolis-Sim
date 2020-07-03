@@ -16,7 +16,7 @@ namespace Industropolis.Sim
 
     public abstract class PathNode<TNode, TPath> : MapObject, IPathNode<TNode> where TNode : PathNode<TNode, TPath>
     {
-        public PathCategory Category { get; }
+        public abstract PathCategory Category { get; }
 
         public IntVector Pos { get; private set; }
         public IReadOnlyDictionary<TNode, TPath> Connections => _connections;
@@ -24,9 +24,8 @@ namespace Industropolis.Sim
 
         public abstract event Action<TNode>? Changed;
 
-        public PathNode(IntVector pos, PathCategory category)
+        public PathNode(IntVector pos)
         {
-            Category = category;
             Pos = pos;
             _connections = new Dictionary<TNode, TPath>();
         }

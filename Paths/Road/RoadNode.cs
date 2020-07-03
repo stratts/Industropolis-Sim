@@ -7,7 +7,9 @@ namespace Industropolis.Sim
     {
         public bool Occupied { get; set; } = false;
 
-        public RoadNode(IntVector pos, PathCategory category) : base(pos, category)
+        public override PathCategory Category => PathCategory.Road;
+
+        public RoadNode(IntVector pos) : base(pos)
         {
         }
 

@@ -16,7 +16,6 @@ namespace Industropolis.Sim
         Rail
     }
 
-
     public interface IPathBuilder
     {
         void BuildPath(PathType type, IntVector source, IntVector dest);
@@ -49,7 +48,7 @@ namespace Industropolis.Sim
         }
 
         public abstract TPath MakePath(PathType type, TNode source, TNode dest);
-        public abstract TNode MakeNode(IntVector pos, PathCategory category);
+        public abstract TNode MakeNode(IntVector pos);
 
         public virtual bool CanBuildPath(PathType type, IntVector source, IntVector dest)
         {
@@ -66,8 +65,8 @@ namespace Industropolis.Sim
         {
             var category = GetCategory(type);
 
-            var sourceNode = AddNode(category, source);
-            var destNode = AddNode(category, dest);
+            var sourceNode = AddNode(source);
+            var destNode = AddNode(dest);
 
             TNode prev = sourceNode;
             var dir = source.Direction8(dest);
@@ -78,7 +77,7 @@ namespace Industropolis.Sim
                 if (_manager.GetPath(pos) is TPath p)
                 {
                     if (p.Direction.IsParallelTo(dir)) DeletePath(p);
-                    else AddNode(category, pos);
+                    else AddNode(pos);
                 }
                 if (_manager.GetNode(pos) is TNode n && n != sourceNode)
                 {
@@ -102,12 +101,12 @@ namespace Industropolis.Sim
             _manager.AddPath(path);
         }
 
-        private TNode AddNode(PathCategory category, IntVector pos)
+        private TNode AddNode(IntVector pos)
         {
             // If node already exists, return that
             if (_manager.GetNode(pos) is TNode n) return n;
 
-            var node = MakeNode(pos, category);
+            var node = MakeNode(pos);
 
             // If path exists at pos, delete and build paths to source and dest 
             if (_manager.GetPath(pos) is TPath p)
@@ -161,7 +160,7 @@ namespace Industropolis.Sim
             if (_manager.GetNode(pos) is TNode n)
             {
                 var nodes = new List<TNode>(n.Connections.Keys);
-                foreach (var connection in nodes) AddNode(n.Category, pos + pos.Direction8(connection.Pos));
+                foreach (var connection in nodes) AddNode(pos + pos.Direction8(connection.Pos));
                 DeleteNode(n);
             }
         }

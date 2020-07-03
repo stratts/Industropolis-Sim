@@ -18,7 +18,7 @@ namespace Industropolis.Sim
             return true;
         }
 
-        public override RailNode MakeNode(IntVector pos, PathCategory category) => new RailNode(pos, category);
+        public override RailNode MakeNode(IntVector pos) => new RailNode(pos);
 
         public override Rail MakePath(PathType type, RailNode source, RailNode dest)
         {
