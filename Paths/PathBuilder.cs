@@ -134,11 +134,19 @@ namespace Industropolis.Sim
         {
             var nodes = new List<TNode>(node.Connections.Keys);
             var type = node.Connections[nodes[0]].PathType;
-            DeleteNode(node);
+            _manager.RemoveNode(node);
             AddPath(type, nodes[0], nodes[1]);
         }
 
-        private void DeleteNode(TNode node) => _manager.RemoveNode(node);
+        private void DeleteNode(TNode node)
+        {
+            var nodes = new List<TNode>(node.Connections.Keys);
+            _manager.RemoveNode(node);
+            foreach (var n in nodes)
+            {
+                if (CanMergeNode(n)) MergeNode(n);
+            }
+        }
 
         private void DeletePath(TPath path) => _manager.RemovePath(path);
 
