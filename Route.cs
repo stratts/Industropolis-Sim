@@ -3,18 +3,26 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public class Route : MapObject
+    public enum RouteDirection { Forwards, Backwards };
+
+    // Temporary!
+    public class RoadRoute : Route<RoadNode>
     {
-        private List<RoadNode> _path = new List<RoadNode>();
-        private IPathfinder<RoadNode> _pathfinder;
+        public RoadRoute(MapInfo info, RoadNode src, RoadNode dest) : base(info, src, dest) { }
+    }
+
+    public class Route<T> : MapObject where T : IPathNode<T>
+    {
+        private List<T> _path = new List<T>();
+        private IPathfinder<T> _pathfinder;
         private Item _item = Item.None;
         private bool _reroute = false;
 
-        public IReadOnlyList<RoadNode> Path => _path;
-        public RoadNode Source { get; set; }
-        public RoadNode Dest { get; set; }
+        public IReadOnlyList<T> Path => _path;
+        public T Source { get; set; }
+        public T Dest { get; set; }
         public MapInfo MapInfo { get; private set; }
-        public event Action<Route>? Changed;
+        public event Action<Route<T>>? Changed;
 
         public IDirectOutput? SourceOutput { get; set; }
         public IDirectInput? DestInput { get; set; }
@@ -32,23 +40,21 @@ namespace Industropolis.Sim
 
         //public int NumHaulers => Haulers.Count;
 
-        public enum Direction { Forwards, Backwards };
-
-        public Route(MapInfo info, RoadNode src, RoadNode dest)
+        public Route(MapInfo info, T src, T dest)
         {
             MapInfo = info;
             Source = src;
             Dest = dest;
-            _pathfinder = new AStarPathfinder<RoadNode>();
+            _pathfinder = new AStarPathfinder<T>();
         }
 
-        public RoadNode Next(RoadNode current, Direction direction)
+        public T Next(T current, RouteDirection direction)
         {
             int shift = 0;
             var curr = _path.IndexOf(current);
 
-            if (direction == Direction.Forwards) shift = 1;
-            else if (direction == Direction.Backwards) shift = -1;
+            if (direction == RouteDirection.Forwards) shift = 1;
+            else if (direction == RouteDirection.Backwards) shift = -1;
 
             var newPos = curr + shift;
             if (newPos >= 0 && newPos < _path.Count) return _path[newPos];
@@ -57,11 +63,11 @@ namespace Industropolis.Sim
 
         public void Pathfind()
         {
-            var path = _pathfinder.FindPath(new PathGraph(), Source, Dest);
+            var path = _pathfinder.FindPath(new PathGraph<T>(), Source, Dest);
             if (path != null)
             {
                 _path = path;
-                foreach (RoadNode node in _path)
+                foreach (T node in _path)
                 {
                     node.Changed += NodeChanged;
                     node.Removed += () => _reroute = true;
@@ -70,7 +76,7 @@ namespace Industropolis.Sim
             else
             {
                 Console.WriteLine("No path found! :(");
-                _path = new List<RoadNode>();
+                _path = new List<T>();
                 return;
             }
         }
@@ -85,7 +91,7 @@ namespace Industropolis.Sim
             }
         }
 
-        private void NodeChanged(RoadNode node)
+        private void NodeChanged(T node)
         {
             // Unsubscribe because the node may not be in the rerouted path
             node.Changed -= NodeChanged;

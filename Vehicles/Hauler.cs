@@ -10,7 +10,7 @@ namespace Industropolis.Sim
 
         private Building? _building;
 
-        public Hauler(Route route) : base(route) { }
+        public Hauler(RoadRoute route) : base(route) { }
 
         protected override void DestinationReached()
         {
@@ -28,7 +28,7 @@ namespace Industropolis.Sim
             }
             else
             {
-                SetDirection(Route.Direction.Forwards);
+                SetDirection(RouteDirection.Forwards);
                 GoNext();
             }
         }
@@ -42,7 +42,7 @@ namespace Industropolis.Sim
             }
             else
             {
-                SetDirection(Route.Direction.Backwards);
+                SetDirection(RouteDirection.Backwards);
                 GoNext();
             }
         }

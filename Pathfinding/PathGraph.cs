@@ -4,26 +4,26 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public class PathGraph : IGraph<RoadNode>
+    public class PathGraph<T> : IGraph<T> where T : IPathNode<T>
     {
-        public bool Accessible(RoadNode src, RoadNode dest)
+        public bool Accessible(T src, T dest)
         {
             return true;
         }
 
-        public float CalculateCost(RoadNode src, RoadNode dest)
+        public float CalculateCost(T src, T dest)
         {
-            return src.Connections[dest].Length + 1; // Penalty for intersections
+            return src.GetCostTo(dest) + 1; // Penalty for intersections
         }
 
-        public float EstimateCost(RoadNode src, RoadNode dest)
+        public float EstimateCost(T src, T dest)
         {
             return src.Pos.Distance(dest.Pos);
         }
 
-        public IEnumerable<RoadNode> GetConnections(RoadNode node)
+        public IEnumerable<T> GetConnections(T node)
         {
-            foreach (var n in node.Connections.Keys)
+            foreach (var n in node.Nodes)
             {
                 if (node.HasPathTo(n)) yield return n;
             }

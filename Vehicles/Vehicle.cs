@@ -5,10 +5,10 @@ namespace Industropolis.Sim
     public abstract class Vehicle : MapObject
     {
         private float _speed = 1; // Tiles per second
-        private Route.Direction _direction;
+        private RouteDirection _direction;
 
         // Set to null! as they are initialized when GoNext() is called in constructor
-        public Route Route { get; }
+        public Route<RoadNode> Route { get; }
         public Road CurrentPath { get; private set; } = null!;
         public RoadLane CurrentLane { get; private set; } = null!;
         public float PathPos { get; private set; }
@@ -19,10 +19,10 @@ namespace Industropolis.Sim
         protected Action? _action;
         protected float _elapsedTime;
 
-        public Vehicle(Route route)
+        public Vehicle(Route<RoadNode> route)
         {
             Route = route;
-            SetDirection(Route.Direction.Forwards);
+            SetDirection(RouteDirection.Forwards);
             GoNext();
         }
 
@@ -63,18 +63,18 @@ namespace Industropolis.Sim
             PathPos += _speed * _elapsedTime;
         }
 
-        protected void SetDirection(Route.Direction direction)
+        protected void SetDirection(RouteDirection direction)
         {
             _direction = direction;
 
             switch (direction)
             {
-                case Route.Direction.Forwards:
+                case RouteDirection.Forwards:
                     Destination = Route.Dest;
                     PrevNode = Route.Source;
                     NextNode = Route.Source;
                     break;
-                case Route.Direction.Backwards:
+                case RouteDirection.Backwards:
                     Destination = Route.Source;
                     PrevNode = Route.Dest;
                     NextNode = Route.Dest;

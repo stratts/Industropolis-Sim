@@ -7,10 +7,15 @@ namespace Industropolis.Sim
     {
         IntVector Pos { get; }
         PathCategory Category { get; }
+        event Action? Removed;
     }
 
     public interface IPathNode<T> : IPathNode
     {
+        event Action<T>? Changed;
+        IEnumerable<T> Nodes { get; }
+        float GetCostTo(T node);
+        bool HasPathTo(T node);
         void Disconnect(T node);
     }
 
@@ -21,6 +26,7 @@ namespace Industropolis.Sim
         public IntVector Pos { get; private set; }
         public IReadOnlyDictionary<TNode, TPath> Connections => _connections;
         private Dictionary<TNode, TPath> _connections;
+        public IEnumerable<TNode> Nodes => _connections.Keys;
 
         public abstract event Action<TNode>? Changed;
 
@@ -53,6 +59,10 @@ namespace Industropolis.Sim
             _connections.Remove(node);
             OnChange();
         }
+
+        public virtual bool HasPathTo(TNode node) => IsConnected(node);
+
+        public virtual float GetCostTo(TNode node) => this.Pos.Distance(node.Pos);
 
         public abstract void OnChange();
 

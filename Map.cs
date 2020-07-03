@@ -19,7 +19,7 @@ namespace Industropolis.Sim
     {
         private Tile[,] tiles;
         private List<Building> buildings;
-        private List<Route> routes;
+        private List<RoadRoute> routes;
         private int _currentMoney = 0;
         private RoadBuilder _pathBuilder;
 
@@ -47,12 +47,12 @@ namespace Industropolis.Sim
         public event Action<Road>? PathAdded;
         public event Action<RoadNode>? PathNodeAdded;
         public event Action<Building>? BuildingAdded;
-        public event Action<Route>? RouteAdded;
+        public event Action<RoadRoute>? RouteAdded;
         public event Action<Vehicle>? VehicleAdded;
 
         public Map()
         {
-            routes = new List<Route>();
+            routes = new List<RoadRoute>();
             buildings = new List<Building>();
 
             Roads.PathAdded += (Road road) => PathAdded?.Invoke(road);
@@ -166,14 +166,14 @@ namespace Industropolis.Sim
 
         public void Update(float delta)
         {
-            foreach (Route r in routes) r.Update();
+            foreach (RoadRoute r in routes) r.Update();
             foreach (Building b in buildings) b.Update(delta);
             foreach (Vehicle v in Vehicles) v.Update(delta);
         }
 
-        public Route AddRoute(BuildingNode start, BuildingNode dest, Item item)
+        public RoadRoute AddRoute(BuildingNode start, BuildingNode dest, Item item)
         {
-            var route = new Route(this, start, dest);
+            var route = new RoadRoute(this, start, dest);
             route.Item = item;
             route.SourceOutput = start.Building.Output;
             route.DestInput = start.Building.Input;
@@ -184,7 +184,7 @@ namespace Industropolis.Sim
             return route;
         }
 
-        public Route? GetRoute(IntVector pos)
+        public RoadRoute? GetRoute(IntVector pos)
         {
             /*foreach (Route r in routes) {
                 foreach (PathNode t in r.Path) {
@@ -195,7 +195,7 @@ namespace Industropolis.Sim
             return null;
         }
 
-        public void RemoveRoute(Route route)
+        public void RemoveRoute(RoadRoute route)
         {
             routes.Remove(route);
             route.Remove();
