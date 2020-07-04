@@ -73,6 +73,7 @@ namespace Industropolis.Sim
                 case BuildingType.Farm: return new Farm(this, pos);
                 case BuildingType.TestConsumer: return new TestConsumer();
                 case BuildingType.TestProducer: return new TestProducer();
+                case BuildingType.TrainStation: return new TrainStation(this);
                 default: return new TestProducer();
             }
         }
@@ -124,6 +125,7 @@ namespace Industropolis.Sim
             building.Pos = pos;
             buildings.Add(building);
             if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);
+            if (building is TrainStation t) t.Setup();
             BuildingAdded?.Invoke(building);
         }
 

@@ -28,6 +28,8 @@ namespace Industropolis.Sim
         public float Length { get; private set; }
         public IntVector Direction { get; private set; }
 
+        public bool Fixed { get; set; } = false;
+
         public Path(T source, T dest)
         {
             Source = source;

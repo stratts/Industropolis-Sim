@@ -7,7 +7,7 @@ namespace Industropolis.Sim
     {
         public event Action? Removed;
 
-        public void Remove()
+        public virtual void Remove()
         {
             Removed?.Invoke();
         }

@@ -122,6 +122,7 @@ namespace Industropolis.Sim
 
         protected bool CanMergeNode(TNode node)
         {
+            if (node.Fixed) return false;
             if (node.Connections.Count != 2) return false;
             var paths = new List<TPath>(node.Connections.Values);
             if (paths[0].PathType != paths[1].PathType) return false;
@@ -151,13 +152,13 @@ namespace Industropolis.Sim
 
         public void DeletePathSegment(IntVector pos)
         {
-            if (_manager.GetPath(pos) is TPath p)
+            if (_manager.GetPath(pos) is TPath p && !p.Fixed)
             {
                 DeletePath(p);
                 BuildPath(p.PathType, p.Source.Pos, pos + pos.Direction8(p.Source.Pos));
                 BuildPath(p.PathType, p.Dest.Pos, pos + pos.Direction8(p.Dest.Pos));
             }
-            if (_manager.GetNode(pos) is TNode n)
+            if (_manager.GetNode(pos) is TNode n && !n.Fixed)
             {
                 var nodes = new List<TNode>(n.Connections.Keys);
                 foreach (var connection in nodes) AddNode(pos + pos.Direction8(connection.Pos));

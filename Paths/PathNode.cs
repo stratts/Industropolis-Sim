@@ -28,6 +28,8 @@ namespace Industropolis.Sim
         private Dictionary<TNode, TPath> _connections;
         public IEnumerable<TNode> Nodes => _connections.Keys;
 
+        public bool Fixed { get; set; } = false;
+
         public abstract event Action<TNode>? Changed;
 
         public PathNode(IntVector pos)
