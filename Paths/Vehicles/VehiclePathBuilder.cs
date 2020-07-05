@@ -3,19 +3,20 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public class RoadBuilder : PathBuilder<RoadNode, Road>
+    public class VehiclePathBuilder : PathBuilder<VehicleNode, VehiclePath>
     {
         private Map _map;
 
-        public RoadBuilder(Map map) : base(map.Roads)
+        public VehiclePathBuilder(Map map) : base(map.VehiclePaths)
         {
             _map = map;
         }
 
-        public override Road MakePath(PathType type, RoadNode source, RoadNode dest)
+        public override VehiclePath MakePath(PathType type, VehicleNode source, VehicleNode dest)
         {
             switch (type)
             {
+                case PathType.Rail: return new Rail(source, dest);
                 case PathType.SimpleRoad: return new SimpleRoad(source, dest);
                 case PathType.OneWayRoad: return new OneWayRoad(source, dest);
                 /*case PathType.Rail: return new Rail(source, dest);*/
@@ -23,12 +24,20 @@ namespace Industropolis.Sim
             }
         }
 
-        public override RoadNode MakeNode(IntVector pos) => new RoadNode(pos);
+        public override VehicleNode MakeNode(IntVector pos, PathCategory category)
+        {
+            switch (category)
+            {
+                case PathCategory.Rail: return new RailNode(pos);
+                case PathCategory.Road: return new RoadNode(pos);
+                default: return new RoadNode(pos);
+            }
+        }
 
         public override bool CanBuildAt(PathType type, IntVector pos)
         {
             if (_map.GetBuilding(pos) != null) return false;
-            if (_map.Rails.GetPath(pos) != null || _map.Rails.GetNode(pos) != null) return false;
+            //if (_map.Rails.GetPath(pos) != null || _map.Rails.GetNode(pos) != null) return false;
             return true;
         }
 
@@ -71,8 +80,8 @@ namespace Industropolis.Sim
         {
             if (building.Entrance == null || building.Entrance.Node == null)
                 throw new ArgumentException("Building does not have an entrance node");
-            RoadNode n = building.Entrance.Node;
-            RoadNode? pathCon = _manager.GetNode(n.Pos + new IntVector(0, 1));
+            VehicleNode n = building.Entrance.Node;
+            VehicleNode? pathCon = _manager.GetNode(n.Pos + new IntVector(0, 1));
             _manager.RemoveNode(n);
             if (pathCon != null && CanMergeNode(pathCon)) MergeNode(pathCon);
             building.Entrance.Disconnect();

@@ -8,18 +8,18 @@ namespace Industropolis.Sim
         private RouteDirection _direction;
 
         // Set to null! as they are initialized when GoNext() is called in constructor
-        public Route<RoadNode> Route { get; }
-        public Road CurrentPath { get; private set; } = null!;
-        public RoadLane CurrentLane { get; private set; } = null!;
+        public Route<VehicleNode> Route { get; }
+        public VehiclePath CurrentPath { get; private set; } = null!;
+        public VehicleLane CurrentLane { get; private set; } = null!;
         public float PathPos { get; private set; }
-        public RoadNode PrevNode { get; private set; } = null!;
-        public RoadNode NextNode { get; private set; } = null!;
-        public RoadNode Destination { get; private set; } = null!;
+        public VehicleNode PrevNode { get; private set; } = null!;
+        public VehicleNode NextNode { get; private set; } = null!;
+        public VehicleNode Destination { get; private set; } = null!;
 
         protected Action? _action;
         protected float _elapsedTime;
 
-        public Vehicle(Route<RoadNode> route)
+        public Vehicle(Route<VehicleNode> route)
         {
             Route = route;
             SetDirection(RouteDirection.Forwards);

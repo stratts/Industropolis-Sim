@@ -19,12 +19,11 @@ namespace Industropolis.Sim
     {
         private Tile[,] tiles;
         private List<Building> buildings;
-        private List<RoadRoute> routes;
+        private List<Route> routes;
         private int _currentMoney = 0;
-        private RoadBuilder _pathBuilder;
+        private VehiclePathBuilder _pathBuilder;
 
-        public IPathContainer<RailNode, Rail> Rails { get; } = new PathContainer<RailNode, Rail>();
-        public IPathContainer<RoadNode, Road> Roads { get; } = new PathContainer<RoadNode, Road>();
+        public IPathContainer<VehicleNode, VehiclePath> VehiclePaths { get; } = new PathContainer<VehicleNode, VehiclePath>();
         public IReadOnlyList<Building> Buildings => buildings;
         public List<Vehicle> Vehicles = new List<Vehicle>();
         public int Width => tiles.GetLength(0);
@@ -44,23 +43,23 @@ namespace Industropolis.Sim
             }
         }
 
-        public event Action<Road>? PathAdded;
-        public event Action<RoadNode>? PathNodeAdded;
+        public event Action<VehiclePath>? PathAdded;
+        public event Action<VehicleNode>? PathNodeAdded;
         public event Action<Building>? BuildingAdded;
-        public event Action<RoadRoute>? RouteAdded;
+        public event Action<Route>? RouteAdded;
         public event Action<Vehicle>? VehicleAdded;
 
         public Map()
         {
-            routes = new List<RoadRoute>();
+            routes = new List<Route>();
             buildings = new List<Building>();
 
-            Roads.PathAdded += (Road road) => PathAdded?.Invoke(road);
-            Roads.NodeAdded += (RoadNode node) => PathNodeAdded?.Invoke(node);
+            VehiclePaths.PathAdded += (VehiclePath road) => PathAdded?.Invoke(road);
+            VehiclePaths.NodeAdded += (VehicleNode node) => PathNodeAdded?.Invoke(node);
 
             int size = 50;
             tiles = MapGenerator.GenerateTiles(size, size, 1);
-            _pathBuilder = new RoadBuilder(this);
+            _pathBuilder = new VehiclePathBuilder(this);
         }
 
         public Building CreateBuilding(BuildingType type, IntVector pos)
@@ -163,19 +162,19 @@ namespace Industropolis.Sim
         {
             building.Remove();
             buildings.Remove(building);
-            if (building.HasEntrance) _pathBuilder.DisconnectBuilding(building);
+            if (building.HasEntrance && building.Entrance!.Node != null) _pathBuilder.DisconnectBuilding(building);
         }
 
         public void Update(float delta)
         {
-            foreach (RoadRoute r in routes) r.Update();
+            foreach (Route r in routes) r.Update();
             foreach (Building b in buildings) b.Update(delta);
             foreach (Vehicle v in Vehicles) v.Update(delta);
         }
 
-        public RoadRoute AddRoute(BuildingNode start, BuildingNode dest, Item item)
+        public Route AddRoute(BuildingNode start, BuildingNode dest, Item item)
         {
-            var route = new RoadRoute(this, start, dest);
+            var route = new Route(this, start, dest);
             route.Item = item;
             route.SourceOutput = start.Building.Output;
             route.DestInput = start.Building.Input;
@@ -186,7 +185,7 @@ namespace Industropolis.Sim
             return route;
         }
 
-        public RoadRoute? GetRoute(IntVector pos)
+        public Route? GetRoute(IntVector pos)
         {
             /*foreach (Route r in routes) {
                 foreach (PathNode t in r.Path) {
@@ -197,19 +196,19 @@ namespace Industropolis.Sim
             return null;
         }
 
-        public void RemoveRoute(RoadRoute route)
+        public void RemoveRoute(Route route)
         {
             routes.Remove(route);
             route.Remove();
         }
 
-        public void AddNode(RoadNode node) => Roads.AddNode(node);
-        public RoadNode? GetNode(IntVector pos) => Roads.GetNode(pos);
-        public void RemoveNode(RoadNode node) => Roads.RemoveNode(node);
+        public void AddNode(VehicleNode node) => VehiclePaths.AddNode(node);
+        public VehicleNode? GetNode(IntVector pos) => VehiclePaths.GetNode(pos);
+        public void RemoveNode(VehicleNode node) => VehiclePaths.RemoveNode(node);
 
-        public void AddPath(Road path) => Roads.AddPath(path);
-        public Road? GetPath(IntVector pos) => Roads.GetPath(pos);
-        public void RemovePath(Road path) => Roads.RemovePath(path);
+        public void AddPath(VehiclePath path) => VehiclePaths.AddPath(path);
+        public VehiclePath? GetPath(IntVector pos) => VehiclePaths.GetPath(pos);
+        public void RemovePath(VehiclePath path) => VehiclePaths.RemovePath(path);
         public void DeletePathSegment(IntVector pos) => _pathBuilder.DeletePathSegment(pos);
 
         public int GetResourceAmount(Item item)

@@ -5,10 +5,9 @@ namespace Industropolis.Sim
 {
     public enum RouteDirection { Forwards, Backwards };
 
-    // Temporary!
-    public class RoadRoute : Route<RoadNode>
+    public class Route : Route<VehicleNode>
     {
-        public RoadRoute(MapInfo info, RoadNode src, RoadNode dest) : base(info, src, dest) { }
+        public Route(MapInfo info, VehicleNode src, VehicleNode dest) : base(info, src, dest) { }
     }
 
     public class Route<T> : MapObject where T : IPathNode<T>

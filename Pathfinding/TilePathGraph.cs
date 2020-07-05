@@ -17,8 +17,8 @@ namespace Industropolis.Sim
 
         public IEnumerable<IntVector> GetConnections(IntVector pos)
         {
-            RoadNode? n = _map.GetNode(pos);
-            Road? p = _map.GetPath(pos);
+            VehicleNode? n = _map.GetNode(pos);
+            VehiclePath? p = _map.GetPath(pos);
             if (n != null)
             {
                 foreach (var connection in n.Connections.Keys)

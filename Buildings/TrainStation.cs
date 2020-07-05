@@ -28,15 +28,19 @@ namespace Industropolis.Sim
             _stop.Connect(_entrance, path);
             _entrance.Connect(_stop, path);
 
-            _map.Rails.AddNode(_stop);
-            _map.Rails.AddNode(_entrance);
-            _map.Rails.AddPath(path);
+            _map.AddNode(_stop);
+            _map.AddNode(_entrance);
+            _map.AddPath(path);
         }
 
         public override void Remove()
         {
-            if (_stop != null) _map.Rails.RemoveNode(_stop);
-            if (_entrance != null) _entrance.Fixed = false;
+            if (_stop != null) _map.RemoveNode(_stop);
+            if (_entrance != null)
+            {
+                _entrance.Fixed = false;
+                if (_entrance.Connections.Count == 0) _map.RemoveNode(_entrance);
+            }
             base.Remove();
         }
     }

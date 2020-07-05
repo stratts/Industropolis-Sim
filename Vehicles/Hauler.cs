@@ -10,7 +10,7 @@ namespace Industropolis.Sim
 
         private Building? _building;
 
-        public Hauler(RoadRoute route) : base(route) { }
+        public Hauler(Route route) : base(route) { }
 
         protected override void DestinationReached()
         {
