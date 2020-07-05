@@ -28,7 +28,7 @@ namespace Industropolis.Sim
             else return 1;
         }
 
-        public IEnumerable<IntVector> GetConnections(IntVector pos)
+        public IEnumerable<IntVector> GetConnections(IntVector cameFrom, IntVector pos)
         {
             foreach (var neighbour in pos.Neighbours)
             {

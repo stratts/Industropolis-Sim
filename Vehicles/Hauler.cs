@@ -15,8 +15,8 @@ namespace Industropolis.Sim
         protected override void DestinationReached()
         {
             _building = ((BuildingNode)Destination).Building;
-            if (_building.Input != null) _action = Unload;
-            else if (_building.Output != null) _action = Load;
+            if (_building.Output != null && Carrying <= 0) _action = Load;
+            else if (_building.Input != null) _action = Unload;
         }
 
         private void Load()
@@ -28,7 +28,7 @@ namespace Industropolis.Sim
             }
             else
             {
-                SetDirection(RouteDirection.Forwards);
+                FlipDirection();
                 GoNext();
             }
         }
@@ -42,7 +42,7 @@ namespace Industropolis.Sim
             }
             else
             {
-                SetDirection(RouteDirection.Backwards);
+                FlipDirection();
                 GoNext();
             }
         }

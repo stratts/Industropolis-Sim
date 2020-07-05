@@ -21,11 +21,11 @@ namespace Industropolis.Sim
             return src.Pos.Distance(dest.Pos);
         }
 
-        public IEnumerable<T> GetConnections(T node)
+        public IEnumerable<T> GetConnections(T cameFrom, T node)
         {
             foreach (var n in node.Nodes)
             {
-                if (node.HasPathTo(n)) yield return n;
+                if (node.HasPathBetween(cameFrom, n)) yield return n;
             }
         }
     }

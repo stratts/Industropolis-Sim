@@ -39,9 +39,10 @@ namespace Industropolis.Sim
             {
                 T node = queue.Dequeue();
                 float dist = visited[node].Dist;
+                T cameFrom = visited[node].CameFrom;
 
                 // Visit all neighbours
-                foreach (T neighbour in graph.GetConnections(node))
+                foreach (T neighbour in graph.GetConnections(cameFrom, node))
                 {
                     var g = dist + graph.CalculateCost(node, neighbour);
                     visited.TryGetValue(neighbour, out NodeData? v);

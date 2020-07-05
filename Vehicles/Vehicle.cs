@@ -63,6 +63,12 @@ namespace Industropolis.Sim
             PathPos += _speed * _elapsedTime;
         }
 
+        protected void FlipDirection()
+        {
+            if (_direction == RouteDirection.Forwards) SetDirection(RouteDirection.Backwards);
+            else SetDirection(RouteDirection.Forwards);
+        }
+
         protected void SetDirection(RouteDirection direction)
         {
             _direction = direction;

@@ -15,7 +15,16 @@ namespace Industropolis.Sim
 
         public override void OnChange() => Changed?.Invoke(this);
 
-        public override bool HasPathTo(VehicleNode node) => IsConnected(node) && Connections[node].HasLaneTo(node);
+        public bool HasPathFrom(VehicleNode node) => IsConnected(node) && Connections[node].HasLaneTo(this);
+
+        public bool HasPathTo(VehicleNode node) => IsConnected(node) && Connections[node].HasLaneTo(node);
+
+        public override bool HasPathBetween(VehicleNode source, VehicleNode dest)
+        {
+            if (source == this && HasPathTo(dest)) return true;
+            return HasPathFrom(source) && HasPathTo(dest) &&
+                (Connections[source].Category == Connections[dest].Category);
+        }
 
         public bool CanProceed(VehicleNode source, VehicleNode dest) =>
             !Occupied &&

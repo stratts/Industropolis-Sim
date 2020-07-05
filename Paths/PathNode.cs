@@ -15,7 +15,7 @@ namespace Industropolis.Sim
         event Action<T>? Changed;
         IEnumerable<T> Nodes { get; }
         float GetCostTo(T node);
-        bool HasPathTo(T node);
+        bool HasPathBetween(T source, T dest);
         void Disconnect(T node);
     }
 
@@ -62,7 +62,7 @@ namespace Industropolis.Sim
             OnChange();
         }
 
-        public virtual bool HasPathTo(TNode node) => IsConnected(node);
+        public virtual bool HasPathBetween(TNode source, TNode dest) => IsConnected(source) && IsConnected(dest);
 
         public virtual float GetCostTo(TNode node) => this.Pos.Distance(node.Pos);
 

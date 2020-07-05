@@ -15,7 +15,7 @@ namespace Industropolis.Sim
 
         public float EstimateCost(IntVector src, IntVector dest) => src.Distance(dest);
 
-        public IEnumerable<IntVector> GetConnections(IntVector pos)
+        public IEnumerable<IntVector> GetConnections(IntVector cameFrom, IntVector pos)
         {
             VehicleNode? n = _map.GetNode(pos);
             VehiclePath? p = _map.GetPath(pos);
@@ -23,6 +23,10 @@ namespace Industropolis.Sim
             {
                 foreach (var connection in n.Connections.Keys)
                 {
+                    if (_map.GetPath(cameFrom) is VehiclePath prevPath)
+                    {
+                        if (prevPath.Category != n.Connections[connection].Category) continue;
+                    }
                     if (!n.HasPathTo(connection)) continue;
                     yield return pos + pos.Direction8(connection.Pos);
                 }

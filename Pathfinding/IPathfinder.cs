@@ -10,7 +10,7 @@ namespace Industropolis.Sim
     public interface IGraph<T>
     {
         bool Accessible(T src, T dest);
-        IEnumerable<T> GetConnections(T node);
+        IEnumerable<T> GetConnections(T cameFrom, T node);
         float CalculateCost(T src, T dest);
         float EstimateCost(T src, T dest);
     }
