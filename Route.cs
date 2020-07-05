@@ -12,12 +12,13 @@ namespace Industropolis.Sim
 
     public class Route<T> : MapObject where T : IPathNode<T>
     {
-        private List<T> _path = new List<T>();
+        private List<T> _forwardsPath = new List<T>();
+        private List<T> _backwardsPath = new List<T>();
         private IPathfinder<T> _pathfinder;
         private Item _item = Item.None;
         private bool _reroute = false;
 
-        public IReadOnlyList<T> Path => _path;
+        public IReadOnlyList<T> Path => _forwardsPath;
         public T Source { get; set; }
         public T Dest { get; set; }
         public MapInfo MapInfo { get; private set; }
@@ -49,24 +50,34 @@ namespace Industropolis.Sim
 
         public T Next(T current, RouteDirection direction)
         {
-            int shift = 0;
-            var curr = _path.IndexOf(current);
+            switch (direction)
+            {
+                case RouteDirection.Forwards: return GetNext(current, _forwardsPath);
+                case RouteDirection.Backwards: return GetNext(current, _backwardsPath);
+                default: throw new NotSupportedException();
+            }
+        }
 
-            if (direction == RouteDirection.Forwards) shift = 1;
-            else if (direction == RouteDirection.Backwards) shift = -1;
-
-            var newPos = curr + shift;
-            if (newPos >= 0 && newPos < _path.Count) return _path[newPos];
-            else return current;
+        private T GetNext(T current, List<T> path)
+        {
+            int index = path.IndexOf(current) + 1;
+            if (index < path.Count) return path[index];
+            return current;
         }
 
         public void Pathfind()
         {
-            var path = _pathfinder.FindPath(new PathGraph<T>(), Source, Dest);
+            FindPath(Source, Dest, ref _forwardsPath);
+            FindPath(Dest, Source, ref _backwardsPath);
+        }
+
+        private void FindPath(T source, T dest, ref List<T> pathStorage)
+        {
+            var path = _pathfinder.FindPath(new PathGraph<T>(), source, dest);
             if (path != null)
             {
-                _path = path;
-                foreach (T node in _path)
+                pathStorage = path;
+                foreach (T node in pathStorage)
                 {
                     node.Changed += NodeChanged;
                     node.Removed += () => _reroute = true;
@@ -75,7 +86,7 @@ namespace Industropolis.Sim
             else
             {
                 Console.WriteLine("No path found! :(");
-                _path = new List<T>();
+                pathStorage = new List<T>();
                 return;
             }
         }
