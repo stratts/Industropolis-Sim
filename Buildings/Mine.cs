@@ -13,7 +13,7 @@ namespace Industropolis.Sim
             ProcessingTime = 2;
             Width = 2;
             Height = 2;
-            Entrance = new BuildingEntrance(this, new IntVector(0, 1));
+            Entrance = new BuildingEntrance(this, new IntVector(0, 1), PathCategory.Road);
         }
     }
 }

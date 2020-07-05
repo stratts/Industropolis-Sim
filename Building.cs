@@ -25,10 +25,11 @@ namespace Industropolis.Sim
         public IntVector ConnectionPos => Pos + new IntVector(0, 1);
         public bool Connected => Node != null;
 
-        public PathCategory Category => PathCategory.Road;
+        public PathCategory Category { get; }
 
-        public BuildingEntrance(Building parent, IntVector location)
+        public BuildingEntrance(Building parent, IntVector location, PathCategory category)
         {
+            Category = category;
             Location = location;
             _parent = parent;
         }

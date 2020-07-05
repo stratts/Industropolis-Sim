@@ -5,7 +5,7 @@ namespace Industropolis.Sim
     public class TrainStation : Building
     {
         private Map _map;
-        private TrainStop? _stop;
+        private BuildingNode? _stop;
         private RailNode? _entrance;
 
         public TrainStation(Map map)
@@ -13,14 +13,19 @@ namespace Industropolis.Sim
             _map = map;
             Width = 2;
             Height = 4;
+            Input = new InfiniteDirectInput();
+            Output = new InfiniteDirectOutput(Item.Wood);
         }
 
         public void Setup()
         {
-            _stop = new TrainStop(Pos + new IntVector(Width, 0), this);
+            _stop = new BuildingNode(Pos + new IntVector(Width, 0), this, PathCategory.Rail);
             _entrance = new RailNode(Pos + new IntVector(Width, Height - 1));
             _stop.Fixed = true;
             _entrance.Fixed = true;
+
+            Entrance = new BuildingEntrance(this, _stop.Pos, PathCategory.Rail);
+            Entrance.Connect(_stop);
 
             var path = new Rail(_entrance, _stop);
             path.Fixed = true;

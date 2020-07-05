@@ -131,7 +131,7 @@ namespace Industropolis.Sim
             _occupier = vehicle;
         }
 
-        public override Vehicle? GetVehicleAhead(Vehicle vehicle) => _occupier;
+        public override Vehicle? GetVehicleAhead(Vehicle vehicle) => null;
     }
 
     public enum LaneDir
