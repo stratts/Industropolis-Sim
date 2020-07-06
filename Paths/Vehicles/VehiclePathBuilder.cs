@@ -34,9 +34,12 @@ namespace Industropolis.Sim
             }
         }
 
-        public override bool CanBuildAt(PathType type, IntVector pos)
+        public override bool CanBuildAt(PathType type, IntVector pos, IntVector direction)
         {
             if (_map.GetBuilding(pos) != null) return false;
+            if (_map.GetPath(pos) is VehiclePath p &&
+                p.Direction.IsParallelTo(direction) &&
+                 p.Category != GetCategory(type)) return false;
             //if (_map.Rails.GetPath(pos) != null || _map.Rails.GetNode(pos) != null) return false;
             return true;
         }

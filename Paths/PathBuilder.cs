@@ -52,14 +52,18 @@ namespace Industropolis.Sim
 
         public virtual bool CanBuildPath(PathType type, IntVector source, IntVector dest)
         {
+            if (source == dest) return false;
+            var dir = source.Direction8(dest);
             foreach (var pos in source.GetPointsBetween(dest))
             {
-                if (!CanBuildAt(type, pos)) return false;
+                if (!CanBuildAt(type, pos, dir)) return false;
             }
             return true;
         }
 
-        public abstract bool CanBuildAt(PathType type, IntVector pos);
+        public abstract bool CanBuildAt(PathType type, IntVector pos, IntVector direction);
+
+        public bool CanBuildAt(PathType type, IntVector pos) => CanBuildAt(type, pos, IntVector.Zero);
 
         public virtual void BuildPath(PathType type, IntVector source, IntVector dest)
         {
