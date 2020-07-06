@@ -5,6 +5,21 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
+    public static class VectorExtensions
+    {
+        public static bool IsParallelTo(this Vector2 v1, Vector2 v2)
+        {
+            var n1 = Vector2.Normalize(v1).Round(2);
+            var n2 = Vector2.Normalize(v2).Round(2);
+            return n1 == n2 || n1 == -n2;
+        }
+
+        public static Vector2 Round(this Vector2 v, int digits = 0)
+        {
+            return new Vector2((float)Math.Round(v.X, digits), (float)Math.Round(v.Y, digits));
+        }
+    }
+
     public struct IntVector
     {
         public int X { get; set; }
@@ -90,28 +105,17 @@ namespace Industropolis.Sim
             }
         }
 
-        public Vector2 Direction(IntVector dest)
-        {
-            var vec = (dest - this).ToVector2();
-            var norm = vec / vec.Length();
-            return new Vector2((float)Math.Round(norm.X, 2), (float)Math.Round(norm.Y, 2));
-        }
+        public Vector2 Direction(IntVector dest) => Vector2.Normalize((dest - this).ToVector2()).Round(2);
 
         public IntVector Direction8(IntVector dest)
         {
-            var dir = Direction(dest);
-            return new IntVector((int)Math.Round(dir.X), (int)Math.Round(dir.Y));
+            var dir = Direction(dest).Round();
+            return new IntVector((int)dir.X, (int)dir.Y);
         }
 
         public float Distance(IntVector dest) => (dest - this).ToVector2().Length();
 
-        public bool IsParallelTo(IntVector vector)
-        {
-            if (this == vector || this == -vector) return true;
-            if (IntVector.Zero.Direction(this) == IntVector.Zero.Direction(vector)) return true;
-            if (IntVector.Zero.Direction(this) == IntVector.Zero.Direction(-vector)) return true;
-            return false;
-        }
+        public bool IsParallelTo(IntVector vector) => this.ToVector2().IsParallelTo(vector.ToVector2());
 
         public Vector2 ToVector2() => new Vector2(X, Y);
 

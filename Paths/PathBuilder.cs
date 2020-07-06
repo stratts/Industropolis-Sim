@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace Industropolis.Sim
@@ -53,7 +54,7 @@ namespace Industropolis.Sim
         public virtual bool CanBuildPath(PathType type, IntVector source, IntVector dest)
         {
             if (source == dest) return false;
-            var dir = source.Direction8(dest);
+            var dir = source.Direction(dest);
             foreach (var pos in source.GetPointsBetween(dest))
             {
                 if (!CanBuildAt(type, pos, dir)) return false;
@@ -61,9 +62,9 @@ namespace Industropolis.Sim
             return true;
         }
 
-        public abstract bool CanBuildAt(PathType type, IntVector pos, IntVector direction);
+        public abstract bool CanBuildAt(PathType type, IntVector pos, Vector2 direction);
 
-        public bool CanBuildAt(PathType type, IntVector pos) => CanBuildAt(type, pos, IntVector.Zero);
+        public bool CanBuildAt(PathType type, IntVector pos) => CanBuildAt(type, pos, Vector2.Zero);
 
         public virtual void BuildPath(PathType type, IntVector source, IntVector dest)
         {
@@ -73,7 +74,7 @@ namespace Industropolis.Sim
             var destNode = AddNode(dest, category);
 
             TNode prev = sourceNode;
-            var dir = source.Direction8(dest);
+            var dir = source.Direction(dest);
 
             // Build path between every node encountered
             foreach (var pos in source.GetPointsBetween(dest))

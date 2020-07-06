@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace Industropolis.Sim
@@ -34,7 +35,7 @@ namespace Industropolis.Sim
             }
         }
 
-        public override bool CanBuildAt(PathType type, IntVector pos, IntVector direction)
+        public override bool CanBuildAt(PathType type, IntVector pos, Vector2 direction)
         {
             if (_map.GetBuilding(pos) != null) return false;
             if (_map.GetPath(pos) is VehiclePath p &&

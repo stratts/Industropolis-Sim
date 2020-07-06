@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 
 namespace Industropolis.Sim
@@ -11,7 +12,7 @@ namespace Industropolis.Sim
         IPathNode SourceNode { get; }
         IPathNode DestNode { get; }
         float Length { get; }
-        IntVector Direction { get; }
+        Vector2 Direction { get; }
         bool OnPath(IntVector pos);
     }
 
@@ -26,7 +27,7 @@ namespace Industropolis.Sim
         public T Source { get; private set; }
         public T Dest { get; private set; }
         public float Length { get; private set; }
-        public IntVector Direction { get; private set; }
+        public Vector2 Direction { get; private set; }
 
         public bool Fixed { get; set; } = false;
 
@@ -35,7 +36,7 @@ namespace Industropolis.Sim
             Source = source;
             Dest = dest;
             Length = Source.Pos.Distance(Dest.Pos);
-            Direction = Source.Pos.Direction8(Dest.Pos);
+            Direction = Source.Pos.Direction(Dest.Pos);
         }
 
         public bool OnPath(IntVector pos)
