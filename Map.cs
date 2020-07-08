@@ -26,6 +26,7 @@ namespace Industropolis.Sim
         public IPathContainer<VehicleNode, VehiclePath> VehiclePaths { get; } = new PathContainer<VehicleNode, VehiclePath>();
         public IReadOnlyList<Building> Buildings => buildings;
         public List<Vehicle> Vehicles = new List<Vehicle>();
+        public IReadOnlyList<Route> Routes => routes;
         public int Width => tiles.GetLength(0);
         public int Height => tiles.GetLength(1);
 
