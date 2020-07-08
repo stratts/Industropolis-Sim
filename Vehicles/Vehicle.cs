@@ -79,10 +79,7 @@ namespace Industropolis.Sim
                         var node = _nodes[0];
                         node.Occupied = false;
                         _nodes.Remove(node);
-                        Console.WriteLine($"Depart node {node}");
                     }
-
-                    //Console.WriteLine("Depart lane");
                 }
             }
         }
@@ -126,7 +123,6 @@ namespace Industropolis.Sim
             {
                 _nodes.Add(NextNode);
                 NextNode.Occupied = true;
-                Console.WriteLine($"Enter node {NextNode}");
             }
 
             var current = NextNode;
@@ -138,7 +134,6 @@ namespace Industropolis.Sim
             _lanes.Add(CurrentLane);
 
             FrontPos = 0;
-            //Console.WriteLine($"Start moving to {NextNode.Pos}");
 
             _action = FollowPath;
         }
