@@ -5,30 +5,46 @@ namespace Industropolis.Sim
 {
     public interface MapInfo
     {
-        int Width { get; }
-        int Height { get; }
         Building? GetBuilding(IntVector pos);
         //PopulationInfo Population { get; }
         bool HasResource(Item item, int amount);
         void GetResource(Item item, int amount);
         Tile GetTile(IntVector pos);
         int CurrentMoney { get; set; }
+        bool ValidPos(IntVector pos);
+    }
+
+    public struct MapChunk
+    {
+        public IntVector Pos { get; }
+        public IntVector MapOffset { get; }
+        public IntVector Size { get; }
+        public Tile[,] Tiles { get; }
+
+        public MapChunk(IntVector pos, IntVector size, Tile[,] tiles)
+        {
+            Pos = pos;
+            Size = size;
+            Tiles = tiles;
+            MapOffset = new IntVector(Pos.X * Size.X, Pos.Y * Size.Y);
+        }
+
+        public Tile GetTile(IntVector pos) => Tiles[pos.X, pos.Y];
     }
 
     public class Map : MapInfo
     {
-        private Tile[,] tiles;
         private List<Building> buildings;
         private List<Route> routes;
         private int _currentMoney = 0;
         private VehiclePathBuilder _pathBuilder;
+        private Dictionary<IntVector, MapChunk> _chunks = new Dictionary<IntVector, MapChunk>();
+        private int _chunkSize = 32;
 
         public IPathContainer<VehicleNode, VehiclePath> VehiclePaths { get; } = new PathContainer<VehicleNode, VehiclePath>();
         public IReadOnlyList<Building> Buildings => buildings;
         public List<Vehicle> Vehicles = new List<Vehicle>();
         public IReadOnlyList<Route> Routes => routes;
-        public int Width => tiles.GetLength(0);
-        public int Height => tiles.GetLength(1);
 
         //public PopulationInfo Population { get; } = new PopulationInfo();
         public int CurrentMoney
@@ -49,6 +65,7 @@ namespace Industropolis.Sim
         public event Action<Building>? BuildingAdded;
         public event Action<Route>? RouteAdded;
         public event Action<Vehicle>? VehicleAdded;
+        public event Action<MapChunk>? ChunkLoaded;
 
         public Map()
         {
@@ -58,9 +75,23 @@ namespace Industropolis.Sim
             VehiclePaths.PathAdded += (VehiclePath road) => PathAdded?.Invoke(road);
             VehiclePaths.NodeAdded += (VehicleNode node) => PathNodeAdded?.Invoke(node);
 
-            int size = 50;
-            tiles = MapGenerator.GenerateTiles(size, size, 1);
             _pathBuilder = new VehiclePathBuilder(this);
+        }
+
+        public void Generate()
+        {
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    var tiles = MapGenerator.GenerateChunk(x, y, _chunkSize, _chunkSize, 1);
+                    var pos = new IntVector(x, y);
+                    var chunk = new MapChunk(pos, new IntVector(_chunkSize, _chunkSize), tiles);
+                    _chunks[pos] = chunk;
+                    ChunkLoaded?.Invoke(chunk);
+                    Console.WriteLine($"Generated chunk {pos} at {chunk.MapOffset}");
+                }
+            }
         }
 
         public Building CreateBuilding(BuildingType type, IntVector pos)
@@ -258,11 +289,23 @@ namespace Industropolis.Sim
 
         public Tile GetTile(IntVector pos)
         {
-            int x = pos.X;
-            int y = pos.Y;
+            var chunkData = GetChunkAt(pos);
+            if (!ValidPos(pos) || !chunkData.HasValue) throw new ArgumentException("Invalid tile");
+            var chunk = chunkData.Value;
+            var chunkIndex = pos - chunk.MapOffset;
+            return chunk.Tiles[chunkIndex.X, chunkIndex.Y];
+        }
 
-            if (x < 0 || y < 0 || x >= Width || y >= Height) throw new ArgumentException("Invalid tile");
-            return tiles[pos.X, pos.Y];
+        public bool ValidPos(IntVector pos) => GetChunkAt(pos).HasValue;
+
+        private MapChunk? GetChunkAt(IntVector pos)
+        {
+            var chunkX = (int)Math.Floor((float)pos.X / _chunkSize);
+            var chunkY = (int)Math.Floor((float)pos.Y / _chunkSize);
+
+            var chunkPos = new IntVector((int)chunkX, (int)chunkY);
+            if (!_chunks.ContainsKey(chunkPos)) return null;
+            return _chunks[chunkPos];
         }
 
         public void CreateResourcePatch(int x, int y, int size, Item resource, int amount)

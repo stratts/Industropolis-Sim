@@ -32,7 +32,7 @@ namespace Industropolis.Sim
         {
             foreach (var neighbour in pos.Neighbours)
             {
-                if (!neighbour.WithinBounds(_map.Width, _map.Height)) continue;
+                if (!_map.ValidPos(neighbour)) continue;
                 if (_map.GetBuilding(neighbour) != null) continue;
                 yield return neighbour;
             }

@@ -30,30 +30,30 @@ namespace Industropolis.Sim
         }
     };
 
-        public static Tile[,] GenerateTiles(int width, int height, long seed)
+        public static Tile[,] GenerateChunk(int x, int y, int width, int height, long seed)
         {
             var noise = new OpenSimplexNoise(seed);
             var tiles = new Tile[width, height];
 
-            for (int x = 0; x < width; x++)
+            for (int i = 0; i < width; i++)
             {
-                for (int y = 0; y < height; y++)
+                for (int j = 0; j < height; j++)
                 {
-                    tiles[x, y] = new Tile();
+                    tiles[i, j] = new Tile();
                 }
             }
 
             foreach (ResourceDef resource in Resources)
             {
-                GenerateResource(tiles, resource, seed);
+                GenerateResource(x * width, y * height, tiles, resource, seed);
             }
 
-            GenerateNutrients(tiles, seed);
+            GenerateNutrients(x * width, y * height, tiles, seed);
 
             return tiles;
         }
 
-        private static void GenerateResource(Tile[,] tiles, ResourceDef resource, long seed)
+        private static void GenerateResource(int offsetX, int offsetY, Tile[,] tiles, ResourceDef resource, long seed)
         {
             var noise = new OpenSimplexNoise(seed + (int)resource.Item);
             var scale = 10 * resource.Scale;
@@ -64,8 +64,8 @@ namespace Industropolis.Sim
             {
                 for (int y = 0; y < tiles.GetLength(1); y++)
                 {
-                    double _x = x;
-                    double _y = y;
+                    double _x = x + offsetX;
+                    double _y = y + offsetY;
                     double value = noise.EvaluateOctave(_x / scale, _y / scale, 2, 0.5);
                     if (value > threshold)
                     {
@@ -77,7 +77,7 @@ namespace Industropolis.Sim
             }
         }
 
-        private static void GenerateNutrients(Tile[,] tiles, long seed)
+        private static void GenerateNutrients(int offsetX, int offsetY, Tile[,] tiles, long seed)
         {
             var noise = new OpenSimplexNoise(seed + 256);
             var scale = 30;
@@ -87,8 +87,8 @@ namespace Industropolis.Sim
             {
                 for (int y = 0; y < tiles.GetLength(1); y++)
                 {
-                    double _x = x;
-                    double _y = y;
+                    double _x = x + offsetX;
+                    double _y = y + offsetY;
                     double value = (noise.EvaluateOctave(_x / scale, _y / scale, 2, 0.5) + 0.5) / 1.5;
                     if (value < 0) continue;
                     tiles[x, y].Nutrients = (int)(amount * value);
