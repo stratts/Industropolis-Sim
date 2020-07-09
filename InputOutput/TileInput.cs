@@ -4,12 +4,12 @@ namespace Industropolis.Sim
     public abstract class BaseTileInput : IConsumer
     {
         protected IntVector pos;
-        protected MapInfo map;
+        protected Map map;
         protected int size;
 
         private Tile? currentTile = null;
 
-        public BaseTileInput(MapInfo map, IntVector pos, int size)
+        public BaseTileInput(Map map, IntVector pos, int size)
         {
             this.map = map;
             this.pos = pos;
@@ -63,7 +63,7 @@ namespace Industropolis.Sim
     {
         private Item resource;
 
-        public ResourceInput(MapInfo map, IntVector pos, int size, Item resource) : base(map, pos, size)
+        public ResourceInput(Map map, IntVector pos, int size, Item resource) : base(map, pos, size)
         {
             this.resource = resource;
         }
@@ -81,7 +81,7 @@ namespace Industropolis.Sim
 
     public class NutrientInput : BaseTileInput
     {
-        public NutrientInput(MapInfo map, IntVector pos, int size) : base(map, pos, size)
+        public NutrientInput(Map map, IntVector pos, int size) : base(map, pos, size)
         {
 
         }

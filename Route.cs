@@ -7,7 +7,7 @@ namespace Industropolis.Sim
 
     public class Route : Route<VehicleNode>
     {
-        public Route(MapInfo info, VehicleNode src, VehicleNode dest) : base(info, src, dest) { }
+        public Route(Map info, VehicleNode src, VehicleNode dest) : base(info, src, dest) { }
     }
 
     public class Route<T> : MapObject where T : IPathNode<T>
@@ -21,7 +21,7 @@ namespace Industropolis.Sim
         public IReadOnlyList<T> Path => _forwardsPath;
         public T Source { get; set; }
         public T Dest { get; set; }
-        public MapInfo MapInfo { get; private set; }
+        public Map Map { get; private set; }
         public event Action<Route<T>>? Changed;
 
         public IDirectOutput? SourceOutput { get; set; }
@@ -40,9 +40,9 @@ namespace Industropolis.Sim
 
         //public int NumHaulers => Haulers.Count;
 
-        public Route(MapInfo info, T src, T dest)
+        public Route(Map info, T src, T dest)
         {
-            MapInfo = info;
+            Map = info;
             Source = src;
             Dest = dest;
             _pathfinder = new AStarPathfinder<T>();
@@ -110,13 +110,13 @@ namespace Industropolis.Sim
 
         public void AddHauler()
         {
-            //if (!MapInfo.Population.Use()) return;
-            /*var hauler = new Hauler(MapInfo, Source.X, Source.Y);
+            //if (!Map.Population.Use()) return;
+            /*var hauler = new Hauler(Map, Source.X, Source.Y);
             hauler.Route = this;
             hauler.Item = Item;
             Haulers.Add(hauler);
             hauler.Haul();
-            MapInfo.AddEntity(hauler);*/
+            Map.AddEntity(hauler);*/
         }
 
         public void RemoveHauler()
@@ -125,8 +125,8 @@ namespace Industropolis.Sim
              Hauler h = Haulers[0];
              Haulers.RemoveAt(0);
              h.Route = null;
-             MapInfo.RemoveEntity(h);*/
-            //MapInfo.Population.Free();
+             Map.RemoveEntity(h);*/
+            //Map.Population.Free();
         }
     }
 }

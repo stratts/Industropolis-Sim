@@ -3,7 +3,7 @@ namespace Industropolis.Sim
 {
     public class Farm : ProductionBuilding
     {
-        public Farm(MapInfo map, IntVector pos)
+        public Farm(Map map, IntVector pos)
         {
             Type = BuildingType.Farm;
             Consumer = new NutrientInput(map, pos, 3);

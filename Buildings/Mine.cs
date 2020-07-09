@@ -3,7 +3,7 @@ namespace Industropolis.Sim
 {
     public class Mine : ProductionBuilding
     {
-        public Mine(MapInfo map, IntVector pos)
+        public Mine(Map map, IntVector pos)
         {
             Type = BuildingType.Mine;
             Consumer = new ResourceInput(map, pos, 5, Item.Stone);

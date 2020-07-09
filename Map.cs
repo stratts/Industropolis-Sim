@@ -3,17 +3,6 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public interface MapInfo
-    {
-        Building? GetBuilding(IntVector pos);
-        //PopulationInfo Population { get; }
-        bool HasResource(Item item, int amount);
-        void GetResource(Item item, int amount);
-        Tile GetTile(IntVector pos);
-        int CurrentMoney { get; set; }
-        bool ValidPos(IntVector pos);
-    }
-
     public struct MapChunk
     {
         public IntVector Pos { get; }
@@ -32,7 +21,7 @@ namespace Industropolis.Sim
         public Tile GetTile(IntVector pos) => Tiles[pos.X, pos.Y];
     }
 
-    public class Map : MapInfo
+    public class Map
     {
         private List<Building> buildings;
         private List<Route> routes;

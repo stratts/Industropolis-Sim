@@ -6,9 +6,9 @@ namespace Industropolis.Sim
 {
     public class MapGraph : IGraph<IntVector>
     {
-        private MapInfo _map;
+        private Map _map;
 
-        public MapGraph(MapInfo map)
+        public MapGraph(Map map)
         {
             _map = map;
         }
