@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace Industropolis.Sim
@@ -136,6 +137,31 @@ namespace Industropolis.Sim
             FrontPos = 0;
 
             _action = FollowPath;
+        }
+
+        public IEnumerable<(Vector2 start, Vector2 end)> GetSegments()
+        {
+            VehicleNode segmentStart = NextNode;
+            float currentLength = 0;
+            var direction = _direction == RouteDirection.Forwards ? RouteDirection.Backwards : RouteDirection.Forwards;
+
+            for (int i = 0; i < Lanes.Count; i++)
+            {
+                VehicleNode segmentEnd = Route.Next(segmentStart, direction);
+                var segmentLength = segmentEnd.Pos.Distance(segmentStart.Pos);
+
+                var endPos = new Vector2(segmentEnd.Pos.X, segmentEnd.Pos.Y);
+                var startPos = new Vector2(segmentStart.Pos.X, segmentStart.Pos.Y);
+                Vector2 dir = Vector2.Normalize(startPos - endPos);
+
+                if (segmentStart == NextNode) startPos -= dir * (segmentLength - FrontPos);
+                currentLength += (startPos - endPos).Length();
+                if (currentLength > Length) endPos += dir * (currentLength - Length);
+
+                yield return (endPos, startPos);
+                if (currentLength > Length) break;
+                segmentStart = segmentEnd;
+            }
         }
 
         protected abstract void DestinationReached();
