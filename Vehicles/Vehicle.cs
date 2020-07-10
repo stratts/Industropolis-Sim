@@ -6,7 +6,7 @@ namespace Industropolis.Sim
 {
     public abstract class Vehicle : MapObject
     {
-        private float _speed = 1; // Tiles per second
+        private float _speed = 1.5f; // Tiles per second
         private RouteDirection _direction;
         private List<VehicleLane> _lanes = new List<VehicleLane>();
         private List<VehicleNode> _nodes = new List<VehicleNode>();
@@ -17,6 +17,7 @@ namespace Industropolis.Sim
         public VehicleLane CurrentLane { get; private set; } = null!;
         public float FrontPos { get; private set; }
         public float RearPos { get; private set; }
+        public VehicleNode RearNode { get; private set; } = null!;
         public VehicleNode PrevNode { get; private set; } = null!;
         public VehicleNode NextNode { get; private set; } = null!;
         public VehicleNode Destination { get; private set; } = null!;
@@ -79,6 +80,7 @@ namespace Industropolis.Sim
                     {
                         var node = _nodes[0];
                         node.Occupied = false;
+                        RearNode = node;
                         _nodes.Remove(node);
                     }
                 }
@@ -106,11 +108,13 @@ namespace Industropolis.Sim
                 case RouteDirection.Forwards:
                     Destination = Route.Dest;
                     PrevNode = Route.Source;
+                    RearNode = Route.Source;
                     NextNode = Route.Source;
                     break;
                 case RouteDirection.Backwards:
                     Destination = Route.Source;
                     PrevNode = Route.Dest;
+                    RearNode = Route.Dest;
                     NextNode = Route.Dest;
                     break;
             }
@@ -139,29 +143,16 @@ namespace Industropolis.Sim
             _action = FollowPath;
         }
 
-        public IEnumerable<(Vector2 start, Vector2 end)> GetSegments()
+        public IEnumerable<Vector2> GetPoints()
         {
-            VehicleNode segmentStart = NextNode;
-            float currentLength = 0;
-            var direction = _direction == RouteDirection.Forwards ? RouteDirection.Backwards : RouteDirection.Forwards;
-
-            for (int i = 0; i < Lanes.Count; i++)
-            {
-                VehicleNode segmentEnd = Route.Next(segmentStart, direction);
-                var segmentLength = segmentEnd.Pos.Distance(segmentStart.Pos);
-
-                var endPos = new Vector2(segmentEnd.Pos.X, segmentEnd.Pos.Y);
-                var startPos = new Vector2(segmentStart.Pos.X, segmentStart.Pos.Y);
-                Vector2 dir = Vector2.Normalize(startPos - endPos);
-
-                if (segmentStart == NextNode) startPos -= dir * (segmentLength - FrontPos);
-                currentLength += (startPos - endPos).Length();
-                if (currentLength > Length) endPos += dir * (currentLength - Length);
-
-                yield return (endPos, startPos);
-                if (currentLength > Length) break;
-                segmentStart = segmentEnd;
-            }
+            // Position of front of vehicle
+            yield return PrevNode.Pos.ToVector2() + PrevNode.Pos.Direction(NextNode.Pos) * FrontPos;
+            // Intermediate occupied nodes, if any
+            for (int i = _nodes.Count - 1; i >= 0; i--) yield return _nodes[i].Pos.ToVector2();
+            // Position of rear of vehicle
+            var rearPos = Math.Max(RearPos, 0);
+            if (_nodes.Count == 0) yield return PrevNode.Pos.ToVector2() + PrevNode.Pos.Direction(NextNode.Pos) * rearPos;
+            else yield return RearNode.Pos.ToVector2() + RearNode.Pos.Direction(_nodes[0].Pos) * rearPos;
         }
 
         protected abstract void DestinationReached();
