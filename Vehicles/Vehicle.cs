@@ -95,29 +95,27 @@ namespace Industropolis.Sim
 
         protected void SetDirection(RouteDirection direction)
         {
+            _direction = direction;
+
+            switch (direction)
+            {
+                case RouteDirection.Forwards: Reset(Route.Source, Route.Dest); break;
+                case RouteDirection.Backwards: Reset(Route.Dest, Route.Source); break;
+            }
+        }
+
+        private void Reset(VehicleNode source, VehicleNode dest)
+        {
             FrontPos = 0;
             RearPos = -Length;
             foreach (var lane in _lanes) lane.Depart(this);
             foreach (var node in _nodes) node.Occupied = false;
             _nodes.Clear();
             _lanes.Clear();
-            _direction = direction;
-
-            switch (direction)
-            {
-                case RouteDirection.Forwards:
-                    Destination = Route.Dest;
-                    PrevNode = Route.Source;
-                    RearNode = Route.Source;
-                    NextNode = Route.Source;
-                    break;
-                case RouteDirection.Backwards:
-                    Destination = Route.Source;
-                    PrevNode = Route.Dest;
-                    RearNode = Route.Dest;
-                    NextNode = Route.Dest;
-                    break;
-            }
+            Destination = dest;
+            PrevNode = source;
+            RearNode = source;
+            NextNode = source;
         }
 
         protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
