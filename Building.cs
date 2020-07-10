@@ -20,7 +20,7 @@ namespace Industropolis.Sim
         private Building _parent;
 
         public IntVector Location { get; }
-        public BuildingNode? Node { get; private set; }
+        public VehicleNode? Node { get; private set; }
         public IntVector Pos => _parent.Pos + Location;
         public IntVector ConnectionPos => Pos + new IntVector(0, 1);
         public bool Connected => Node != null;
@@ -39,8 +39,21 @@ namespace Industropolis.Sim
             category == Category &&
             !Connected;
 
-        public void Connect(BuildingNode node) => Node = node;
-        public void Disconnect() => Node = null;
+        public void Connect(VehicleNode node)
+        {
+            node.AddLink(_parent);
+            _parent.AddLink(node);
+            Node = node;
+        }
+        public void Disconnect()
+        {
+            if (Node != null)
+            {
+                Node.RemoveLink(_parent);
+                _parent.RemoveLink(Node);
+                Node = null;
+            }
+        }
     }
 
     public class Building : MapObject

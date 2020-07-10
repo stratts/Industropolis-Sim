@@ -5,7 +5,7 @@ namespace Industropolis.Sim
     public class TrainStation : Building
     {
         private Map _map;
-        private BuildingNode? _stop;
+        private VehicleNode? _stop;
         private RailNode? _entrance;
 
         public TrainStation(Map map)
@@ -19,7 +19,7 @@ namespace Industropolis.Sim
 
         public void Setup()
         {
-            _stop = new BuildingNode(Pos + new IntVector(Width, 0), this, PathCategory.Rail);
+            _stop = new RailNode(Pos + new IntVector(Width, 0));
             _entrance = new RailNode(Pos + new IntVector(Width, Height - 1));
             _stop.Fixed = true;
             _entrance.Fixed = true;

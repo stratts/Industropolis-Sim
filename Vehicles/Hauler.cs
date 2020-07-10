@@ -14,7 +14,7 @@ namespace Industropolis.Sim
 
         protected override void DestinationReached()
         {
-            _building = ((BuildingNode)Destination).Building;
+            _building = Destination.GetLink<Building>();
             if (_building.Output != null && Carrying <= 0) _action = Load;
             else if (_building.Input != null) _action = Unload;
         }

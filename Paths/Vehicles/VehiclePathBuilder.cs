@@ -72,7 +72,7 @@ namespace Industropolis.Sim
             var n = _manager.GetNode(entrance.ConnectionPos);
             if ((p != null && p.Category == entrance.Category) || (n != null && n.Category == entrance.Category))
             {
-                var node = new BuildingNode(entrance.Pos, building, entrance.Category);
+                var node = new RoadNode(entrance.Pos);
                 entrance.Connect(node);
                 if (entrance.Node == null) throw new Exception("Could not connect entrance");
                 _manager.AddNode(entrance.Node);
