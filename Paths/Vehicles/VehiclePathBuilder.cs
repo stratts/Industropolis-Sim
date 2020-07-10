@@ -45,9 +45,9 @@ namespace Industropolis.Sim
             return true;
         }
 
-        public override void BuildPath(PathType type, IntVector source, IntVector dest)
+        public override void BuildPath(PathType type, IntVector source, IntVector dest, bool buildFixed = false)
         {
-            base.BuildPath(type, source, dest);
+            base.BuildPath(type, source, dest, buildFixed);
             if (source == dest) return;
 
             foreach (var current in source.GetPointsBetween(dest))

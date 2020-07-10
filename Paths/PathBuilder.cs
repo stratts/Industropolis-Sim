@@ -19,7 +19,7 @@ namespace Industropolis.Sim
 
     public interface IPathBuilder
     {
-        void BuildPath(PathType type, IntVector source, IntVector dest);
+        void BuildPath(PathType type, IntVector source, IntVector dest, bool buildFixed = false);
         bool CanBuildPath(PathType type, IntVector source, IntVector dest);
         bool CanBuildAt(PathType type, IntVector pos);
     }
@@ -66,12 +66,12 @@ namespace Industropolis.Sim
 
         public bool CanBuildAt(PathType type, IntVector pos) => CanBuildAt(type, pos, Vector2.Zero);
 
-        public virtual void BuildPath(PathType type, IntVector source, IntVector dest)
+        public virtual void BuildPath(PathType type, IntVector source, IntVector dest, bool buildFixed)
         {
             var category = GetCategory(type);
 
-            var sourceNode = AddNode(source, category);
-            var destNode = AddNode(dest, category);
+            var sourceNode = AddNode(source, category, buildFixed);
+            var destNode = AddNode(dest, category, buildFixed);
 
             TNode prev = sourceNode;
             var dir = source.Direction(dest);
@@ -82,11 +82,11 @@ namespace Industropolis.Sim
                 if (_manager.GetPath(pos) is TPath p)
                 {
                     if (p.Direction.IsParallelTo(dir)) DeletePath(p);
-                    else AddNode(pos, category);
+                    else AddNode(pos, category, buildFixed);
                 }
                 if (_manager.GetNode(pos) is TNode n && n != sourceNode)
                 {
-                    if (!prev.Connections.ContainsKey(n)) AddPath(type, prev, n);
+                    if (!prev.Connections.ContainsKey(n)) AddPath(type, prev, n, buildFixed);
                     prev = n;
                 }
             }
@@ -98,27 +98,33 @@ namespace Industropolis.Sim
             }
         }
 
-        private void AddPath(PathType type, TNode source, TNode dest)
+        private void AddPath(PathType type, TNode source, TNode dest, bool fixedPath)
         {
             var path = MakePath(type, source, dest);
             source.Connect(dest, path);
             dest.Connect(source, path);
+            path.Fixed = fixedPath;
             _manager.AddPath(path);
         }
 
-        private TNode AddNode(IntVector pos, PathCategory category)
+        private TNode AddNode(IntVector pos, PathCategory category, bool fixedNode)
         {
             // If node already exists, return that
-            if (_manager.GetNode(pos) is TNode n) return n;
+            if (_manager.GetNode(pos) is TNode n)
+            {
+                n.Fixed = fixedNode;
+                return n;
+            }
 
             var node = MakeNode(pos, category);
+            node.Fixed = fixedNode;
 
             // If path exists at pos, delete and build paths to source and dest 
             if (_manager.GetPath(pos) is TPath p)
             {
                 DeletePath(p);
-                AddPath(p.PathType, p.Source, node);
-                AddPath(p.PathType, node, p.Dest);
+                AddPath(p.PathType, p.Source, node, p.Fixed);
+                AddPath(p.PathType, node, p.Dest, p.Fixed);
             }
 
             _manager.AddNode(node);
@@ -140,7 +146,7 @@ namespace Industropolis.Sim
             var nodes = new List<TNode>(node.Connections.Keys);
             var type = node.Connections[nodes[0]].PathType;
             _manager.RemoveNode(node);
-            AddPath(type, nodes[0], nodes[1]);
+            AddPath(type, nodes[0], nodes[1], node.Fixed);
         }
 
         private void DeleteNode(TNode node)
@@ -160,13 +166,13 @@ namespace Industropolis.Sim
             if (_manager.GetPath(pos) is TPath p && !p.Fixed)
             {
                 DeletePath(p);
-                BuildPath(p.PathType, p.Source.Pos, pos + pos.Direction8(p.Source.Pos));
-                BuildPath(p.PathType, p.Dest.Pos, pos + pos.Direction8(p.Dest.Pos));
+                BuildPath(p.PathType, p.Source.Pos, pos + pos.Direction8(p.Source.Pos), p.Fixed);
+                BuildPath(p.PathType, p.Dest.Pos, pos + pos.Direction8(p.Dest.Pos), p.Fixed);
             }
             if (_manager.GetNode(pos) is TNode n && !n.Fixed)
             {
                 var nodes = new List<TNode>(n.Connections.Keys);
-                foreach (var connection in nodes) AddNode(pos + pos.Direction8(connection.Pos), n.Category);
+                foreach (var connection in nodes) AddNode(pos + pos.Direction8(connection.Pos), n.Category, n.Fixed);
                 DeleteNode(n);
             }
         }
