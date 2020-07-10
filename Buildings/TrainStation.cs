@@ -6,7 +6,7 @@ namespace Industropolis.Sim
     {
         private Map _map;
         private VehicleNode? _stop;
-        private RailNode? _entrance;
+        private VehicleNode? _entrance;
 
         public TrainStation(Map map)
         {
@@ -19,23 +19,17 @@ namespace Industropolis.Sim
 
         public void Setup()
         {
-            _stop = new RailNode(Pos + new IntVector(Width, 0));
-            _entrance = new RailNode(Pos + new IntVector(Width, Height - 1));
-            _stop.Fixed = true;
-            _entrance.Fixed = true;
+            var stopPos = Pos + new IntVector(Width, 0);
+            var entrancePos = Pos + new IntVector(Width, Height - 1);
+            _map.BuildPath(PathType.Rail, stopPos, entrancePos, true);
+
+            _stop = _map.GetNode(stopPos);
+            _entrance = _map.GetNode(entrancePos);
+
+            if (_stop == null) throw new System.Exception("Could not build train station rails");
 
             Entrance = new BuildingEntrance(this, _stop.Pos, PathCategory.Rail);
             Entrance.Connect(_stop);
-
-            var path = new Rail(_entrance, _stop);
-            path.Fixed = true;
-
-            _stop.Connect(_entrance, path);
-            _entrance.Connect(_stop, path);
-
-            _map.AddNode(_stop);
-            _map.AddNode(_entrance);
-            _map.AddPath(path);
         }
 
         public override void Remove()

@@ -112,7 +112,7 @@ namespace Industropolis.Sim
             // If node already exists, return that
             if (_manager.GetNode(pos) is TNode n)
             {
-                n.Fixed = fixedNode;
+                if (fixedNode) n.Fixed = true;
                 return n;
             }
 

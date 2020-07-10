@@ -223,11 +223,14 @@ namespace Industropolis.Sim
             route.Remove();
         }
 
-        public void AddNode(VehicleNode node) => VehiclePaths.AddNode(node);
+        public void BuildPath(PathType type, IntVector source, IntVector dest, bool buildFixed = false)
+        {
+            _pathBuilder.BuildPath(type, source, dest, buildFixed);
+        }
+
         public VehicleNode? GetNode(IntVector pos) => VehiclePaths.GetNode(pos);
         public void RemoveNode(VehicleNode node) => VehiclePaths.RemoveNode(node);
 
-        public void AddPath(VehiclePath path) => VehiclePaths.AddPath(path);
         public VehiclePath? GetPath(IntVector pos) => VehiclePaths.GetPath(pos);
         public void RemovePath(VehiclePath path) => VehiclePaths.RemovePath(path);
         public void DeletePathSegment(IntVector pos) => _pathBuilder.DeletePathSegment(pos);
