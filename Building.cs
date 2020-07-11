@@ -3,19 +3,6 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public enum BuildingType
-    {
-        None,
-        Workshop,
-        //House,
-        Mine,
-        Farm,
-        TestProducer,
-        TestConsumer,
-        TrainStation,
-        Core
-    }
-
     public class BuildingEntrance
     {
         private Building _parent;
@@ -81,6 +68,8 @@ namespace Industropolis.Sim
         {
 
         }
+
+        public static Building Create(Map map, BuildingType type, IntVector pos) => BuildingFactory.Create(map, type, pos);
     }
 
     public class ProductionBuilding : Building

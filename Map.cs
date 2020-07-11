@@ -85,22 +85,6 @@ namespace Industropolis.Sim
             }
         }
 
-        public Building CreateBuilding(BuildingType type, IntVector pos)
-        {
-            switch (type)
-            {
-                case BuildingType.Workshop: return new Workshop();
-                //case BuildingType.House: building = new House(this.Population); break;
-                case BuildingType.Mine: return new Mine(this, pos);
-                case BuildingType.Farm: return new Farm(this, pos);
-                case BuildingType.TestConsumer: return new TestConsumer();
-                case BuildingType.TestProducer: return new TestProducer();
-                case BuildingType.TrainStation: return new TrainStation(this);
-                case BuildingType.Core: return new Core(this);
-                default: return new TestProducer();
-            }
-        }
-
         public bool CanBuild(Building building, IntVector pos)
         {
             for (int x = 0; x < building.Width; x++)

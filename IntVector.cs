@@ -119,6 +119,8 @@ namespace Industropolis.Sim
 
         public Vector2 ToVector2() => new Vector2(X, Y);
 
+        public static implicit operator IntVector((int x, int y) t) => new IntVector(t.x, t.y);
+
         public override int GetHashCode()
         {
             return X.GetHashCode() + Y.GetHashCode();
