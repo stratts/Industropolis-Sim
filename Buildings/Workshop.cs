@@ -23,6 +23,9 @@ namespace Industropolis.Sim
         {
             Type = BuildingType.Workshop;
             Recipe = Recipes.GetRecipe("None");
+            Width = 2;
+            Height = 2;
+            Entrance = new BuildingEntrance(this, (0, 1), PathCategory.Road);
         }
 
         private void LoadRecipe(Recipe recipe)
