@@ -6,25 +6,27 @@ namespace Industropolis.Sim
         public Item Item => Route.Item;
 
         public int Carrying { get; private set; } = 0;
-        public int MaxCapacity { get; } = 50;
-
-        private Building? _building;
+        public int MaxCapacity { get; } = 5;
 
         public Hauler(Route route) : base(route) { }
 
         protected override void DestinationReached()
         {
-            _building = Destination.GetLink<Building>();
-            if (_building.Output != null && Carrying <= 0) _action = Load;
-            else if (_building.Input != null) _action = Unload;
+            var building = Destination.GetLink<Building>();
+            if (building.Output != null && Carrying <= 0 && building.Output.Has(Item)) _action = Load;
+            else if (building.Input != null && building.Input.Accepts(Item)) _action = Unload;
         }
 
         private void Load()
         {
-            if (Carrying < MaxCapacity)
+            var building = Destination.GetLink<Building>();
+            if (Carrying < MaxCapacity && building.Output != null)
             {
-                _building!.Output!.Remove(Item);
-                Carrying++;
+                if (building.Output.CanRemove(Item))
+                {
+                    building.Output.Remove(Item);
+                    Carrying++;
+                }
             }
             else
             {
@@ -35,9 +37,10 @@ namespace Industropolis.Sim
 
         private void Unload()
         {
-            if (Carrying > 0)
+            var building = Destination.GetLink<Building>();
+            if (Carrying > 0 && building.Input != null && building.Input.CanInsert(Item))
             {
-                _building!.Input!.Insert(Item);
+                building.Input.Insert(Item);
                 Carrying--;
             }
             else

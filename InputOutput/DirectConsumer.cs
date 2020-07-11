@@ -48,7 +48,7 @@ namespace Industropolis.Sim
             {
                 if (b.Item == item) return b;
             }
-            throw new System.ArgumentException("Item not contained in buffers");
+            throw new System.ArgumentException($"Item {item} not contained in buffers");
         }
 
         public void AddItem(int bufferSize, int consumeAmount, Item item)
