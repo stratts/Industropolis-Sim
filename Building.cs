@@ -12,7 +12,8 @@ namespace Industropolis.Sim
         Farm,
         TestProducer,
         TestConsumer,
-        TrainStation
+        TrainStation,
+        Core
     }
 
     public class BuildingEntrance

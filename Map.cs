@@ -29,11 +29,13 @@ namespace Industropolis.Sim
         private VehiclePathBuilder _pathBuilder;
         private Dictionary<IntVector, MapChunk> _chunks = new Dictionary<IntVector, MapChunk>();
         private int _chunkSize = 32;
+        private Dictionary<Item, int> _resources = new Dictionary<Item, int>();
 
         public IPathContainer<VehicleNode, VehiclePath> VehiclePaths { get; } = new PathContainer<VehicleNode, VehiclePath>();
         public IReadOnlyList<Building> Buildings => buildings;
         public List<Vehicle> Vehicles = new List<Vehicle>();
         public IReadOnlyList<Route> Routes => routes;
+        public IReadOnlyDictionary<Item, int> Resources => _resources;
 
         //public PopulationInfo Population { get; } = new PopulationInfo();
         public int CurrentMoney
@@ -94,6 +96,7 @@ namespace Industropolis.Sim
                 case BuildingType.TestConsumer: return new TestConsumer();
                 case BuildingType.TestProducer: return new TestProducer();
                 case BuildingType.TrainStation: return new TrainStation(this);
+                case BuildingType.Core: return new Core(this);
                 default: return new TestProducer();
             }
         }
@@ -235,48 +238,25 @@ namespace Industropolis.Sim
         public void RemovePath(VehiclePath path) => VehiclePaths.RemovePath(path);
         public void DeletePathSegment(IntVector pos) => _pathBuilder.DeletePathSegment(pos);
 
+        public void AddResource(Item item, int amount)
+        {
+            if (!_resources.ContainsKey(item)) _resources[item] = 0;
+            _resources[item] += amount;
+        }
+
         public int GetResourceAmount(Item item)
         {
-            foreach (Building b in buildings)
-            {
-                if (b is Stockpile s)
-                {
-                    if (s.Output == null) return 0;
-                    if (s.Output.Has(item))
-                    {
-                        return s.Output.AmountOf(item);
-                    }
-                }
-            }
-
-            return 0;
+            bool has = _resources.TryGetValue(item, out int count);
+            if (!has) return 0;
+            return count;
         }
 
-        public bool HasResource(Item item, int amount)
-        {
-            foreach (Building b in buildings)
-            {
-                if (b is Stockpile s)
-                {
-                    if (s.HasItem(item, amount)) return true;
-                }
-            }
-            return false;
-        }
+        public bool HasResource(Item item, int amount) => GetResourceAmount(item) >= amount;
 
-        public void GetResource(Item item, int amount)
+        public void UseResource(Item item, int amount)
         {
-            foreach (Building b in buildings)
-            {
-                if (b is Stockpile s)
-                {
-                    if (s.HasItem(item, amount))
-                    {
-                        s.RemoveItem(item, amount);
-                        return;
-                    }
-                }
-            }
+            if (!HasResource(item, amount)) throw new ArgumentException($"Not enough resources to use {amount} of {item}");
+            _resources[item] -= amount;
         }
 
         public Tile GetTile(IntVector pos)
