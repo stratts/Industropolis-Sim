@@ -12,6 +12,7 @@ namespace Industropolis.Sim
 
         protected override void DestinationReached()
         {
+            Destination.Occupied = true;
             var building = Destination.GetLink<Building>();
             if (building.Output != null && Carrying <= 0 && building.Output.Has(Item)) _action = Load;
             else if (building.Input != null && building.Input.Accepts(Item)) _action = Unload;
@@ -30,6 +31,7 @@ namespace Industropolis.Sim
             }
             else
             {
+                Destination.Occupied = false;
                 FlipDirection();
                 GoNext();
             }
@@ -45,6 +47,7 @@ namespace Industropolis.Sim
             }
             else
             {
+                Destination.Occupied = false;
                 FlipDirection();
                 GoNext();
             }

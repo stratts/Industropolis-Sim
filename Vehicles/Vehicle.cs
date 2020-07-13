@@ -83,7 +83,6 @@ namespace Industropolis.Sim
                     if (_nodes.Count > 0)
                     {
                         var node = _nodes[0];
-                        node.Occupied = false;
                         RearNode = node;
                         _nodes.Remove(node);
                     }
@@ -112,10 +111,7 @@ namespace Industropolis.Sim
         {
             FrontPos = 0;
             RearPos = -Length;
-            foreach (var lane in _lanes) lane.Depart(this);
-            foreach (var node in _nodes) node.Occupied = false;
-            _nodes.Clear();
-            _lanes.Clear();
+            ClearOccupied();
             Destination = dest;
             PrevNode = source;
             RearNode = source;
@@ -124,22 +120,24 @@ namespace Industropolis.Sim
 
         public override void Remove()
         {
+            ClearOccupied();
+            base.Remove();
+        }
+
+        private void ClearOccupied()
+        {
             foreach (var lane in _lanes) lane.Depart(this);
             foreach (var node in _nodes) node.Occupied = false;
             _nodes.Clear();
             _lanes.Clear();
-            base.Remove();
+            DepartedLane?.Invoke(this);
         }
 
         protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
 
         protected void GoNext()
         {
-            if (PrevNode != NextNode)
-            {
-                _nodes.Add(NextNode);
-                NextNode.Occupied = true;
-            }
+            if (PrevNode != NextNode) _nodes.Add(NextNode);
 
             var current = NextNode;
             PrevNode = current;

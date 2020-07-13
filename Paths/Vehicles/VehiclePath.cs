@@ -85,6 +85,9 @@ namespace Industropolis.Sim
 
         public override bool AtCapacity => _queue.Count >= Parent.Length;
 
+        public int Capacity => (int)Parent.Length;
+        public int CapacityUsed => _queue.Count;
+
         public override void Enter(Vehicle vehicle)
         {
             _queue.Add(vehicle);
