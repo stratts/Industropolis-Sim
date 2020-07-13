@@ -7,7 +7,28 @@ namespace Industropolis.Sim
 
     public class Route : Route<VehicleNode>
     {
+        public List<Hauler> Haulers { get; } = new List<Hauler>();
+
         public Route(Map info, VehicleNode src, VehicleNode dest) : base(info, src, dest) { }
+
+        public void AddHauler(VehicleType type)
+        {
+            var hauler = Vehicle.Create(type, this);
+            if (hauler is Hauler h)
+            {
+                Haulers.Add(h);
+                Map.AddVehicle(h);
+            }
+            else throw new ArgumentException($"Vehicle {type} is not a hauler");
+        }
+
+        public void RemoveHauler()
+        {
+            if (Haulers.Count == 0) return;
+            var hauler = Haulers[Haulers.Count - 1];
+            Haulers.Remove(hauler);
+            hauler.Remove();
+        }
     }
 
     public class Route<T> : MapObject where T : IPathNode<T>
@@ -36,9 +57,6 @@ namespace Industropolis.Sim
                 //foreach (var h in Haulers) h.Item = value;
             }
         }
-        //public List<Hauler> Haulers { get; } = new List<Hauler>();
-
-        //public int NumHaulers => Haulers.Count;
 
         public Route(Map info, T src, T dest)
         {
@@ -106,27 +124,6 @@ namespace Industropolis.Sim
             // Unsubscribe because the node may not be in the rerouted path
             node.Changed -= NodeChanged;
             _reroute = true;
-        }
-
-        public void AddHauler()
-        {
-            //if (!Map.Population.Use()) return;
-            /*var hauler = new Hauler(Map, Source.X, Source.Y);
-            hauler.Route = this;
-            hauler.Item = Item;
-            Haulers.Add(hauler);
-            hauler.Haul();
-            Map.AddEntity(hauler);*/
-        }
-
-        public void RemoveHauler()
-        {
-            /*if (Haulers.Count == 0) return;
-             Hauler h = Haulers[0];
-             Haulers.RemoveAt(0);
-             h.Route = null;
-             Map.RemoveEntity(h);*/
-            //Map.Population.Free();
         }
     }
 }

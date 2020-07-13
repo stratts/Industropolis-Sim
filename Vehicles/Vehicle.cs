@@ -118,6 +118,15 @@ namespace Industropolis.Sim
             NextNode = source;
         }
 
+        public override void Remove()
+        {
+            foreach (var lane in _lanes) lane.Depart(this);
+            foreach (var node in _nodes) node.Occupied = false;
+            _nodes.Clear();
+            _lanes.Clear();
+            base.Remove();
+        }
+
         protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
 
         protected void GoNext()
@@ -154,5 +163,7 @@ namespace Industropolis.Sim
         }
 
         protected abstract void DestinationReached();
+
+        public static Vehicle Create(VehicleType type, Route route) => VehicleFactory.Create(type, route);
     }
 }
