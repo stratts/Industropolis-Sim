@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Industropolis.Sim
@@ -19,6 +20,8 @@ namespace Industropolis.Sim
 
         private Recipe _recipe;
 
+        public event Action<Workshop>? RecipeChanged;
+
         public Workshop()
         {
             Type = BuildingType.Workshop;
@@ -30,6 +33,7 @@ namespace Industropolis.Sim
 
         private void LoadRecipe(Recipe recipe)
         {
+            RecipeChanged?.Invoke(this);
             var input = new DirectConsumer();
             foreach (RecipeInput i in recipe.Input)
             {
