@@ -10,6 +10,7 @@ namespace Industropolis.Sim
         private RouteDirection _direction;
         private List<VehicleLane> _lanes = new List<VehicleLane>();
         private List<VehicleNode> _nodes = new List<VehicleNode>();
+        private Vehicle? _following;
 
         // Set to null! as they are initialized when GoNext() is called in constructor
         public Route<VehicleNode> Route { get; }
@@ -23,6 +24,8 @@ namespace Industropolis.Sim
         public VehicleNode Destination { get; private set; } = null!;
         public float Length { get; set; } = 0.5f;
         public IReadOnlyList<VehicleLane> Lanes => _lanes;
+
+        public event Action<Vehicle>? DepartedLane;
 
         protected Action? _action;
         protected float _elapsedTime;
@@ -64,7 +67,7 @@ namespace Industropolis.Sim
 
         protected void Move()
         {
-            if (CurrentLane.GetVehicleAhead(this) is Vehicle v && v.RearPos - FrontPos < 0.5f) return;
+            if (_following != null && _following.RearPos - FrontPos < 0.5f) return;
             FrontPos += _speed * _elapsedTime;
             RearPos += _speed * _elapsedTime;
             if (_lanes.Count > 0)
@@ -75,6 +78,7 @@ namespace Industropolis.Sim
                     RearPos = 0;
                     rearLane.Depart(this);
                     _lanes.Remove(rearLane);
+                    DepartedLane?.Invoke(this);
 
                     if (_nodes.Count > 0)
                     {
@@ -144,10 +148,18 @@ namespace Industropolis.Sim
             CurrentLane = CurrentPath.GetLaneTo(NextNode);
             CurrentLane.Enter(this);
             _lanes.Add(CurrentLane);
+            _following = CurrentLane.GetVehicleAhead(this);
+            if (_following != null) _following.DepartedLane += Unfollow;
 
             FrontPos = 0;
 
             _action = FollowPath;
+        }
+
+        private void Unfollow(Vehicle vehicle)
+        {
+            _following = null;
+            vehicle.DepartedLane -= Unfollow;
         }
 
         public IEnumerable<Vector2> GetPoints()
