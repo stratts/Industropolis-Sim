@@ -62,7 +62,18 @@ namespace Industropolis.Sim
             return true;
         }
 
-        public abstract bool CanBuildAt(PathType type, IntVector pos, Vector2 direction);
+        public virtual bool CanBuildAt(PathType type, IntVector pos, Vector2 direction)
+        {
+            if (_manager.GetPath(pos) is VehiclePath p)
+            {
+                if (p.Direction.IsParallelTo(direction))
+                {
+                    if (p.Category != GetCategory(type)) return false;
+                }
+                else if (p.Fixed) return false;
+            }
+            return true;
+        }
 
         public bool CanBuildAt(PathType type, IntVector pos) => CanBuildAt(type, pos, Vector2.Zero);
 
@@ -79,7 +90,7 @@ namespace Industropolis.Sim
             // Build path between every node encountered
             foreach (var pos in source.GetPointsBetween(dest))
             {
-                if (_manager.GetPath(pos) is TPath p)
+                if (_manager.GetPath(pos) is TPath p && !p.Fixed)
                 {
                     if (p.Direction.IsParallelTo(dir)) DeletePath(p);
                     else AddNode(pos, category, buildFixed);
