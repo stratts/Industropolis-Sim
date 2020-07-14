@@ -36,6 +36,7 @@ namespace Industropolis.Sim
         public List<Vehicle> Vehicles = new List<Vehicle>();
         public IReadOnlyList<Route> Routes => routes;
         public IReadOnlyDictionary<Item, int> Resources => _resources;
+        public ICollection<MapChunk> Chunks => _chunks.Values;
 
         //public PopulationInfo Population { get; } = new PopulationInfo();
         public int CurrentMoney

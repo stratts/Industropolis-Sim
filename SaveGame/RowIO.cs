@@ -69,7 +69,7 @@ namespace Industropolis.Sim.SaveGame
             _buffer = new byte[_maxLine * numRows];
         }
 
-        public void WriteRow(params string[] args)
+        public void WriteRow(params object[] args)
         {
             var buffer = _buffer.AsSpan();
 
@@ -81,9 +81,8 @@ namespace Industropolis.Sim.SaveGame
 
             for (int i = 0; i < args.Length; i++)
             {
-                var str = args[i].AsSpan();
-                Encoding.UTF8.GetBytes(str, buffer.Slice(_pos));
-                _pos += str.Length;
+                var str = args[i].ToString().AsSpan();
+                _pos += Encoding.UTF8.GetBytes(str, buffer.Slice(_pos));
                 _buffer[_pos] = (byte)';';
                 _pos++;
             }

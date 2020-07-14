@@ -59,14 +59,14 @@ namespace Industropolis.Sim
                 }
             }
 
-            SaveGame.TestSave.Save(_map);
+            //SaveGame.TestSave.Save(_map);
         }
 
         public override void DeletePathSegment(IntVector pos)
         {
             base.DeletePathSegment(pos);
 
-            SaveGame.TestSave.Save(_map);
+            //SaveGame.TestSave.Save(_map);
         }
 
         public void ConnectBuilding(Building building)
