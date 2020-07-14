@@ -13,6 +13,7 @@ namespace Industropolis.Sim
         void RemovePath(TPath path);
         event Action<TNode>? NodeAdded;
         event Action<TPath>? PathAdded;
+        IReadOnlyList<TPath> Paths { get; }
     }
 
     public class PathContainer<TNode, TPath> : IPathContainer<TNode, TPath>
@@ -23,6 +24,8 @@ namespace Industropolis.Sim
 
         private List<TNode> _nodes = new List<TNode>();
         private List<TPath> _paths = new List<TPath>();
+
+        public IReadOnlyList<TPath> Paths => _paths;
 
         public TNode? GetNode(IntVector pos)
         {

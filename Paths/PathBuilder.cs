@@ -12,6 +12,7 @@ namespace Industropolis.Sim
 
     public enum PathType
     {
+        Driveway,
         SimpleRoad,
         OneWayRoad,
         Rail
@@ -32,6 +33,7 @@ namespace Industropolis.Sim
             {
                 case PathType.SimpleRoad: return PathCategory.Road;
                 case PathType.OneWayRoad: return PathCategory.Road;
+                case PathType.Driveway: return PathCategory.Road;
                 case PathType.Rail: return PathCategory.Rail;
                 default: return default(PathCategory);
             }
@@ -172,7 +174,7 @@ namespace Industropolis.Sim
 
         private void DeletePath(TPath path) => _manager.RemovePath(path);
 
-        public void DeletePathSegment(IntVector pos)
+        public virtual void DeletePathSegment(IntVector pos)
         {
             if (_manager.GetPath(pos) is TPath p && !p.Fixed)
             {

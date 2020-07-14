@@ -21,6 +21,13 @@ namespace Industropolis.Sim
         }
     }
 
+    public class Driveway : SimpleRoad
+    {
+        public Driveway(VehicleNode source, VehicleNode dest) : base(source, dest) { }
+
+        public override PathType PathType => PathType.Driveway;
+    }
+
     public class OneWayRoad : Road
     {
         public OneWayRoad(VehicleNode source, VehicleNode dest) : base(source, dest) { }

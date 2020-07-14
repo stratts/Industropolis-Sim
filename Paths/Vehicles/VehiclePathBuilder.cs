@@ -20,6 +20,7 @@ namespace Industropolis.Sim
                 case PathType.Rail: return new Rail(source, dest);
                 case PathType.SimpleRoad: return new SimpleRoad(source, dest);
                 case PathType.OneWayRoad: return new OneWayRoad(source, dest);
+                case PathType.Driveway: return new Driveway(source, dest);
                 /*case PathType.Rail: return new Rail(source, dest);*/
                 default: return new SimpleRoad(source, dest);
             }
@@ -57,6 +58,15 @@ namespace Industropolis.Sim
                     }
                 }
             }
+
+            SaveGame.TestSave.Save(_map);
+        }
+
+        public override void DeletePathSegment(IntVector pos)
+        {
+            base.DeletePathSegment(pos);
+
+            SaveGame.TestSave.Save(_map);
         }
 
         public void ConnectBuilding(Building building)
@@ -72,7 +82,7 @@ namespace Industropolis.Sim
                 entrance.Connect(node);
                 if (entrance.Node == null) throw new Exception("Could not connect entrance");
                 _manager.AddNode(entrance.Node);
-                BuildPath(PathType.SimpleRoad, entrance.Pos, entrance.ConnectionPos);
+                BuildPath(PathType.Driveway, entrance.Pos, entrance.ConnectionPos);
             }
         }
 
