@@ -74,25 +74,25 @@ namespace Industropolis.Sim.SaveGame
             reader.LoadFile();
             while (!reader.AtEnd)
             {
-                var row = new RowParser(reader.ReadRow());
-                var source = row.ReadIntVector();
-                var dest = row.ReadIntVector(); ;
-                var type = row.ReadEnum<PathType>();
-                var isFixed = row.ReadBool();
+                var source = reader.ReadIntVector();
+                var dest = reader.ReadIntVector(); ;
+                var type = reader.ReadEnum<PathType>();
+                var isFixed = reader.ReadBool();
                 map.BuildPath(type, source, dest, isFixed);
+                reader.NextRow();
             }
 
             reader = new RowReader("savegame/buildings.csv");
             reader.LoadFile();
             while (!reader.AtEnd)
             {
-                var row = new RowParser(reader.ReadRow());
-                var pos = row.ReadIntVector();
-                var type = row.ReadEnum<BuildingType>();
+                var pos = reader.ReadIntVector();
+                var type = reader.ReadEnum<BuildingType>();
                 var building = Building.Create(map, type, pos);
-                if (building is Workshop w) w.Recipe = Recipes.GetRecipe(row.ReadString());
-                if (building.Output is DirectProducer p) p.SetBuffer(row.ReadInt());
+                if (building is Workshop w) w.Recipe = Recipes.GetRecipe(reader.ReadString());
+                if (building.Output is DirectProducer p) p.SetBuffer(reader.ReadInt());
                 map.AddBuilding(building, pos);
+                reader.NextRow();
             }
 
             var end = DateTime.Now;

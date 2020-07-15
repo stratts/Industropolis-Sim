@@ -4,47 +4,19 @@ using System.Text;
 
 namespace Industropolis.Sim.SaveGame
 {
-    public ref struct RowParser
-    {
-        private Span<string> _row;
-
-        public bool IsEmpty => _row.Length == 0;
-
-        public RowParser(Span<string> row)
-        {
-            _row = row;
-        }
-
-        public IntVector ReadIntVector() => IntVector.Parse(ReadString());
-
-        public int ReadInt() => int.Parse(ReadString());
-
-        public bool ReadBool() => bool.Parse(ReadString());
-
-        public T ReadEnum<T>() where T : struct => Enum.Parse<T>(ReadString());
-
-        public string ReadString()
-        {
-            if (IsEmpty) throw new ArgumentException("Row was empty");
-            var str = _row[0];
-            _row = _row.Slice(1);
-            return str;
-        }
-    }
-
     public class RowReader
     {
         private string _file;
         private byte[] _buffer;
-        private string[] _fieldBuffer;
+        private char[] _fieldBuffer;
         private int _pos;
         private Memory<string> _row;
 
         public RowReader(string file)
         {
             _file = file;
-            _fieldBuffer = new string[10];
             _buffer = new byte[0];
+            _fieldBuffer = new char[128];
         }
 
         public void LoadFile()
@@ -59,29 +31,33 @@ namespace Industropolis.Sim.SaveGame
 
         public bool AtEnd => _pos >= _buffer.Length;
 
-        public Span<string> ReadRow()
+        public IntVector ReadIntVector() => IntVector.Parse(ReadField());
+
+        public int ReadInt() => int.Parse(ReadField());
+
+        public bool ReadBool() => bool.Parse(ReadField());
+
+        public T ReadEnum<T>() where T : struct => Enum.Parse<T>(ReadField().ToString());
+
+        public string ReadString() => ReadField().ToString();
+
+        private Span<char> ReadField()
         {
-            if (AtEnd) return null;
             var buffer = _buffer.AsSpan().Slice(_pos);
+            var sep = buffer.IndexOf((byte)';');
+            if (AtEnd || _buffer[_pos] == (byte)'\n' || sep == -1) throw new ArgumentException("End of row or file");
+            var text = buffer.Slice(0, sep);
+            int len = Encoding.UTF8.GetChars(text, _fieldBuffer);
+            _pos += sep + 1;
+            return _fieldBuffer.AsSpan().Slice(0, len);
+        }
 
-            int fieldStart = 0;
-            int fieldCount = 0;
-
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                _pos++;
-                byte c = buffer[i];
-                if (c == (byte)';')
-                {
-                    var field = buffer.Slice(fieldStart, i - fieldStart);
-                    _fieldBuffer[fieldCount] = Encoding.UTF8.GetString(field);
-                    fieldCount++;
-                    fieldStart = i + 1;
-                }
-                if (c == (byte)'\n') break;
-            }
-
-            return _fieldBuffer.AsSpan(0, fieldCount);
+        public void NextRow()
+        {
+            if (AtEnd) return;
+            var newLine = _buffer.AsSpan().Slice(_pos).IndexOf((byte)'\n');
+            if (newLine == -1) _pos = _buffer.Length;
+            else _pos += newLine + 1;
         }
     }
 

@@ -72,10 +72,10 @@ namespace Industropolis.Sim
             return $"({X}, {Y})";
         }
 
-        public static IntVector Parse(string input)
+        public static IntVector Parse(Span<char> input)
         {
             Span<char> trimChars = stackalloc char[] { '(', ')' };
-            var trimmed = input.AsSpan().Trim(trimChars);
+            var trimmed = input.Trim(trimChars);
             var sep = trimmed.IndexOf(',');
             var x = trimmed.Slice(0, sep).Trim();
             var y = trimmed.Slice(sep + 1).Trim();
