@@ -10,6 +10,8 @@ namespace Industropolis.Sim
         public bool CanConsume => _canConsume();
         public IEnumerable<Item> Items => _consumeAmount.Keys;
 
+        public IReadOnlyList<ItemBuffer> Buffers => _buffers;
+
         public DirectConsumer()
         {
 

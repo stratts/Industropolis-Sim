@@ -10,6 +10,7 @@ namespace Industropolis.Sim
             Height = 3;
             Output = new InfiniteDirectOutput(Item.Wood);
             Entrance = new BuildingEntrance(this, new IntVector(1, 2), PathCategory.Road);
+            Type = BuildingType.TestProducer;
         }
     }
 
@@ -21,6 +22,7 @@ namespace Industropolis.Sim
             Height = 2;
             Input = new InfiniteDirectInput();
             Entrance = new BuildingEntrance(this, new IntVector(0, 1), PathCategory.Road);
+            Type = BuildingType.TestConsumer;
         }
     }
 }

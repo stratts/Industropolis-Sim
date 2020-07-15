@@ -15,6 +15,7 @@ namespace Industropolis.Sim
             Height = 4;
             Input = new InfiniteDirectInput();
             Output = new InfiniteDirectOutput(Item.Wood);
+            Type = BuildingType.TrainStation;
         }
 
         public void Setup()

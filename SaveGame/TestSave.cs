@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Buffers;
+using System.Text.Json;
 
 namespace Industropolis.Sim.SaveGame
 {
@@ -8,6 +10,7 @@ namespace Industropolis.Sim.SaveGame
         public static void Save(Map map)
         {
             Directory.CreateDirectory("savegame");
+            Directory.CreateDirectory("savegame/chunks");
             Console.Write("Saving... ");
             var start = DateTime.Now;
 
@@ -18,21 +21,33 @@ namespace Industropolis.Sim.SaveGame
             {
                 if (path.PathType == PathType.Driveway) continue;
                 writer.WriteRow(
-                    path.Source.Pos.X,
-                    path.Source.Pos.Y,
-                    path.Dest.Pos.X,
-                    path.Dest.Pos.Y,
+                    path.Source,
+                    path.Dest,
                     path.PathType,
                     path.Fixed
                 );
             }
             writer.SaveFile();
 
-            writer = new RowWriter("savegame/chunk.csv", ((32 * 32) + 1) * map.Chunks.Count);
+            writer = new RowWriter("savegame/buildings.csv", map.Buildings.Count);
+
+            foreach (var building in map.Buildings)
+            {
+                writer.StartRow();
+                writer.WriteFields(building.Pos, building.Type);
+                if (building is Workshop w) writer.WriteField(w.Recipe.Name);
+                if (building.Output is DirectProducer p) writer.WriteField(p.Buffer);
+                if (building.Input is DirectConsumer c)
+                {
+                    foreach (var buffer in c.Buffers) writer.WriteFields(buffer.Item, buffer.Buffer);
+                }
+            }
+
+            writer.SaveFile();
 
             foreach (var chunk in map.Chunks)
             {
-                writer.WriteRow(chunk.Pos, chunk.Size);
+                writer = new RowWriter($"savegame/chunks/chunk_{chunk.Pos.X}_{chunk.Pos.Y}.csv", ((32 * 32) + 1) * map.Chunks.Count);
                 for (int x = 0; x < chunk.Size.X; x++)
                 {
                     for (int y = 0; y < chunk.Size.Y; y++)
@@ -42,9 +57,8 @@ namespace Industropolis.Sim.SaveGame
                         else writer.WriteRow(tile.Nutrients, tile.Resource, tile.ResourceCount);
                     }
                 }
+                writer.SaveFile();
             }
-
-            writer.SaveFile();
 
             var end = DateTime.Now;
             var span = end - start;
@@ -60,12 +74,25 @@ namespace Industropolis.Sim.SaveGame
             reader.LoadFile();
             while (!reader.AtEnd)
             {
-                var row = reader.ReadRow();
-                var source = (int.Parse(row[0]), int.Parse(row[1]));
-                var dest = (int.Parse(row[2]), int.Parse(row[3]));
-                var type = Enum.Parse<PathType>(row[4]);
-                var isFixed = bool.Parse(row[5]);
+                var row = new RowParser(reader.ReadRow());
+                var source = row.ReadIntVector();
+                var dest = row.ReadIntVector(); ;
+                var type = row.ReadEnum<PathType>();
+                var isFixed = row.ReadBool();
                 map.BuildPath(type, source, dest, isFixed);
+            }
+
+            reader = new RowReader("savegame/buildings.csv");
+            reader.LoadFile();
+            while (!reader.AtEnd)
+            {
+                var row = new RowParser(reader.ReadRow());
+                var pos = row.ReadIntVector();
+                var type = row.ReadEnum<BuildingType>();
+                var building = Building.Create(map, type, pos);
+                if (building is Workshop w) w.Recipe = Recipes.GetRecipe(row.ReadString());
+                if (building.Output is DirectProducer p) p.SetBuffer(row.ReadInt());
+                map.AddBuilding(building, pos);
             }
 
             var end = DateTime.Now;

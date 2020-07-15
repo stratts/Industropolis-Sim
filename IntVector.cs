@@ -72,6 +72,16 @@ namespace Industropolis.Sim
             return $"({X}, {Y})";
         }
 
+        public static IntVector Parse(string input)
+        {
+            Span<char> trimChars = stackalloc char[] { '(', ')' };
+            var trimmed = input.AsSpan().Trim(trimChars);
+            var sep = trimmed.IndexOf(',');
+            var x = trimmed.Slice(0, sep).Trim();
+            var y = trimmed.Slice(sep + 1).Trim();
+            return (int.Parse(x), int.Parse(y));
+        }
+
         public bool WithinBounds(int width, int height)
         {
             return (X >= 0 && Y >= 0 && X < width && Y < height);

@@ -4,12 +4,41 @@ using System.Text;
 
 namespace Industropolis.Sim.SaveGame
 {
+    public ref struct RowParser
+    {
+        private Span<string> _row;
+
+        public bool IsEmpty => _row.Length == 0;
+
+        public RowParser(Span<string> row)
+        {
+            _row = row;
+        }
+
+        public IntVector ReadIntVector() => IntVector.Parse(ReadString());
+
+        public int ReadInt() => int.Parse(ReadString());
+
+        public bool ReadBool() => bool.Parse(ReadString());
+
+        public T ReadEnum<T>() where T : struct => Enum.Parse<T>(ReadString());
+
+        public string ReadString()
+        {
+            if (IsEmpty) throw new ArgumentException("Row was empty");
+            var str = _row[0];
+            _row = _row.Slice(1);
+            return str;
+        }
+    }
+
     public class RowReader
     {
         private string _file;
         private byte[] _buffer;
         private string[] _fieldBuffer;
         private int _pos;
+        private Memory<string> _row;
 
         public RowReader(string file)
         {
@@ -71,21 +100,31 @@ namespace Industropolis.Sim.SaveGame
 
         public void WriteRow(params object[] args)
         {
-            var buffer = _buffer.AsSpan();
+            StartRow();
+            WriteFields(args);
+        }
 
+        public void StartRow()
+        {
             if (_pos > 0)
             {
                 _buffer[_pos] = (byte)'\n';
                 _pos++;
             }
+        }
 
-            for (int i = 0; i < args.Length; i++)
-            {
-                var str = args[i].ToString().AsSpan();
-                _pos += Encoding.UTF8.GetBytes(str, buffer.Slice(_pos));
-                _buffer[_pos] = (byte)';';
-                _pos++;
-            }
+        public void WriteField(object arg)
+        {
+            var buffer = _buffer.AsSpan();
+            var str = arg.ToString().AsSpan();
+            _pos += Encoding.UTF8.GetBytes(str, buffer.Slice(_pos));
+            _buffer[_pos] = (byte)';';
+            _pos++;
+        }
+
+        public void WriteFields(params object[] args)
+        {
+            foreach (var arg in args) WriteField(arg);
         }
 
         public void SaveFile()

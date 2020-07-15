@@ -9,6 +9,7 @@ namespace Industropolis.Sim
             Width = 4;
             Height = 4;
             Entrance = new BuildingEntrance(this, new IntVector(1, 3), PathCategory.Road);
+            Type = BuildingType.Core;
         }
     }
 }

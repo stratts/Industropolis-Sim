@@ -24,6 +24,8 @@ namespace Industropolis.Sim
             this.ProduceAmount = produceAmount;
         }
 
+        public void SetBuffer(int count) => _buffer.Buffer = count;
+
         public bool Produce()
         {
             if (CanProduce)
