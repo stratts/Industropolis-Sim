@@ -21,14 +21,14 @@ namespace Industropolis.Sim
         public bool Consume()
         {
             Tile? t = GetCurrentTile();
-            if (t == null) return false;
-            ConsumeResource(t);
+            if (!t.HasValue) return false;
+            ConsumeResource(t.Value);
             return true;
         }
 
         private Tile? GetCurrentTile()
         {
-            if (currentTile == null || !HasResource(currentTile))
+            if (currentTile == null || !HasResource(currentTile.Value))
             {
                 currentTile = NextTileWithResource();
             }
@@ -45,7 +45,7 @@ namespace Industropolis.Sim
                     Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
                     if (t != null)
                     {
-                        if (HasResource(t))
+                        if (HasResource(t.Value))
                             return t;
                     }
                 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace Industropolis.Sim.SaveGame
 {
@@ -6,10 +7,13 @@ namespace Industropolis.Sim.SaveGame
     {
         public static void Save(Map map)
         {
+            Directory.CreateDirectory("savegame");
             Console.Write("Saving... ");
-            var paths = map.VehiclePaths.Paths;
-            var writer = new RowWriter("paths.csv", paths.Count);
             var start = DateTime.Now;
+
+            var paths = map.VehiclePaths.Paths;
+            var writer = new RowWriter("savegame/paths.csv", paths.Count);
+
             foreach (var path in paths)
             {
                 if (path.PathType == PathType.Driveway) continue;
@@ -24,8 +28,7 @@ namespace Industropolis.Sim.SaveGame
             }
             writer.SaveFile();
 
-            writer = new RowWriter("chunk.csv", ((32 * 32) + 1) * map.Chunks.Count);
-
+            writer = new RowWriter("savegame/chunk.csv", ((32 * 32) + 1) * map.Chunks.Count);
 
             foreach (var chunk in map.Chunks)
             {
@@ -40,17 +43,20 @@ namespace Industropolis.Sim.SaveGame
                     }
                 }
             }
-            Console.Write("writing... ");
+
             writer.SaveFile();
-            Console.WriteLine("done.");
+
             var end = DateTime.Now;
             var span = end - start;
-            Console.WriteLine(span.TotalSeconds);
+            Console.WriteLine($"done (took {Math.Round(span.TotalMilliseconds)} ms).");
         }
 
         public static void Load(Map map)
         {
-            var reader = new RowReader("paths.csv");
+            Console.Write("Loading... ");
+            var start = DateTime.Now;
+
+            var reader = new RowReader("savegame/paths.csv");
             reader.LoadFile();
             while (!reader.AtEnd)
             {
@@ -61,6 +67,10 @@ namespace Industropolis.Sim.SaveGame
                 var isFixed = bool.Parse(row[5]);
                 map.BuildPath(type, source, dest, isFixed);
             }
+
+            var end = DateTime.Now;
+            var span = end - start;
+            Console.WriteLine($"done (took {Math.Round(span.TotalMilliseconds)} ms).");
         }
     }
 }

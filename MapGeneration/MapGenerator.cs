@@ -71,7 +71,7 @@ namespace Industropolis.Sim
                     {
 
                         tiles[x, y].Resource = resource.Item;
-                        tiles[x, y].ResourceCount = (int)(amount * ((value - threshold) / (1 - threshold)));
+                        tiles[x, y].ResourceCount = (short)(amount * ((value - threshold) / (1 - threshold)));
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace Industropolis.Sim
                     double _y = y + offsetY;
                     double value = (noise.EvaluateOctave(_x / scale, _y / scale, 2, 0.5) + 0.5) / 1.5;
                     if (value < 0) continue;
-                    tiles[x, y].Nutrients = (int)(amount * value);
+                    tiles[x, y].Nutrients = (short)(amount * value);
                 }
             }
         }

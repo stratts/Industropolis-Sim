@@ -1,7 +1,7 @@
 
 namespace Industropolis.Sim
 {
-    public enum Item
+    public enum Item : short
     {
         None,
         Stone,

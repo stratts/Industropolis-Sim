@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public class Tile
+    public struct Tile
     {
-        private int _resourceCount = 0;
+        private short _resourceCount;
 
         public event Action? ResourceExhausted;
 
-        public int Nutrients = 0;
-        public Item Resource { get; set; } = Item.None;
-        public int ResourceCount
+        public short Nutrients;
+        public Item Resource;
+        public short ResourceCount
         {
             get => _resourceCount;
             set
@@ -20,8 +20,6 @@ namespace Industropolis.Sim
                 _resourceCount = value;
             }
         }
-
-        public float SpeedMultiplier => 1;
         //public List<Entity> Entities { get; set; } = new List<Entity>();
     }
 }

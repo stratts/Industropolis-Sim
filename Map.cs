@@ -244,13 +244,13 @@ namespace Industropolis.Sim
             _resources[item] -= amount;
         }
 
-        public Tile GetTile(IntVector pos)
+        public ref Tile GetTile(IntVector pos)
         {
             var chunkData = GetChunkAt(pos);
             if (!ValidPos(pos) || !chunkData.HasValue) throw new ArgumentException("Invalid tile");
             var chunk = chunkData.Value;
             var chunkIndex = pos - chunk.MapOffset;
-            return chunk.Tiles[chunkIndex.X, chunkIndex.Y];
+            return ref chunk.Tiles[chunkIndex.X, chunkIndex.Y];
         }
 
         public bool ValidPos(IntVector pos) => GetChunkAt(pos).HasValue;
@@ -271,12 +271,9 @@ namespace Industropolis.Sim
             {
                 for (int j = y; j < y + size; j++)
                 {
-                    Tile? t = GetTile(new IntVector(i, j));
-                    if (t != null)
-                    {
-                        t.Resource = resource;
-                        t.ResourceCount = amount;
-                    }
+                    Tile t = GetTile(new IntVector(i, j));
+                    t.Resource = resource;
+                    t.ResourceCount = (short)amount;
                 }
             }
         }
