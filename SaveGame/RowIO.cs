@@ -6,13 +6,18 @@ namespace Industropolis.Sim.SaveGame
 {
     public class RowReader : IDisposable
     {
-        private string _file;
+        private Stream _file;
         private byte[] _buffer;
         private char[] _fieldBuffer;
         private int _pos = -1;
         private Memory<string> _row;
 
-        public RowReader(string file)
+        public RowReader(string file) : this(File.OpenRead(file))
+        {
+
+        }
+
+        public RowReader(Stream file)
         {
             _file = file;
             _buffer = new byte[0];
@@ -22,11 +27,8 @@ namespace Industropolis.Sim.SaveGame
         public void LoadFile()
         {
             _pos = 0;
-            using (var f = File.OpenRead(_file))
-            {
-                _buffer = new byte[f.Length];
-                f.Read(_buffer);
-            }
+            _buffer = new byte[_file.Length];
+            _file.Read(_buffer);
         }
 
         public bool AtEnd => _pos >= _buffer.Length;
@@ -57,6 +59,7 @@ namespace Industropolis.Sim.SaveGame
         {
             if (_pos == -1)
             {
+                if (_file.Length == 0) return false;
                 LoadFile();
                 return true;
             }
@@ -74,20 +77,28 @@ namespace Industropolis.Sim.SaveGame
             }
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            _file.Dispose();
+        }
     }
 
     public class RowWriter : IDisposable
     {
         private int _maxLine = 128;
-        private string _file;
+        private Stream _file;
         private byte[] _buffer;
         private int _pos = 0;
 
-        public RowWriter(string file, int numRows)
+        public RowWriter(Stream file, int numRows)
         {
             _file = file;
             _buffer = new byte[_maxLine * numRows];
+        }
+
+        public RowWriter(string file, int numRows) : this(File.Open(file, FileMode.Create), numRows)
+        {
+
         }
 
         public void WriteRow(params object[] args)
@@ -121,10 +132,8 @@ namespace Industropolis.Sim.SaveGame
 
         public void SaveFile()
         {
-            using (var f = File.Open(_file, FileMode.Create))
-            {
-                f.Write(_buffer, 0, _pos);
-            }
+            _file.Write(_buffer, 0, _pos);
+            _file.Dispose();
         }
 
         public void Dispose() => SaveFile();
