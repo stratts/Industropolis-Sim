@@ -4,12 +4,12 @@ using System.Text;
 
 namespace Industropolis.Sim.SaveGame
 {
-    public class RowReader
+    public class RowReader : IDisposable
     {
         private string _file;
         private byte[] _buffer;
         private char[] _fieldBuffer;
-        private int _pos;
+        private int _pos = -1;
         private Memory<string> _row;
 
         public RowReader(string file)
@@ -43,6 +43,7 @@ namespace Industropolis.Sim.SaveGame
 
         private Span<char> ReadField()
         {
+            if (_pos == -1) throw new ArgumentException("Get a row first");
             var buffer = _buffer.AsSpan().Slice(_pos);
             var sep = buffer.IndexOf((byte)';');
             if (AtEnd || _buffer[_pos] == (byte)'\n' || sep == -1) throw new ArgumentException("End of row or file");
@@ -52,16 +53,31 @@ namespace Industropolis.Sim.SaveGame
             return _fieldBuffer.AsSpan().Slice(0, len);
         }
 
-        public void NextRow()
+        public bool GetRow()
         {
-            if (AtEnd) return;
+            if (_pos == -1)
+            {
+                LoadFile();
+                return true;
+            }
+            if (AtEnd) return false;
             var newLine = _buffer.AsSpan().Slice(_pos).IndexOf((byte)'\n');
-            if (newLine == -1) _pos = _buffer.Length;
-            else _pos += newLine + 1;
+            if (newLine >= 0)
+            {
+                _pos += newLine + 1;
+                return true;
+            }
+            else
+            {
+                _pos = _buffer.Length;
+                return false;
+            }
         }
+
+        public void Dispose() { }
     }
 
-    public class RowWriter
+    public class RowWriter : IDisposable
     {
         private int _maxLine = 128;
         private string _file;
@@ -110,5 +126,7 @@ namespace Industropolis.Sim.SaveGame
                 f.Write(_buffer, 0, _pos);
             }
         }
+
+        public void Dispose() => SaveFile();
     }
 }
