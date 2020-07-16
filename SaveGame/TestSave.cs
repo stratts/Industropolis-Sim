@@ -40,51 +40,51 @@ namespace Industropolis.Sim.SaveGame
             }
 
             // Save paths
-            using (var writer = new RowWriter(GetWriteStream("paths.csv"), map.VehiclePaths.Paths.Count))
+            using (var writer = new StackWriter(GetWriteStream("paths.csv")))
             {
                 foreach (var path in map.VehiclePaths.Paths)
                 {
                     if (path.PathType == PathType.Driveway || path.Fixed) continue;
-                    writer.WriteRow(path.Source, path.Dest, path.PathType);
+                    writer.WriteStack(path.Source, path.Dest, path.PathType);
                 }
             }
 
             // Save buildings
-            using (var writer = new RowWriter(GetWriteStream("buildings.csv"), map.Buildings.Count))
+            using (var writer = new StackWriter(GetWriteStream("buildings.csv")))
             {
                 foreach (var building in map.Buildings)
                 {
-                    writer.StartRow();
-                    writer.WriteFields(building.Pos, building.Type);
-                    if (building is Workshop w) writer.WriteField(w.Recipe.Name);
-                    if (building.Output is DirectProducer p) writer.WriteField(p.Buffer);
+                    writer.PushItems(building.Pos, building.Type);
+                    if (building is Workshop w) writer.PushItem(w.Recipe.Name);
+                    if (building.Output is DirectProducer p) writer.PushItem(p.Buffer);
                     if (building.Input is DirectConsumer c)
                     {
-                        foreach (var buffer in c.Buffers) writer.WriteFields(buffer.Item, buffer.Buffer);
+                        foreach (var buffer in c.Buffers) writer.PushItems(buffer.Item, buffer.Buffer);
                     }
+                    writer.WriteStack();
                 }
             }
 
             // Save routes
-            using (var writer = new RowWriter(GetWriteStream("routes.csv"), map.Routes.Count))
+            using (var writer = new StackWriter(GetWriteStream("routes.csv")))
             {
                 foreach (var route in map.Routes)
                 {
-                    writer.StartRow();
-                    writer.WriteFields(route.Source.Pos, route.Dest.Pos, route.Item);
-                    foreach (var node in route.Path) writer.WriteField(node.Pos);
+                    writer.PushItems(route.Source.Pos, route.Dest.Pos, route.Item);
+                    foreach (var node in route.Path) writer.PushItem(node.Pos);
+                    writer.WriteStack();
                 }
             }
 
             // Save chunks
             foreach (var chunk in map.Chunks)
             {
-                using (var writer = new RowWriter(GetWriteStream($"chunks/chunk_{chunk.Pos.X}_{chunk.Pos.Y}.csv"), chunk.Tiles.Length))
+                using (var writer = new StackWriter(GetWriteStream($"chunks/chunk_{chunk.Pos.X}_{chunk.Pos.Y}.csv")))
                 {
                     foreach (var tile in chunk.Tiles)
                     {
-                        if (tile.Resource == Item.None) writer.WriteRow(tile.Nutrients);
-                        else writer.WriteRow(tile.Nutrients, tile.Resource, tile.ResourceCount);
+                        if (tile.Resource == Item.None) writer.WriteStack(tile.Nutrients);
+                        else writer.WriteStack(tile.Nutrients, tile.Resource, tile.ResourceCount);
                     }
                 }
             }
@@ -122,43 +122,43 @@ namespace Industropolis.Sim.SaveGame
             }
 
             // Load paths
-            using (var reader = new RowReader(GetReadStream("paths.csv")))
+            using (var reader = new StackReader(GetReadStream("paths.csv")))
             {
-                while (reader.GetRow())
+                while (reader.TryGetStack(out var stack))
                 {
-                    var source = reader.ReadIntVector();
-                    var dest = reader.ReadIntVector(); ;
-                    var type = reader.ReadEnum<PathType>();
+                    var source = stack.PopIntVector();
+                    var dest = stack.PopIntVector();
+                    var type = stack.PopEnum<PathType>();
                     map.BuildPath(type, source, dest);
                 }
             }
 
             // Load buildings
-            using (var reader = new RowReader(GetReadStream("buildings.csv")))
+            using (var reader = new StackReader(GetReadStream("buildings.csv")))
             {
-                while (reader.GetRow())
+                while (reader.TryGetStack(out var stack))
                 {
-                    var pos = reader.ReadIntVector();
-                    var type = reader.ReadEnum<BuildingType>();
+                    var pos = stack.PopIntVector();
+                    var type = stack.PopEnum<BuildingType>();
                     var building = Building.Create(map, type, pos);
-                    if (building is Workshop w) w.Recipe = Recipes.GetRecipe(reader.ReadString());
-                    if (building.Output is DirectProducer p) p.SetBuffer(reader.ReadInt());
+                    if (building is Workshop w) w.Recipe = Recipes.GetRecipe(stack.PopString());
+                    if (building.Output is DirectProducer p) p.SetBuffer(stack.PopInt());
                     map.AddBuilding(building, pos);
                 }
             }
 
             // Load routes
-            using (var reader = new RowReader(GetReadStream("routes.csv")))
+            using (var reader = new StackReader(GetReadStream("routes.csv")))
             {
-                while (reader.GetRow())
+                while (reader.TryGetStack(out var stack))
                 {
-                    var source = reader.ReadIntVector();
-                    var dest = reader.ReadIntVector();
-                    var item = reader.ReadEnum<Item>();
+                    var source = stack.PopIntVector();
+                    var dest = stack.PopIntVector();
+                    var item = stack.PopEnum<Item>();
                     var path = new List<VehicleNode>();
-                    while (reader.HasField())
+                    while (stack.HasItem())
                     {
-                        var pos = reader.ReadIntVector();
+                        var pos = stack.PopIntVector();
                         var node = map.GetNode(pos);
                         if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
                         path.Add(node);
