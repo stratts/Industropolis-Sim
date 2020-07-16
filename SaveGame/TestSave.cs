@@ -12,6 +12,12 @@ namespace Industropolis.Sim.SaveGame
         private static bool _zip = false;
         private static ZipArchive _archive = null!;
 
+        private static ISaveProvider[] _providers = new ISaveProvider[] {
+            new PathSaver(),
+            new BuildingSaver(),
+            new RouteSaver()
+        };
+
         private static Stream GetReadStream(string path)
         {
             if (_zip) return _archive.GetEntry(path).Open();
@@ -39,42 +45,7 @@ namespace Industropolis.Sim.SaveGame
                 Directory.CreateDirectory("savegame/chunks");
             }
 
-            // Save paths
-            using (var writer = new StackWriter(GetWriteStream("paths.csv")))
-            {
-                foreach (var path in map.VehiclePaths.Paths)
-                {
-                    if (path.PathType == PathType.Driveway || path.Fixed) continue;
-                    writer.WriteStack(path.Source, path.Dest, path.PathType);
-                }
-            }
-
-            // Save buildings
-            using (var writer = new StackWriter(GetWriteStream("buildings.csv")))
-            {
-                foreach (var building in map.Buildings)
-                {
-                    writer.PushItems(building.Pos, building.Type);
-                    if (building is Workshop w) writer.PushItem(w.Recipe.Name);
-                    if (building.Output is DirectProducer p) writer.PushItem(p.Buffer);
-                    if (building.Input is DirectConsumer c)
-                    {
-                        foreach (var buffer in c.Buffers) writer.PushItems(buffer.Item, buffer.Buffer);
-                    }
-                    writer.WriteStack();
-                }
-            }
-
-            // Save routes
-            using (var writer = new StackWriter(GetWriteStream("routes.csv")))
-            {
-                foreach (var route in map.Routes)
-                {
-                    writer.PushItems(route.Source.Pos, route.Dest.Pos, route.Item);
-                    foreach (var node in route.Path) writer.PushItem(node.Pos);
-                    writer.WriteStack();
-                }
-            }
+            foreach (var provider in _providers) provider.Save(GetWriteStream(provider.Path), map);
 
             // Save chunks
             foreach (var chunk in map.Chunks)
@@ -121,51 +92,7 @@ namespace Industropolis.Sim.SaveGame
                 _archive = new ZipArchive(stream, ZipArchiveMode.Read);
             }
 
-            // Load paths
-            using (var reader = new StackReader(GetReadStream("paths.csv")))
-            {
-                while (reader.TryGetStack(out var stack))
-                {
-                    var source = stack.PopIntVector();
-                    var dest = stack.PopIntVector();
-                    var type = stack.PopEnum<PathType>();
-                    map.BuildPath(type, source, dest);
-                }
-            }
-
-            // Load buildings
-            using (var reader = new StackReader(GetReadStream("buildings.csv")))
-            {
-                while (reader.TryGetStack(out var stack))
-                {
-                    var pos = stack.PopIntVector();
-                    var type = stack.PopEnum<BuildingType>();
-                    var building = Building.Create(map, type, pos);
-                    if (building is Workshop w) w.Recipe = Recipes.GetRecipe(stack.PopString());
-                    if (building.Output is DirectProducer p) p.SetBuffer(stack.PopInt());
-                    map.AddBuilding(building, pos);
-                }
-            }
-
-            // Load routes
-            using (var reader = new StackReader(GetReadStream("routes.csv")))
-            {
-                while (reader.TryGetStack(out var stack))
-                {
-                    var source = stack.PopIntVector();
-                    var dest = stack.PopIntVector();
-                    var item = stack.PopEnum<Item>();
-                    var path = new List<VehicleNode>();
-                    while (stack.HasItem())
-                    {
-                        var pos = stack.PopIntVector();
-                        var node = map.GetNode(pos);
-                        if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
-                        path.Add(node);
-                    }
-                    map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path);
-                }
-            }
+            foreach (var provider in _providers) provider.Load(GetReadStream(provider.Path), map);
 
             if (_zip) _archive.Dispose();
 
