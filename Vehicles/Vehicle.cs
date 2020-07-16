@@ -6,14 +6,17 @@ namespace Industropolis.Sim
 {
     public abstract class Vehicle : MapObject
     {
+        public enum Direction { Forwards, Backwards };
+
         private float _speed = 1.5f; // Tiles per second
-        private RouteDirection _direction;
+        private Direction _direction;
         private List<VehicleLane> _lanes = new List<VehicleLane>();
         private List<VehicleNode> _nodes = new List<VehicleNode>();
         private Vehicle? _following;
+        private int _routeIndex = 0;
 
         // Set to null! as they are initialized when GoNext() is called in constructor
-        public Route<VehicleNode> Route { get; }
+        public Route<VehicleNode> Route { get; set; }
         public VehiclePath CurrentPath { get; private set; } = null!;
         public VehicleLane CurrentLane { get; private set; } = null!;
         public float FrontPos { get; private set; }
@@ -33,7 +36,7 @@ namespace Industropolis.Sim
         public Vehicle(Route<VehicleNode> route)
         {
             Route = route;
-            SetDirection(RouteDirection.Forwards);
+            SetDirection(Direction.Forwards);
             GoNext();
         }
 
@@ -92,18 +95,18 @@ namespace Industropolis.Sim
 
         protected void FlipDirection()
         {
-            if (_direction == RouteDirection.Forwards) SetDirection(RouteDirection.Backwards);
-            else SetDirection(RouteDirection.Forwards);
+            if (_direction == Direction.Forwards) SetDirection(Direction.Backwards);
+            else SetDirection(Direction.Forwards);
         }
 
-        protected void SetDirection(RouteDirection direction)
+        protected void SetDirection(Direction direction)
         {
             _direction = direction;
 
             switch (direction)
             {
-                case RouteDirection.Forwards: Reset(Route.Source, Route.Dest); break;
-                case RouteDirection.Backwards: Reset(Route.Dest, Route.Source); break;
+                case Direction.Forwards: Reset(Route.Source, Route.Dest); break;
+                case Direction.Backwards: Reset(Route.Dest, Route.Source); break;
             }
         }
 
@@ -133,7 +136,7 @@ namespace Industropolis.Sim
             DepartedLane?.Invoke(this);
         }
 
-        protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(NextNode, _direction));
+        protected bool CanGoNext() => NextNode.CanProceed(PrevNode, Route.Next(_routeIndex).node);
 
         protected void GoNext()
         {
@@ -141,7 +144,7 @@ namespace Industropolis.Sim
 
             var current = NextNode;
             PrevNode = current;
-            NextNode = Route.Next(current, _direction);
+            (_routeIndex, NextNode) = Route.Next(_routeIndex);
             CurrentPath = current.Connections[NextNode];
             CurrentLane = CurrentPath.GetLaneTo(NextNode);
             CurrentLane.Enter(this);

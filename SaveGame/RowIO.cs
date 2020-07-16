@@ -43,12 +43,20 @@ namespace Industropolis.Sim.SaveGame
 
         public string ReadString() => ReadField().ToString();
 
+        public bool HasField()
+        {
+            var buffer = _buffer.AsSpan().Slice(_pos);
+            var sep = buffer.IndexOf((byte)';');
+            if (AtEnd || _buffer[_pos] == (byte)'\n' || sep == -1) return false;
+            return true;
+        }
+
         private Span<char> ReadField()
         {
             if (_pos == -1) throw new ArgumentException("Get a row first");
+            if (!HasField()) throw new ArgumentException("End of row or file");
             var buffer = _buffer.AsSpan().Slice(_pos);
             var sep = buffer.IndexOf((byte)';');
-            if (AtEnd || _buffer[_pos] == (byte)'\n' || sep == -1) throw new ArgumentException("End of row or file");
             var text = buffer.Slice(0, sep);
             int len = Encoding.UTF8.GetChars(text, _fieldBuffer);
             _pos += sep + 1;

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Industropolis.Sim
 {
-    public enum RouteDirection { Forwards, Backwards };
-
     public class Route : Route<VehicleNode>
     {
         public List<Hauler> Haulers { get; } = new List<Hauler>();
@@ -33,13 +31,12 @@ namespace Industropolis.Sim
 
     public class Route<T> : MapObject where T : IPathNode<T>
     {
-        private List<T> _forwardsPath = new List<T>();
-        private List<T> _backwardsPath = new List<T>();
+        private List<T> _path = new List<T>();
         private IPathfinder<T> _pathfinder;
         private Item _item = Item.None;
         private bool _reroute = false;
 
-        public IReadOnlyList<T> Path => _forwardsPath;
+        public IReadOnlyList<T> Path => _path;
         public T Source { get; set; }
         public T Dest { get; set; }
         public Map Map { get; private set; }
@@ -66,28 +63,22 @@ namespace Industropolis.Sim
             _pathfinder = new AStarPathfinder<T>();
         }
 
-        public T Next(T current, RouteDirection direction)
+        public (int pos, T node) Next(int currentPos)
         {
-            switch (direction)
-            {
-                case RouteDirection.Forwards: return GetNext(current, _forwardsPath);
-                case RouteDirection.Backwards: return GetNext(current, _backwardsPath);
-                default: throw new NotSupportedException();
-            }
-        }
-
-        private T GetNext(T current, List<T> path)
-        {
-            int index = path.IndexOf(current) + 1;
-            if (index < path.Count) return path[index];
-            return current;
+            int index = currentPos + 1;
+            if (index > _path.Count - 1) index = 0;
+            return (index, _path[index]);
         }
 
         public void Pathfind()
         {
-            FindPath(Source, Dest, ref _forwardsPath);
-            FindPath(Dest, Source, ref _backwardsPath);
+            FindPath(Source, Dest, ref _path);
+            var reversed = _path.GetRange(1, _path.Count - 2);
+            reversed.Reverse();
+            _path.AddRange(reversed);
         }
+
+        public void SetPath(IEnumerable<T> path) => _path = new List<T>(path);
 
         private void FindPath(T source, T dest, ref List<T> pathStorage)
         {

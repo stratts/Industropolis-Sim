@@ -181,13 +181,14 @@ namespace Industropolis.Sim
             foreach (Vehicle v in Vehicles) v.Update(delta);
         }
 
-        public Route AddRoute(VehicleNode start, VehicleNode dest, Item item)
+        public Route AddRoute(VehicleNode start, VehicleNode dest, Item item, IEnumerable<VehicleNode>? path = null)
         {
             var route = new Route(this, start, dest);
             route.Item = item;
             route.SourceOutput = start.GetLink<Building>().Output;
             route.DestInput = dest.GetLink<Building>().Input;
-            route.Pathfind();
+            if (path != null) route.SetPath(path);
+            else route.Pathfind();
             routes.Add(route);
             RouteAdded?.Invoke(route);
 

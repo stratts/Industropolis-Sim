@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Buffers;
@@ -61,6 +62,17 @@ namespace Industropolis.Sim.SaveGame
                     {
                         foreach (var buffer in c.Buffers) writer.WriteFields(buffer.Item, buffer.Buffer);
                     }
+                }
+            }
+
+            // Save routes
+            using (var writer = new RowWriter(GetWriteStream("routes.csv"), map.Routes.Count))
+            {
+                foreach (var route in map.Routes)
+                {
+                    writer.StartRow();
+                    writer.WriteFields(route.Source.Pos, route.Dest.Pos, route.Item);
+                    foreach (var node in route.Path) writer.WriteField(node.Pos);
                 }
             }
 
@@ -132,6 +144,26 @@ namespace Industropolis.Sim.SaveGame
                     if (building is Workshop w) w.Recipe = Recipes.GetRecipe(reader.ReadString());
                     if (building.Output is DirectProducer p) p.SetBuffer(reader.ReadInt());
                     map.AddBuilding(building, pos);
+                }
+            }
+
+            // Load routes
+            using (var reader = new RowReader(GetReadStream("routes.csv")))
+            {
+                while (reader.GetRow())
+                {
+                    var source = reader.ReadIntVector();
+                    var dest = reader.ReadIntVector();
+                    var item = reader.ReadEnum<Item>();
+                    var path = new List<VehicleNode>();
+                    while (reader.HasField())
+                    {
+                        var pos = reader.ReadIntVector();
+                        var node = map.GetNode(pos);
+                        if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
+                        path.Add(node);
+                    }
+                    map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path);
                 }
             }
 
