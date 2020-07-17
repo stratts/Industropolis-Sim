@@ -67,16 +67,21 @@ namespace Industropolis.Sim
             _pathfinder = new AStarPathfinder<T>();
         }
 
+        public int WrapIndex(int index)
+        {
+            if (index > _path.Count - 1) return index % _path.Count;
+            else if (index < 0) return WrapIndex(_path.Count + index);
+            else return index;
+        }
+
         public T GetNode(int index)
         {
-            if (index > _path.Count - 1 || index < 0) index = 0;
-            return _path[index];
+            return _path[WrapIndex(index)];
         }
 
         public (int pos, T node) Next(int currentPos)
         {
-            int index = currentPos + 1;
-            if (index > _path.Count - 1) index = 0;
+            int index = WrapIndex(currentPos + 1);
             return (index, _path[index]);
         }
 

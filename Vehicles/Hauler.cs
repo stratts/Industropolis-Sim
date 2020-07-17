@@ -6,7 +6,7 @@ namespace Industropolis.Sim
         public Item Item => Route.Item;
 
         public int Carrying { get; set; } = 0;
-        public int MaxCapacity { get; } = 5;
+        public int MaxCapacity { get; } = 100;
 
         public override VehicleType Type => VehicleType.Hauler;
 
@@ -16,7 +16,7 @@ namespace Industropolis.Sim
         {
             Destination.Occupied = true;
             var building = Destination.GetLink<Building>();
-            if (building.Output != null && Carrying <= 0 && building.Output.Has(Item)) _action = Load;
+            if (building.Output != null && Carrying < MaxCapacity && building.Output.Has(Item)) _action = Load;
             else if (building.Input != null && building.Input.Accepts(Item)) _action = Unload;
         }
 

@@ -50,7 +50,7 @@ namespace Industropolis.Sim
 
         public void SetPosition(int routeIndex, float frontPos)
         {
-            _routeIndex = routeIndex - 1;
+            _routeIndex = Route.WrapIndex(routeIndex - 1);
             Reset(Route.GetNode(_routeIndex), Route.GetNextDestination(_routeIndex));
             GoNext();
             FrontPos = frontPos;
@@ -138,6 +138,7 @@ namespace Industropolis.Sim
 
             var current = NextNode;
             PrevNode = current;
+
             (_routeIndex, NextNode) = Route.Next(_routeIndex);
             CurrentPath = current.Connections[NextNode];
             CurrentLane = CurrentPath.GetLaneTo(NextNode);
