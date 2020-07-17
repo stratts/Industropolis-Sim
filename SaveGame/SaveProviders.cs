@@ -59,6 +59,15 @@ namespace Industropolis.Sim.SaveGame
                 var building = Building.Create(map, type, pos);
                 if (building is Workshop w) w.Recipe = Recipes.GetRecipe(stack.PopString());
                 if (building.Output is DirectProducer p) p.SetBuffer(stack.PopInt());
+                if (building.Input is DirectConsumer c)
+                {
+                    while (stack.HasItem())
+                    {
+                        var item = stack.PopEnum<Item>();
+                        int amount = stack.PopInt();
+                        c.GetBuffer(item).Buffer = amount;
+                    }
+                }
                 map.AddBuilding(building, pos);
             }
         }

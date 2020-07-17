@@ -93,30 +93,30 @@ namespace Industropolis.Sim
 
         public void Pathfind()
         {
-            FindPath(Source, Dest, ref _path);
+            FindPath(Source, Dest);
             var reversed = _path.GetRange(1, _path.Count - 2);
             reversed.Reverse();
             _path.AddRange(reversed);
         }
 
-        public void SetPath(IEnumerable<T> path) => _path = new List<T>(path);
+        public void SetPath(IEnumerable<T> path)
+        {
+            _path = new List<T>(path);
+            foreach (T node in _path)
+            {
+                node.Changed += NodeChanged;
+                node.Removed += () => _reroute = true;
+            }
+        }
 
-        private void FindPath(T source, T dest, ref List<T> pathStorage)
+        private void FindPath(T source, T dest)
         {
             var path = _pathfinder.FindPath(new PathGraph<T>(), source, dest);
-            if (path != null)
-            {
-                pathStorage = path;
-                foreach (T node in pathStorage)
-                {
-                    node.Changed += NodeChanged;
-                    node.Removed += () => _reroute = true;
-                }
-            }
+            if (path != null) SetPath(path);
             else
             {
                 Console.WriteLine("No path found! :(");
-                pathStorage = new List<T>();
+                _path = new List<T>();
                 return;
             }
         }
@@ -125,6 +125,7 @@ namespace Industropolis.Sim
         {
             if (_reroute)
             {
+                Console.WriteLine("Reroute!");
                 Pathfind();
                 Changed?.Invoke(this);
                 _reroute = false;

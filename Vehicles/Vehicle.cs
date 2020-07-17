@@ -38,6 +38,7 @@ namespace Industropolis.Sim
         public Vehicle(Route<VehicleNode> route)
         {
             Route = route;
+            Route.Changed += (_) => SetPosition(_routeIndex, FrontPos);
             Reset(route.Source, route.Dest);
             GoNext();
         }

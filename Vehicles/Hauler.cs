@@ -6,7 +6,7 @@ namespace Industropolis.Sim
         public Item Item => Route.Item;
 
         public int Carrying { get; set; } = 0;
-        public int MaxCapacity { get; } = 100;
+        public int MaxCapacity { get; } = 5;
 
         public override VehicleType Type => VehicleType.Hauler;
 
