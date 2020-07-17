@@ -21,6 +21,8 @@ namespace Industropolis.Sim.SaveGame
 
         public int PopInt() => int.Parse(PopItem());
 
+        public float PopFloat() => float.Parse(PopItem());
+
         public bool PopBool() => bool.Parse(PopItem());
 
         public T PopEnum<T>() where T : struct => Enum.Parse<T>(PopItem().ToString());
@@ -80,6 +82,8 @@ namespace Industropolis.Sim.SaveGame
             return false;
         }
 
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
         public bool HasStack() => _pos < _buffer.Length;
 
         public StackEntry GetStack()
@@ -95,6 +99,29 @@ namespace Industropolis.Sim.SaveGame
         public void Dispose()
         {
             _file.Dispose();
+        }
+
+        public ref struct Enumerator
+        {
+            private StackReader _reader;
+
+            public StackEntry Current { get; private set; }
+
+            public Enumerator(StackReader reader)
+            {
+                Current = default(StackEntry);
+                _reader = reader;
+            }
+
+            public bool MoveNext()
+            {
+                if (_reader.HasStack())
+                {
+                    Current = _reader.GetStack();
+                    return true;
+                }
+                else return false;
+            }
         }
     }
 

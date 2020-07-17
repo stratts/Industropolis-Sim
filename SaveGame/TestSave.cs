@@ -15,13 +15,19 @@ namespace Industropolis.Sim.SaveGame
         private static ISaveProvider[] _providers = new ISaveProvider[] {
             new PathSaver(),
             new BuildingSaver(),
-            new RouteSaver()
+            new RouteSaver(),
+            new VehicleSaver(),
         };
 
-        private static Stream GetReadStream(string path)
+        private static Stream? GetReadStream(string path)
         {
             if (_zip) return _archive.GetEntry(path).Open();
-            else return File.OpenRead(Path.Join("savegame", path));
+            else
+            {
+                var p = Path.Join("savegame", path);
+                if (!File.Exists(p)) return null;
+                return File.OpenRead(Path.Join("savegame", path));
+            }
         }
 
         private static Stream GetWriteStream(string path)
@@ -92,7 +98,11 @@ namespace Industropolis.Sim.SaveGame
                 _archive = new ZipArchive(stream, ZipArchiveMode.Read);
             }
 
-            foreach (var provider in _providers) provider.Load(GetReadStream(provider.Path), map);
+            foreach (var provider in _providers)
+            {
+                var file = GetReadStream(provider.Path);
+                if (file != null) provider.Load(file, map);
+            }
 
             if (_zip) _archive.Dispose();
 

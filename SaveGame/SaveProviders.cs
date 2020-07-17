@@ -25,6 +25,8 @@ namespace Industropolis.Sim.SaveGame
             using (var reader = new StackReader(stream)) { Load(reader, map); }
         }
 
+        public void Error(string err) => Console.Write($"ERROR: {err}");
+
         protected abstract void Save(StackWriter writer, Map map);
         protected abstract void Load(StackReader reader, Map map);
     }
@@ -117,6 +119,44 @@ namespace Industropolis.Sim.SaveGame
                     path.Add(node);
                 }
                 map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path);
+            }
+        }
+    }
+
+    public class VehicleSaver : StackSaver
+    {
+        public override string Path => "vehicles.csv";
+
+        protected override void Save(StackWriter writer, Map map)
+        {
+            foreach (var vehicle in map.Vehicles)
+            {
+                writer.PushItems(vehicle.Type, vehicle.Route.Id, vehicle.RouteIndex, vehicle.FrontPos);
+                if (vehicle is Hauler h) writer.PushItems(h.Carrying);
+                writer.WriteStack();
+            }
+        }
+
+        protected override void Load(StackReader reader, Map map)
+        {
+            foreach (var stack in reader)
+            {
+                var type = stack.PopEnum<VehicleType>();
+                var (routeId, routeIdx) = (stack.PopString(), stack.PopInt());
+                var frontPos = stack.PopFloat();
+                var route = map.GetRoute(routeId);
+                if (route == null)
+                {
+                    Error($"Vehicle route {routeId} not found");
+                    continue;
+                }
+                var vehicle = Vehicle.Create(type, route);
+                vehicle.SetPosition(routeIdx, frontPos);
+                if (vehicle is Hauler h)
+                {
+                    h.Carrying = stack.PopInt();
+                    route.AddHauler(h);
+                }
             }
         }
     }

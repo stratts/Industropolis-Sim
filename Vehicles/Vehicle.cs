@@ -9,7 +9,6 @@ namespace Industropolis.Sim
         public enum Direction { Forwards, Backwards };
 
         private float _speed = 1.5f; // Tiles per second
-        private Direction _direction;
         private List<VehicleLane> _lanes = new List<VehicleLane>();
         private List<VehicleNode> _nodes = new List<VehicleNode>();
         private Vehicle? _following;
@@ -27,8 +26,11 @@ namespace Industropolis.Sim
         public VehicleNode Destination { get; private set; } = null!;
         public float Length { get; set; } = 0.5f;
         public IReadOnlyList<VehicleLane> Lanes => _lanes;
+        public int RouteIndex => _routeIndex;
 
         public event Action<Vehicle>? DepartedLane;
+
+        public abstract VehicleType Type { get; }
 
         protected Action? _action;
         protected float _elapsedTime;
@@ -36,7 +38,7 @@ namespace Industropolis.Sim
         public Vehicle(Route<VehicleNode> route)
         {
             Route = route;
-            SetDirection(Direction.Forwards);
+            Reset(route.Source, route.Dest);
             GoNext();
         }
 
@@ -44,6 +46,15 @@ namespace Industropolis.Sim
         {
             _elapsedTime = elapsedTime;
             _action?.Invoke();
+        }
+
+        public void SetPosition(int routeIndex, float frontPos)
+        {
+            _routeIndex = routeIndex - 1;
+            Reset(Route.GetNode(_routeIndex), Route.GetNextDestination(_routeIndex));
+            GoNext();
+            FrontPos = frontPos;
+            RearPos = frontPos - Length;
         }
 
         protected void FollowPath()
@@ -93,32 +104,15 @@ namespace Industropolis.Sim
             }
         }
 
-        protected void FlipDirection()
-        {
-            if (_direction == Direction.Forwards) SetDirection(Direction.Backwards);
-            else SetDirection(Direction.Forwards);
-        }
-
-        protected void SetDirection(Direction direction)
-        {
-            _direction = direction;
-
-            switch (direction)
-            {
-                case Direction.Forwards: Reset(Route.Source, Route.Dest); break;
-                case Direction.Backwards: Reset(Route.Dest, Route.Source); break;
-            }
-        }
-
-        private void Reset(VehicleNode source, VehicleNode dest)
+        protected void Reset(VehicleNode current, VehicleNode dest)
         {
             FrontPos = 0;
             RearPos = -Length;
             ClearOccupied();
             Destination = dest;
-            PrevNode = source;
-            RearNode = source;
-            NextNode = source;
+            PrevNode = current;
+            RearNode = current;
+            NextNode = current;
         }
 
         public override void Remove()

@@ -195,13 +195,12 @@ namespace Industropolis.Sim
             return route;
         }
 
-        public Route? GetRoute(IntVector pos)
+        public Route? GetRoute(string id)
         {
-            /*foreach (Route r in routes) {
-                foreach (PathNode t in r.Path) {
-                    if (t == pos) return r;
-                }
-            }*/
+            foreach (var route in Routes)
+            {
+                if (route.Id == id) return route;
+            }
 
             return null;
         }

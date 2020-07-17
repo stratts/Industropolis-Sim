@@ -12,12 +12,14 @@ namespace Industropolis.Sim
         public void AddHauler(VehicleType type)
         {
             var hauler = Vehicle.Create(type, this);
-            if (hauler is Hauler h)
-            {
-                Haulers.Add(h);
-                Map.AddVehicle(h);
-            }
+            if (hauler is Hauler h) AddHauler(h);
             else throw new ArgumentException($"Vehicle {type} is not a hauler");
+        }
+
+        public void AddHauler(Hauler hauler)
+        {
+            Haulers.Add(hauler);
+            Map.AddVehicle(hauler);
         }
 
         public void RemoveHauler()
@@ -42,6 +44,8 @@ namespace Industropolis.Sim
         public Map Map { get; private set; }
         public event Action<Route<T>>? Changed;
 
+        public string Id => $"{Source.Pos}{Dest.Pos}{Item}";
+
         public IDirectOutput? SourceOutput { get; set; }
         public IDirectInput? DestInput { get; set; }
 
@@ -63,11 +67,23 @@ namespace Industropolis.Sim
             _pathfinder = new AStarPathfinder<T>();
         }
 
+        public T GetNode(int index)
+        {
+            if (index > _path.Count - 1 || index < 0) index = 0;
+            return _path[index];
+        }
+
         public (int pos, T node) Next(int currentPos)
         {
             int index = currentPos + 1;
             if (index > _path.Count - 1) index = 0;
             return (index, _path[index]);
+        }
+
+        public T GetNextDestination(int currentPos)
+        {
+            if (currentPos < _path.IndexOf(Dest)) return Dest;
+            else return Source;
         }
 
         public void Pathfind()

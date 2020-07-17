@@ -5,8 +5,10 @@ namespace Industropolis.Sim
     {
         public Item Item => Route.Item;
 
-        public int Carrying { get; private set; } = 0;
+        public int Carrying { get; set; } = 0;
         public int MaxCapacity { get; } = 5;
+
+        public override VehicleType Type => VehicleType.Hauler;
 
         public Hauler(Route route) : base(route) { }
 
@@ -32,7 +34,7 @@ namespace Industropolis.Sim
             else
             {
                 Destination.Occupied = false;
-                FlipDirection();
+                Reset(Destination, Route.GetNextDestination(RouteIndex));
                 GoNext();
             }
         }
@@ -48,7 +50,7 @@ namespace Industropolis.Sim
             else
             {
                 Destination.Occupied = false;
-                FlipDirection();
+                Reset(Destination, Route.GetNextDestination(RouteIndex));
                 GoNext();
             }
         }
