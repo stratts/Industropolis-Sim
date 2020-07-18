@@ -183,8 +183,7 @@ namespace Industropolis.Sim
 
         public Route AddRoute(VehicleNode start, VehicleNode dest, Item item, IEnumerable<VehicleNode>? path = null)
         {
-            var route = new Route(this, start, dest);
-            route.Item = item;
+            var route = new Route(this, start, dest, item);
             route.SourceOutput = start.GetLink<Building>().Output;
             route.DestInput = dest.GetLink<Building>().Input;
             if (path != null) route.SetPath(path);

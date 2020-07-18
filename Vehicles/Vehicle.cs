@@ -15,7 +15,7 @@ namespace Industropolis.Sim
         private int _routeIndex = 0;
 
         // Set to null! as they are initialized when GoNext() is called in constructor
-        public Route<VehicleNode> Route { get; set; }
+        public Route Route { get; set; }
         public VehiclePath CurrentPath { get; private set; } = null!;
         public VehicleLane CurrentLane { get; private set; } = null!;
         public float FrontPos { get; private set; }
@@ -35,11 +35,11 @@ namespace Industropolis.Sim
         protected Action? _action;
         protected float _elapsedTime;
 
-        public Vehicle(Route<VehicleNode> route)
+        public Vehicle(Route route)
         {
             Route = route;
             Route.Changed += (_) => SetPosition(_routeIndex, FrontPos);
-            Reset(route.Source, route.Dest);
+            Reset(route.GetNode(0), route.GetNextDestination(0));
             GoNext();
         }
 

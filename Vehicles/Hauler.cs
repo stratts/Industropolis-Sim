@@ -16,8 +16,9 @@ namespace Industropolis.Sim
         {
             Destination.Occupied = true;
             var building = Destination.GetLink<Building>();
-            if (building.Output != null && Carrying < MaxCapacity && building.Output.Has(Item)) _action = Load;
-            else if (building.Input != null && building.Input.Accepts(Item)) _action = Unload;
+            var action = Route.GetAction(Destination);
+            if (action.Type == Route.ActionType.Pickup) _action = Load;
+            else if (action.Type == Route.ActionType.Dropoff) _action = Unload;
         }
 
         private void Load()

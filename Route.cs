@@ -5,9 +5,31 @@ namespace Industropolis.Sim
 {
     public class Route : Route<VehicleNode>
     {
+        private Dictionary<VehicleNode, DestinationAction> _actions = new Dictionary<VehicleNode, DestinationAction>();
+
+        public enum ActionType { Pickup, Dropoff }
+
+        public struct DestinationAction
+        {
+            public ActionType Type { get; }
+            public Item Item { get; }
+
+            public DestinationAction(ActionType type, Item item)
+            {
+                Type = type;
+                Item = item;
+            }
+        }
+
         public List<Hauler> Haulers { get; } = new List<Hauler>();
 
-        public Route(Map info, VehicleNode src, VehicleNode dest) : base(info, src, dest) { }
+        public Route(Map info, VehicleNode src, VehicleNode dest, Item item) : base(info, src, dest, item)
+        {
+            _actions[src] = new DestinationAction(ActionType.Pickup, item);
+            _actions[dest] = new DestinationAction(ActionType.Dropoff, item);
+        }
+
+        public DestinationAction GetAction(VehicleNode destination) => _actions[destination];
 
         public void AddHauler(VehicleType type)
         {
@@ -59,11 +81,12 @@ namespace Industropolis.Sim
             }
         }
 
-        public Route(Map info, T src, T dest)
+        public Route(Map info, T src, T dest, Item item)
         {
             Map = info;
             Source = src;
             Dest = dest;
+            Item = item;
             _pathfinder = new AStarPathfinder<T>();
         }
 

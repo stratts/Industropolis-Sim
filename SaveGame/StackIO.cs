@@ -55,7 +55,6 @@ namespace Industropolis.Sim.SaveGame
         private byte[] _buffer;
         private char[] _fieldBuffer;
         private int _pos = -1;
-        private Memory<string> _row;
 
         public StackReader(string file) : this(File.OpenRead(file))
         {
