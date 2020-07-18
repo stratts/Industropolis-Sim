@@ -181,12 +181,11 @@ namespace Industropolis.Sim
             foreach (Vehicle v in Vehicles) v.Update(delta);
         }
 
-        public Route AddRoute(VehicleNode start, VehicleNode dest, Item item, IEnumerable<VehicleNode>? path = null)
+        public Route AddRoute(VehicleNode start, VehicleNode dest, Item item, IEnumerable<VehicleNode>? path = null, Guid? id = null)
         {
             var route = new Route(this, start, dest, item);
-            route.SourceOutput = start.GetLink<Building>().Output;
-            route.DestInput = dest.GetLink<Building>().Input;
             if (path != null) route.SetPath(path);
+            if (id.HasValue) route.SetId(id.Value);
             else route.Pathfind();
             routes.Add(route);
             RouteAdded?.Invoke(route);
@@ -194,7 +193,7 @@ namespace Industropolis.Sim
             return route;
         }
 
-        public Route? GetRoute(string id)
+        public Route? GetRoute(Guid id)
         {
             foreach (var route in Routes)
             {

@@ -106,7 +106,13 @@ namespace Industropolis.Sim.SaveGame
         {
             foreach (var route in map.Routes)
             {
-                writer.PushItems(route.Source.Pos, route.Dest.Pos, route.Item);
+                writer.PushItem(route.Id);
+                writer.PushItem(route.Destinations.Count);
+                foreach (var destination in route.Destinations)
+                {
+                    var action = route.GetAction(destination);
+                    writer.PushItems(destination.Pos, action.Type, action.Item);
+                }
                 foreach (var node in route.Path) writer.PushItem(node.Pos);
                 writer.WriteStack();
             }
@@ -116,9 +122,23 @@ namespace Industropolis.Sim.SaveGame
         {
             while (reader.TryGetStack(out var stack))
             {
-                var source = stack.PopIntVector();
-                var dest = stack.PopIntVector();
-                var item = stack.PopEnum<Item>();
+                var id = stack.PopId();
+                var dests = stack.PopInt();
+
+                IntVector source = IntVector.Zero;
+                IntVector dest = IntVector.Zero;
+                Item item = Item.None;
+
+                for (int i = 0; i < dests; i++)
+                {
+                    var (pos, type, itemEntry) = (stack.PopIntVector(), stack.PopEnum<Route.ActionType>(), stack.PopEnum<Item>());
+                    if (i == 0)
+                    {
+                        source = pos;
+                        item = itemEntry;
+                    }
+                    if (i == 1) dest = pos;
+                }
                 var path = new List<VehicleNode>();
                 while (stack.HasItem())
                 {
@@ -127,7 +147,7 @@ namespace Industropolis.Sim.SaveGame
                     if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
                     path.Add(node);
                 }
-                map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path);
+                map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path, id);
             }
         }
     }
@@ -151,7 +171,7 @@ namespace Industropolis.Sim.SaveGame
             foreach (var stack in reader)
             {
                 var type = stack.PopEnum<VehicleType>();
-                var (routeId, routeIdx) = (stack.PopString(), stack.PopInt());
+                var (routeId, routeIdx) = (stack.PopId(), stack.PopInt());
                 var frontPos = stack.PopFloat();
                 var route = map.GetRoute(routeId);
                 if (route == null)

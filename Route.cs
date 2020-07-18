@@ -23,10 +23,19 @@ namespace Industropolis.Sim
 
         public List<Hauler> Haulers { get; } = new List<Hauler>();
 
-        public Route(Map info, VehicleNode src, VehicleNode dest, Item item) : base(info, src, dest, item)
+        public VehicleNode Source => Destinations[0];
+        public VehicleNode Dest => Destinations[1];
+
+        public Route(Map info, VehicleNode src, VehicleNode dest, Item item) : base(info, item)
         {
-            _actions[src] = new DestinationAction(ActionType.Pickup, item);
-            _actions[dest] = new DestinationAction(ActionType.Dropoff, item);
+            AddDestination(src, ActionType.Pickup, item);
+            AddDestination(dest, ActionType.Dropoff, item);
+        }
+
+        public void AddDestination(VehicleNode node, ActionType type, Item item)
+        {
+            AddDestination(node);
+            _actions[node] = new DestinationAction(type, item);
         }
 
         public DestinationAction GetAction(VehicleNode destination) => _actions[destination];
@@ -55,21 +64,18 @@ namespace Industropolis.Sim
 
     public class Route<T> : MapObject where T : IPathNode<T>
     {
+        private List<T> _destinations = new List<T>();
         private List<T> _path = new List<T>();
         private IPathfinder<T> _pathfinder;
         private Item _item = Item.None;
         private bool _reroute = false;
 
+        public IReadOnlyList<T> Destinations => _destinations;
         public IReadOnlyList<T> Path => _path;
-        public T Source { get; set; }
-        public T Dest { get; set; }
         public Map Map { get; private set; }
         public event Action<Route<T>>? Changed;
 
-        public string Id => $"{Source.Pos}{Dest.Pos}{Item}";
-
-        public IDirectOutput? SourceOutput { get; set; }
-        public IDirectInput? DestInput { get; set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
 
         public Item Item
         {
@@ -81,14 +87,16 @@ namespace Industropolis.Sim
             }
         }
 
-        public Route(Map info, T src, T dest, Item item)
+        public Route(Map info, Item item)
         {
             Map = info;
-            Source = src;
-            Dest = dest;
             Item = item;
             _pathfinder = new AStarPathfinder<T>();
         }
+
+        protected void AddDestination(T node) => _destinations.Add(node);
+
+        public void SetId(Guid g) => Id = g;
 
         public int WrapIndex(int index)
         {
@@ -110,16 +118,34 @@ namespace Industropolis.Sim
 
         public T GetNextDestination(int currentPos)
         {
-            if (currentPos < _path.IndexOf(Dest)) return Dest;
-            else return Source;
+            for (int i = 0; i < Path.Count; i++)
+            {
+                int idx = WrapIndex(currentPos + i);
+                var node = _path[idx];
+                if (_destinations.Contains(node)) return node;
+            }
+            throw new ArgumentException("Could not find next destination");
         }
 
         public void Pathfind()
         {
-            FindPath(Source, Dest);
-            var reversed = _path.GetRange(1, _path.Count - 2);
-            reversed.Reverse();
-            _path.AddRange(reversed);
+            var path = new List<T>();
+            var graph = new PathGraph<T>();
+            for (int i = 0; i < _destinations.Count; i++)
+            {
+                T source = _destinations[i];
+                T dest = i == _destinations.Count - 1 ? _destinations[0] : _destinations[i + 1];
+
+                var segment = _pathfinder.FindPath(graph, source, dest);
+                if (segment == null)
+                {
+                    Console.WriteLine("No path found! :(");
+                    continue;
+                }
+
+                path.AddRange(segment.GetRange(0, segment.Count - 1));
+            }
+            SetPath(path);
         }
 
         public void SetPath(IEnumerable<T> path)

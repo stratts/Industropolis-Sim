@@ -17,6 +17,8 @@ namespace Industropolis.Sim.SaveGame
             _fieldBuffer = fieldBuffer;
         }
 
+        public Guid PopId() => Guid.Parse(PopItem());
+
         public IntVector PopIntVector() => IntVector.Parse(PopItem());
 
         public int PopInt() => int.Parse(PopItem());
@@ -37,7 +39,7 @@ namespace Industropolis.Sim.SaveGame
             return true;
         }
 
-        private Span<char> PopItem()
+        private ReadOnlySpan<char> PopItem()
         {
             if (!HasItem()) throw new ArgumentException("End of stack");
             var buffer = _data.Slice(_pos);
