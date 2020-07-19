@@ -23,14 +23,7 @@ namespace Industropolis.Sim
 
         public List<Hauler> Haulers { get; } = new List<Hauler>();
 
-        public VehicleNode Source => Destinations[0];
-        public VehicleNode Dest => Destinations[1];
-
-        public Route(Map info, VehicleNode src, VehicleNode dest, Item item) : base(info, item)
-        {
-            AddDestination(src, ActionType.Pickup, item);
-            AddDestination(dest, ActionType.Dropoff, item);
-        }
+        public Route(Map info) : base(info) { }
 
         public void AddDestination(VehicleNode node, ActionType type, Item item)
         {
@@ -67,7 +60,6 @@ namespace Industropolis.Sim
         private List<T> _destinations = new List<T>();
         private List<T> _path = new List<T>();
         private IPathfinder<T> _pathfinder;
-        private Item _item = Item.None;
         private bool _reroute = false;
 
         public IReadOnlyList<T> Destinations => _destinations;
@@ -77,20 +69,9 @@ namespace Industropolis.Sim
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
-        public Item Item
-        {
-            get => _item;
-            set
-            {
-                _item = value;
-                //foreach (var h in Haulers) h.Item = value;
-            }
-        }
-
-        public Route(Map info, Item item)
+        public Route(Map info)
         {
             Map = info;
-            Item = item;
             _pathfinder = new AStarPathfinder<T>();
         }
 

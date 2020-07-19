@@ -3,7 +3,7 @@ namespace Industropolis.Sim
 {
     public class Hauler : Vehicle
     {
-        public Item Item => Route.Item;
+        public Item Item { get; set; }
 
         public int Carrying { get; set; } = 0;
         public int MaxCapacity { get; } = 5;
@@ -17,6 +17,7 @@ namespace Industropolis.Sim
             Destination.Occupied = true;
             var building = Destination.GetLink<Building>();
             var action = Route.GetAction(Destination);
+            Item = action.Item;
             if (action.Type == Route.ActionType.Pickup) _action = Load;
             else if (action.Type == Route.ActionType.Dropoff) _action = Unload;
         }

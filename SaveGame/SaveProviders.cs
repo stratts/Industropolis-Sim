@@ -122,22 +122,18 @@ namespace Industropolis.Sim.SaveGame
         {
             while (reader.TryGetStack(out var stack))
             {
+                var route = new Route(map);
                 var id = stack.PopId();
                 var dests = stack.PopInt();
 
-                IntVector source = IntVector.Zero;
-                IntVector dest = IntVector.Zero;
-                Item item = Item.None;
+                route.SetId(id);
 
                 for (int i = 0; i < dests; i++)
                 {
-                    var (pos, type, itemEntry) = (stack.PopIntVector(), stack.PopEnum<Route.ActionType>(), stack.PopEnum<Item>());
-                    if (i == 0)
-                    {
-                        source = pos;
-                        item = itemEntry;
-                    }
-                    if (i == 1) dest = pos;
+                    var (pos, type, item) = (stack.PopIntVector(), stack.PopEnum<Route.ActionType>(), stack.PopEnum<Item>());
+                    var node = map.GetNode(pos);
+                    if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
+                    route.AddDestination(node, type, item);
                 }
                 var path = new List<VehicleNode>();
                 while (stack.HasItem())
@@ -147,7 +143,8 @@ namespace Industropolis.Sim.SaveGame
                     if (node == null) throw new NullReferenceException($"Node {pos} on map is null or does not exist");
                     path.Add(node);
                 }
-                map.AddRoute(map.GetNode(source)!, map.GetNode(dest)!, item, path, id);
+                route.SetPath(path);
+                map.AddRoute(route);
             }
         }
     }
