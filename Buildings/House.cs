@@ -1,4 +1,4 @@
-namespace Industropolis.Sim
+namespace Industropolis.Sim.Buildings
 {
 
     /*public class House : ProductionBuilding {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Industropolis.Sim
+namespace Industropolis.Sim.Buildings
 {
     public class Workshop : ProductionBuilding
     {

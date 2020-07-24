@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Industropolis.Sim.Buildings;
 
 namespace Industropolis.Sim.SaveGame
 {

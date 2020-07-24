@@ -1,3 +1,4 @@
+using Industropolis.Sim.Buildings;
 
 namespace Industropolis.Sim
 {
@@ -8,6 +9,7 @@ namespace Industropolis.Sim
         //House,
         Mine,
         Farm,
+        Lumbermill,
         TestProducer,
         TestConsumer,
         TrainStation,
@@ -28,6 +30,7 @@ namespace Industropolis.Sim
                 case BuildingType.TestProducer: return new TestProducer();
                 case BuildingType.TrainStation: return new TrainStation(map);
                 case BuildingType.Core: return new Core(map);
+                case BuildingType.Lumbermill: return new Lumbermill(map, pos);
                 default: return new TestProducer();
             }
         }

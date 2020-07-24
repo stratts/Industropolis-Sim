@@ -37,10 +37,10 @@ namespace Industropolis.Sim
 
         private Tile? NextTileWithResource()
         {
-            int s = size / 2;
-            for (int x = -s; x <= s; x++)
+            int s = size;
+            for (int x = 0; x < size; x++)
             {
-                for (int y = -s; y <= s; y++)
+                for (int y = 0; y < size; y++)
                 {
                     Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
                     if (t != null)
