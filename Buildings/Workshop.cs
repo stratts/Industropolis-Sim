@@ -28,7 +28,7 @@ namespace Industropolis.Sim.Buildings
             Recipe = Recipes.GetRecipe("None");
             Width = 2;
             Height = 2;
-            Entrance = new BuildingEntrance(this, (0, 1), PathCategory.Road);
+            Entrance = new BuildingEntrance(this, (0, 1), (0, 2), PathType.Driveway);
         }
 
         private void LoadRecipe(Recipe recipe)

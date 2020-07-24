@@ -46,20 +46,6 @@ namespace Industropolis.Sim
         {
             base.BuildPath(type, source, dest, buildFixed);
             if (source == dest) return;
-
-            foreach (var current in source.GetPointsBetween(dest))
-            {
-                foreach (var building in _map.Buildings)
-                {
-                    if (building.HasEntrance && building.Entrance != null &&
-                        building.Entrance.CanConnect(current, GetCategory(type)))
-                    {
-                        ConnectBuilding(building);
-                    }
-                }
-            }
-
-            //SaveGame.TestSave.Save(_map);
         }
 
         public override void DeletePathSegment(IntVector pos)
@@ -74,27 +60,27 @@ namespace Industropolis.Sim
             var entrance = building.Entrance;
             if (entrance == null)
                 throw new ArgumentException("Building does not have an entrance");
-            var p = _manager.GetPath(entrance.ConnectionPos);
-            var n = _manager.GetNode(entrance.ConnectionPos);
-            if ((p != null && p.Category == entrance.Category) || (n != null && n.Category == entrance.Category))
-            {
-                var node = new RoadNode(entrance.Pos);
-                entrance.Connect(node);
-                if (entrance.Node == null) throw new Exception("Could not connect entrance");
-                _manager.AddNode(entrance.Node);
-                BuildPath(PathType.Driveway, entrance.Pos, entrance.ConnectionPos);
-            }
+            BuildPath(entrance.Type, entrance.Start, entrance.End, true);
+            var start = _manager.GetNode(entrance.Start);
+            if (start == null) throw new Exception("Could not build start node for building");
+            entrance.Connect(start);
         }
 
         public void DisconnectBuilding(Building building)
         {
-            if (building.Entrance == null || building.Entrance.Node == null)
+            var entrance = building.Entrance;
+            if (entrance == null || entrance.Node == null)
                 throw new ArgumentException("Building does not have an entrance node");
-            VehicleNode n = building.Entrance.Node;
-            VehicleNode? pathCon = _manager.GetNode(n.Pos + new IntVector(0, 1));
-            _manager.RemoveNode(n);
-            if (pathCon != null && CanMergeNode(pathCon)) MergeNode(pathCon);
-            building.Entrance.Disconnect();
+            VehicleNode start = entrance.Node;
+            VehicleNode? end = _manager.GetNode(entrance.End);
+            _manager.RemoveNode(start);
+            if (end != null)
+            {
+                end.Fixed = false;
+                if (CanMergeNode(end)) MergeNode(end);
+                else if (end.Connections.Count == 0) _manager.RemoveNode(end);
+            }
+            entrance.Disconnect();
         }
     }
 }

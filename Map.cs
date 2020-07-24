@@ -93,10 +93,20 @@ namespace Industropolis.Sim
             {
                 for (int y = 0; y < building.Height; y++)
                 {
-                    var p = new IntVector(pos.X + x, pos.Y + y);
+                    var p = pos + (x, y);
                     if (GetPath(p) != null) return false;
                     if (GetNode(p) != null) return false;
                     if (GetBuilding(p) != null) return false;
+                }
+            }
+
+            if (building.Entrance is BuildingEntrance e)
+            {
+                foreach (var point in e.Start.GetPointsBetween(e.End))
+                {
+                    var p = pos + point;
+                    if (GetBuilding(p) != null) return false;
+                    if (GetPath(p) is VehiclePath path && path.Category != PathBuilder.GetCategory(e.Type)) return false;
                 }
             }
 
@@ -134,7 +144,6 @@ namespace Industropolis.Sim
             building.Pos = pos;
             buildings.Add(building);
             if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);
-            if (building is TrainStation t) t.Setup();
             BuildingAdded?.Invoke(building);
         }
 

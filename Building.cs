@@ -6,26 +6,23 @@ namespace Industropolis.Sim
     public class BuildingEntrance
     {
         private Building _parent;
+        private IntVector _start;
+        private IntVector _end;
 
-        public IntVector Location { get; }
+        public IntVector Start => _parent.Pos + _start;
+        public IntVector End => _parent.Pos + _end;
         public VehicleNode? Node { get; private set; }
-        public IntVector Pos => _parent.Pos + Location;
-        public IntVector ConnectionPos => Pos + new IntVector(0, 1);
         public bool Connected => Node != null;
 
-        public PathCategory Category { get; }
+        public PathType Type { get; }
 
-        public BuildingEntrance(Building parent, IntVector location, PathCategory category)
+        public BuildingEntrance(Building parent, IntVector start, IntVector end, PathType type)
         {
-            Category = category;
-            Location = location;
             _parent = parent;
+            _start = start;
+            _end = end;
+            Type = type;
         }
-
-        public bool CanConnect(IntVector pos, PathCategory category) =>
-            pos == ConnectionPos &&
-            category == Category &&
-            !Connected;
 
         public void Connect(VehicleNode node)
         {
@@ -33,6 +30,7 @@ namespace Industropolis.Sim
             _parent.AddLink(node);
             Node = node;
         }
+
         public void Disconnect()
         {
             if (Node != null)
