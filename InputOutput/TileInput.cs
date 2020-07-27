@@ -6,11 +6,16 @@ namespace Industropolis.Sim
         protected IntVector pos;
         protected Map map;
         protected int size;
+        private Building _parent;
 
         private Tile? currentTile = null;
 
-        public BaseTileInput(Map map, IntVector pos, int size)
+        public IntVector Pos => pos;
+        public int Size => size;
+
+        public BaseTileInput(Map map, Building parent, IntVector pos, int size)
         {
+            _parent = parent;
             this.map = map;
             this.pos = pos;
             this.size = size;
@@ -42,7 +47,7 @@ namespace Industropolis.Sim
             {
                 for (int y = 0; y < size; y++)
                 {
-                    Tile? t = map.GetTile(new IntVector(pos.X + x, pos.Y + y));
+                    Tile? t = map.GetTile(_parent.Pos + (x, y));
                     if (t != null)
                     {
                         if (HasResource(t.Value))
@@ -63,7 +68,7 @@ namespace Industropolis.Sim
     {
         private Item resource;
 
-        public ResourceInput(Map map, IntVector pos, int size, Item resource) : base(map, pos, size)
+        public ResourceInput(Map map, Building parent, IntVector pos, int size, Item resource) : base(map, parent, pos, size)
         {
             this.resource = resource;
         }
@@ -81,7 +86,7 @@ namespace Industropolis.Sim
 
     public class NutrientInput : BaseTileInput
     {
-        public NutrientInput(Map map, IntVector pos, int size) : base(map, pos, size)
+        public NutrientInput(Map map, Building parent, IntVector pos, int size) : base(map, parent, pos, size)
         {
 
         }

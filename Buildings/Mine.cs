@@ -6,7 +6,7 @@ namespace Industropolis.Sim.Buildings
         public Mine(Map map, IntVector pos)
         {
             Type = BuildingType.Mine;
-            Consumer = new ResourceInput(map, pos, 5, Item.Stone);
+            Consumer = new ResourceInput(map, this, (-1, -1), 4, Item.Stone);
             var output = new DirectProducer(5, 1, Item.Stone);
             Output = output;
             Producer = output;

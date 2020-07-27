@@ -8,7 +8,7 @@ namespace Industropolis.Sim.Buildings
             Type = BuildingType.Lumbermill;
             Width = 2;
             Height = 2;
-            Consumer = new ResourceInput(map, pos - (1, 1), 4, Item.Wood);
+            Consumer = new ResourceInput(map, this, (-2, -2), 6, Item.Wood);
             var producer = new DirectProducer(5, 1, Item.Wood);
             Producer = producer;
             Output = producer;
