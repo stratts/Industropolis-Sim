@@ -13,7 +13,6 @@ namespace Industropolis.Sim.Buildings
             ProcessingTime = 2;
             Width = 4;
             Height = 4;
-            Cost = 50;
         }
     }
 }

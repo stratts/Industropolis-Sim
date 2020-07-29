@@ -115,32 +115,6 @@ namespace Industropolis.Sim
 
         public void AddBuilding(Building building, IntVector pos)
         {
-            /*if (building.RequiredResources != null) {
-                foreach (var resource in building.RequiredResources) {
-                    if (!HasResource(resource.Key, resource.Value)) {
-                        Godot.GD.Print($"Not enough resources to build {building.GetType().Name}");
-                        return;
-                    }
-                }
-                foreach (var resource in building.RequiredResources) {
-                    GetResource(resource.Key, resource.Value);
-                }
-            }*/
-            if (CurrentMoney < building.Cost)
-            {
-                Console.WriteLine($"Not enough money to build {building.GetType().Name}");
-                return;
-            }
-            else
-            {
-                CurrentMoney -= building.Cost;
-            }
-            building.Pos = pos;
-            if (!CanBuild(building, pos))
-            {
-                Console.WriteLine("Cannot build here");
-                return;
-            }
             building.Pos = pos;
             buildings.Add(building);
             if (building.HasEntrance) _pathBuilder.ConnectBuilding(building);

@@ -44,6 +44,8 @@ namespace Industropolis.Sim
 
     public class Building : MapObject
     {
+        private Dictionary<Item, int>? _requiredResources = null;
+
         public IntVector Pos { get; set; }
         public BuildingType Type { get; protected set; }
 
@@ -53,14 +55,19 @@ namespace Industropolis.Sim
         public int Width { get; protected set; } = 1;
         public int Height { get; protected set; } = 1;
 
-        public int Cost { get; set; } = 0;
-
         public bool HasEntrance => Entrance != null;
         public BuildingEntrance? Entrance { get; protected set; }
 
-        //public IReadOnlyDictionary<Item, int> RequiredResources => _requiredResources;
+        public IReadOnlyDictionary<Item, int>? RequiredResources => _requiredResources;
 
-        //protected Dictionary<Item, int> _requiredResources = null;
+        protected void SetRequiredResources(params (Item item, int amount)[] resources)
+        {
+            if (_requiredResources == null) _requiredResources = new Dictionary<Item, int>();
+            foreach (var resource in resources)
+            {
+                _requiredResources[resource.item] = resource.amount;
+            }
+        }
 
         public virtual void Update(float delta)
         {
