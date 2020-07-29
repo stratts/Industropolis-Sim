@@ -216,6 +216,8 @@ namespace Industropolis.Sim
             _resources[item] += amount;
         }
 
+        public void SetResourceAmount(Item item, int amount) => _resources[item] = amount;
+
         public int GetResourceAmount(Item item)
         {
             bool has = _resources.TryGetValue(item, out int count);

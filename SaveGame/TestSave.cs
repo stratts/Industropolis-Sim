@@ -17,6 +17,7 @@ namespace Industropolis.Sim.SaveGame
             new BuildingSaver(),
             new RouteSaver(),
             new VehicleSaver(),
+            new ResourceSaver(),
         };
 
         private static Stream? GetReadStream(string path)

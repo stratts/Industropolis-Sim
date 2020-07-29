@@ -40,6 +40,7 @@ namespace Industropolis.Sim.SaveGame
         {
             foreach (var building in map.Buildings)
             {
+                if (building is Core) continue;
                 writer.PushItems(building.Pos, building.Type);
                 if (building is Workshop w) writer.PushItem(w.Recipe.Name);
                 if (building.Output is DirectProducer p) writer.PushItem(p.Buffer);
@@ -184,6 +185,29 @@ namespace Industropolis.Sim.SaveGame
                     h.Carrying = stack.PopInt();
                     route.AddHauler(h);
                 }
+            }
+        }
+    }
+
+    public class ResourceSaver : StackSaver
+    {
+        public override string Path => "resources.csv";
+
+        protected override void Load(StackReader reader, Map map)
+        {
+            foreach (var stack in reader)
+            {
+                var item = stack.PopEnum<Item>();
+                var amount = stack.PopInt();
+                map.SetResourceAmount(item, amount);
+            }
+        }
+
+        protected override void Save(StackWriter writer, Map map)
+        {
+            foreach (var item in map.Resources)
+            {
+                writer.WriteStack(item.Key, item.Value);
             }
         }
     }

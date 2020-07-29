@@ -99,7 +99,7 @@ namespace Industropolis.Sim
 
         public T GetNextDestination(int currentPos)
         {
-            for (int i = 0; i < Path.Count; i++)
+            for (int i = 1; i < Path.Count; i++)
             {
                 int idx = WrapIndex(currentPos + i);
                 var node = _path[idx];
