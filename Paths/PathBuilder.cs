@@ -38,6 +38,17 @@ namespace Industropolis.Sim
                 default: return default(PathCategory);
             }
         }
+
+        public static (Item item, int amount) GetResourceRequirement(PathType type)
+        {
+            switch (type)
+            {
+                case PathType.SimpleRoad: return (Item.Stone, 10);
+                case PathType.OneWayRoad: return (Item.Stone, 10);
+                case PathType.Rail: return (Item.Wood, 10);
+                default: return (Item.None, 0);
+            }
+        }
     }
 
     public abstract class PathBuilder<TNode, TPath> : PathBuilder, IPathBuilder
