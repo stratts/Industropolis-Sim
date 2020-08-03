@@ -19,7 +19,7 @@ namespace Industropolis.Sim
             MapOffset = new IntVector(Pos.X * Size.X, Pos.Y * Size.Y);
         }
 
-        public Tile GetTile(IntVector pos) => Tiles[pos.X, pos.Y];
+        public ref Tile GetTile(IntVector pos) => ref Tiles[pos.X, pos.Y];
     }
 
     public class Map

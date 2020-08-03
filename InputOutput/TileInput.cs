@@ -8,7 +8,7 @@ namespace Industropolis.Sim
         protected int size;
         private Building _parent;
 
-        private Tile? currentTile = null;
+        private IntVector? currentTile = null;
 
         public IntVector Pos => pos;
         public int Size => size;
@@ -25,34 +25,32 @@ namespace Industropolis.Sim
 
         public bool Consume()
         {
-            Tile? t = GetCurrentTile();
+            IntVector? t = GetCurrentTile();
             if (!t.HasValue) return false;
-            ConsumeResource(t.Value);
+            ConsumeResource(ref map.GetTile(t.Value));
             return true;
         }
 
-        private Tile? GetCurrentTile()
+        private IntVector? GetCurrentTile()
         {
-            if (currentTile == null || !HasResource(currentTile.Value))
+            if (currentTile == null || !HasResource(map.GetTile(currentTile.Value)))
             {
                 currentTile = NextTileWithResource();
             }
             return currentTile;
         }
 
-        private Tile? NextTileWithResource()
+        private IntVector? NextTileWithResource()
         {
             int s = size;
             for (int x = 0; x < size; x++)
             {
                 for (int y = 0; y < size; y++)
                 {
-                    Tile? t = map.GetTile(_parent.Pos + (x, y));
-                    if (t != null)
-                    {
-                        if (HasResource(t.Value))
-                            return t;
-                    }
+                    var p = _parent.Pos + pos + (x, y);
+                    if (!map.ValidPos(p)) continue;
+                    Tile t = map.GetTile(p);
+                    if (HasResource(t)) return p;
                 }
             }
 
@@ -61,7 +59,7 @@ namespace Industropolis.Sim
 
         protected abstract bool HasResource(Tile tile);
 
-        protected abstract void ConsumeResource(Tile tile);
+        protected abstract void ConsumeResource(ref Tile tile);
     }
 
     public class ResourceInput : BaseTileInput
@@ -78,7 +76,7 @@ namespace Industropolis.Sim
             return tile.Resource == resource && tile.ResourceCount > 0;
         }
 
-        protected override void ConsumeResource(Tile tile)
+        protected override void ConsumeResource(ref Tile tile)
         {
             tile.ResourceCount--;
         }
@@ -96,7 +94,7 @@ namespace Industropolis.Sim
             return tile.Nutrients > 0;
         }
 
-        protected override void ConsumeResource(Tile tile)
+        protected override void ConsumeResource(ref Tile tile)
         {
             tile.Nutrients--;
         }
