@@ -21,6 +21,8 @@ namespace Industropolis.Sim
             }
         }
 
+        public event Action<Route>? HaulersChanged;
+
         public List<Hauler> Haulers { get; } = new List<Hauler>();
 
         public Route(Map info) : base(info) { }
@@ -44,14 +46,12 @@ namespace Industropolis.Sim
         {
             Haulers.Add(hauler);
             Map.AddVehicle(hauler);
-        }
-
-        public void RemoveHauler()
-        {
-            if (Haulers.Count == 0) return;
-            var hauler = Haulers[Haulers.Count - 1];
-            Haulers.Remove(hauler);
-            hauler.Remove();
+            HaulersChanged?.Invoke(this);
+            hauler.Removed += () =>
+            {
+                Haulers.Remove(hauler);
+                HaulersChanged?.Invoke(this);
+            };
         }
     }
 
