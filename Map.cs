@@ -31,10 +31,12 @@ namespace Industropolis.Sim
         private Dictionary<IntVector, MapChunk> _chunks = new Dictionary<IntVector, MapChunk>();
         private int _chunkSize = 32;
         private Dictionary<Item, int> _resources = new Dictionary<Item, int>();
+        private List<VehicleType> _availableVehicles = new List<VehicleType>();
 
         public IPathContainer<VehicleNode, VehiclePath> VehiclePaths { get; } = new PathContainer<VehicleNode, VehiclePath>();
         public IReadOnlyList<Building> Buildings => buildings;
         public List<Vehicle> Vehicles = new List<Vehicle>();
+        public IReadOnlyList<VehicleType> AvailableVehicles => _availableVehicles;
         public IReadOnlyList<Route> Routes => routes;
         public IReadOnlyDictionary<Item, int> Resources => _resources;
         public ICollection<MapChunk> Chunks => _chunks.Values;
@@ -126,6 +128,17 @@ namespace Industropolis.Sim
             Vehicles.Add(vehicle);
             vehicle.Removed += () => Vehicles.Remove(vehicle);
             VehicleAdded?.Invoke(vehicle);
+        }
+
+        public void AddAvailableVehicle(VehicleType type) => _availableVehicles.Add(type);
+
+        public void RemoveAvailableVehicle(VehicleType type)
+        {
+            if (!_availableVehicles.Contains(type))
+            {
+                throw new ArgumentException($"No available vehicles of type {type}");
+            }
+            else _availableVehicles.Remove(type);
         }
 
         public Building? GetBuilding(IntVector pos)
