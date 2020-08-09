@@ -233,6 +233,20 @@ namespace Industropolis.Sim
             _resources[item] -= amount;
         }
 
+        public bool HasResources(IEnumerable<(Item, int)> resources)
+        {
+            foreach (var (item, amount) in resources)
+            {
+                if (!HasResource(item, amount)) return false;
+            }
+            return true;
+        }
+
+        public void UseResources(IEnumerable<(Item, int)> resources)
+        {
+            foreach (var (item, amount) in resources) UseResource(item, amount);
+        }
+
         public ref Tile GetTile(IntVector pos)
         {
             var chunkData = GetChunkAt(pos);
