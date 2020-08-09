@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Industropolis.Sim.Buildings;
 
 namespace Industropolis.Sim
@@ -16,8 +17,15 @@ namespace Industropolis.Sim
         Core
     }
 
+    public static class BuildingTypeExtensions
+    {
+        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(this BuildingType type) => BuildingFactory.GetRequiredResources(type);
+    }
+
     public static class BuildingFactory
     {
+        private static Map _map = new Map();
+
         public static Building Create(Map map, BuildingType type, IntVector pos)
         {
             switch (type)
@@ -33,6 +41,11 @@ namespace Industropolis.Sim
                 case BuildingType.Lumbermill: return new Lumbermill(map, pos);
                 default: return new TestProducer();
             }
+        }
+
+        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(BuildingType type)
+        {
+            return Create(_map, type, IntVector.Zero).RequiredResources;
         }
     }
 }

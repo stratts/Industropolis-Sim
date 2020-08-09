@@ -75,6 +75,7 @@ namespace Industropolis.Sim
         }
 
         public static Building Create(Map map, BuildingType type, IntVector pos) => BuildingFactory.Create(map, type, pos);
+        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(BuildingType type) => BuildingFactory.GetRequiredResources(type);
     }
 
     public class ProductionBuilding : Building
