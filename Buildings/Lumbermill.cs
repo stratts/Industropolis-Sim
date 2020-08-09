@@ -14,7 +14,6 @@ namespace Industropolis.Sim.Buildings
             Output = producer;
             ProcessingTime = 1;
             Entrance = new BuildingEntrance(this, (0, 1), (0, 2), PathType.Driveway);
-            SetRequiredResources((Item.Wood, 100));
         }
     }
 }

@@ -3,6 +3,8 @@ using Industropolis.Sim.Buildings;
 
 namespace Industropolis.Sim
 {
+    using static BuildingType;
+
     public enum BuildingType
     {
         None,
@@ -17,11 +19,6 @@ namespace Industropolis.Sim
         Core
     }
 
-    public static class BuildingTypeExtensions
-    {
-        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(this BuildingType type) => BuildingFactory.GetRequiredResources(type);
-    }
-
     public static class BuildingFactory
     {
         private static Map _map = new Map();
@@ -30,22 +27,28 @@ namespace Industropolis.Sim
         {
             switch (type)
             {
-                case BuildingType.Workshop: return new Workshop();
+                case Workshop: return new Workshop();
                 //case BuildingType.House: building = new House(this.Population); break;
-                case BuildingType.Mine: return new Mine(map, pos);
-                case BuildingType.Farm: return new Farm(map, pos);
-                case BuildingType.TestConsumer: return new TestConsumer();
-                case BuildingType.TestProducer: return new TestProducer();
-                case BuildingType.TrainStation: return new TrainStation(map);
-                case BuildingType.Core: return new Core(map);
-                case BuildingType.Lumbermill: return new Lumbermill(map, pos);
+                case Mine: return new Mine(map, pos);
+                case Farm: return new Farm(map, pos);
+                case TestConsumer: return new TestConsumer();
+                case TestProducer: return new TestProducer();
+                case TrainStation: return new TrainStation(map);
+                case Core: return new Core(map);
+                case Lumbermill: return new Lumbermill(map, pos);
                 default: return new TestProducer();
             }
         }
 
-        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(BuildingType type)
+        public static RequiredResources GetRequiredResources(this BuildingType type)
         {
-            return Create(_map, type, IntVector.Zero).RequiredResources;
+            return type switch
+            {
+                Lumbermill => new[] { (Item.Wood, 100) },
+                Mine => new[] { (Item.Stone, 100) },
+                Workshop => new[] { (Item.Stone, 100), (Item.Wood, 100) },
+                _ => RequiredResources.None
+            };
         }
     }
 }

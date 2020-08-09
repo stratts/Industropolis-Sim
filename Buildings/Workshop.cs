@@ -29,7 +29,6 @@ namespace Industropolis.Sim.Buildings
             Width = 2;
             Height = 2;
             Entrance = new BuildingEntrance(this, (0, 1), (0, 2), PathType.Driveway);
-            SetRequiredResources((Item.Stone, 100), (Item.Wood, 100));
         }
 
         private void LoadRecipe(Recipe recipe)

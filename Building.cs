@@ -58,24 +58,13 @@ namespace Industropolis.Sim
         public bool HasEntrance => Entrance != null;
         public BuildingEntrance? Entrance { get; protected set; }
 
-        public IReadOnlyDictionary<Item, int>? RequiredResources => _requiredResources;
-
-        protected void SetRequiredResources(params (Item item, int amount)[] resources)
-        {
-            if (_requiredResources == null) _requiredResources = new Dictionary<Item, int>();
-            foreach (var resource in resources)
-            {
-                _requiredResources[resource.item] = resource.amount;
-            }
-        }
-
         public virtual void Update(float delta)
         {
 
         }
 
         public static Building Create(Map map, BuildingType type, IntVector pos) => BuildingFactory.Create(map, type, pos);
-        public static IReadOnlyDictionary<Item, int>? GetRequiredResources(BuildingType type) => BuildingFactory.GetRequiredResources(type);
+        public static RequiredResources GetRequiredResources(BuildingType type) => BuildingFactory.GetRequiredResources(type);
     }
 
     public class ProductionBuilding : Building
