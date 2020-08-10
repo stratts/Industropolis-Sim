@@ -60,6 +60,8 @@ namespace Industropolis.Sim
         public event Action<Building>? BuildingAdded;
         public event Action<Route>? RouteAdded;
         public event Action<Vehicle>? VehicleAdded;
+        public event Action<VehicleType>? AvailableVehicleAdded;
+        public event Action<VehicleType>? AvailableVehicleRemoved;
         public event Action<MapChunk>? ChunkLoaded;
 
         public Map()
@@ -130,7 +132,11 @@ namespace Industropolis.Sim
             VehicleAdded?.Invoke(vehicle);
         }
 
-        public void AddAvailableVehicle(VehicleType type) => _availableVehicles.Add(type);
+        public void AddAvailableVehicle(VehicleType type)
+        {
+            _availableVehicles.Add(type);
+            AvailableVehicleAdded?.Invoke(type);
+        }
 
         public void RemoveAvailableVehicle(VehicleType type)
         {
@@ -138,7 +144,11 @@ namespace Industropolis.Sim
             {
                 throw new ArgumentException($"No available vehicles of type {type}");
             }
-            else _availableVehicles.Remove(type);
+            else
+            {
+                _availableVehicles.Remove(type);
+                AvailableVehicleRemoved?.Invoke(type);
+            }
         }
 
         public Building? GetBuilding(IntVector pos)

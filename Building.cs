@@ -44,8 +44,6 @@ namespace Industropolis.Sim
 
     public class Building : MapObject
     {
-        private Dictionary<Item, int>? _requiredResources = null;
-
         public IntVector Pos { get; set; }
         public BuildingType Type { get; protected set; }
 
