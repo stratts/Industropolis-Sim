@@ -163,6 +163,11 @@ namespace Industropolis.Sim.SaveGame
                 if (vehicle is Hauler h) writer.PushItems(h.Carrying);
                 writer.WriteStack();
             }
+            foreach (var type in map.AvailableVehicles)
+            {
+                writer.PushItems(type, Guid.Empty);
+                writer.WriteStack();
+            }
         }
 
         protected override void Load(StackReader reader, Map map)
@@ -170,7 +175,13 @@ namespace Industropolis.Sim.SaveGame
             foreach (var stack in reader)
             {
                 var type = stack.PopEnum<VehicleType>();
-                var (routeId, routeIdx) = (stack.PopId(), stack.PopInt());
+                var routeId = stack.PopId();
+                if (routeId == Guid.Empty)
+                {
+                    map.AddAvailableVehicle(type);
+                    continue;
+                }
+                var routeIdx = stack.PopInt();
                 var frontPos = stack.PopFloat();
                 var route = map.GetRoute(routeId);
                 if (route == null)
