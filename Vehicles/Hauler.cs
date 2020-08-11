@@ -1,14 +1,12 @@
 
 namespace Industropolis.Sim
 {
-    public class Hauler : Vehicle
+    public abstract class Hauler : Vehicle
     {
         public Item Item { get; set; }
 
         public int Carrying { get; set; } = 0;
-        public int MaxCapacity { get; } = 5;
-
-        public override VehicleType Type => VehicleType.Hauler;
+        public abstract int MaxCapacity { get; }
 
         public Hauler(Route route) : base(route) { }
 

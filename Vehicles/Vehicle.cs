@@ -8,7 +8,7 @@ namespace Industropolis.Sim
     {
         public enum Direction { Forwards, Backwards };
 
-        private float _speed = 1.5f; // Tiles per second
+        private float _speed => Speed; // Tiles per second
         private List<VehicleLane> _lanes = new List<VehicleLane>();
         private List<VehicleNode> _nodes = new List<VehicleNode>();
         private Vehicle? _following;
@@ -24,7 +24,8 @@ namespace Industropolis.Sim
         public VehicleNode PrevNode { get; private set; } = null!;
         public VehicleNode NextNode { get; private set; } = null!;
         public VehicleNode Destination { get; private set; } = null!;
-        public float Length { get; set; } = 0.5f;
+        public abstract float Length { get; }
+        public abstract float Speed { get; }
         public IReadOnlyList<VehicleLane> Lanes => _lanes;
         public int RouteIndex => _routeIndex;
 
