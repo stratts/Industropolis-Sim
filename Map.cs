@@ -93,9 +93,9 @@ namespace Industropolis.Sim
 
         public bool CanBuild(Building building, IntVector pos)
         {
-            for (int x = 0; x < building.Width; x++)
+            for (int x = 0; x < building.MapWidth; x++)
             {
-                for (int y = 0; y < building.Height; y++)
+                for (int y = 0; y < building.MapHeight; y++)
                 {
                     var p = pos + (x, y);
                     if (GetPath(p) != null) return false;
@@ -165,9 +165,9 @@ namespace Industropolis.Sim
 
         public IEnumerable<IntVector> GetBuildingTiles(Building building)
         {
-            for (int x = 0; x < building.Width; x++)
+            for (int x = 0; x < building.MapWidth; x++)
             {
-                for (int y = 0; y < building.Height; y++)
+                for (int y = 0; y < building.MapHeight; y++)
                 {
                     yield return building.Pos + new IntVector(x, y);
                 }

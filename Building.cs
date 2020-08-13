@@ -1,16 +1,37 @@
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Industropolis.Sim
 {
+    using static Building.BuildingDirection;
+
+    internal static class IntVectorExtensions
+    {
+        public static IntVector ApplyRotation(this IntVector pos, Building building)
+        {
+            IntVector FlipH(IntVector p) => (building.MapWidth - 1 - p.X, p.Y);
+            IntVector FlipV(IntVector p) => (p.X, building.MapHeight - 1 - p.Y);
+            IntVector Transpose(IntVector p) => (p.Y, p.X);
+
+            return building.Direction switch
+            {
+                Down => pos,
+                Up => FlipV(FlipH(pos)),
+                Left => FlipV(Transpose(pos)),
+                Right => FlipH(Transpose(pos)),
+                _ => pos
+            };
+        }
+    }
+
     public class BuildingEntrance
     {
         private Building _parent;
         private IntVector _start;
         private IntVector _end;
 
-        public IntVector Start => _parent.Pos + _start;
-        public IntVector End => _parent.Pos + _end;
+        public IntVector Start => _parent.Pos + _start.ApplyRotation(_parent);
+        public IntVector End => _parent.Pos + _end.ApplyRotation(_parent);
         public VehicleNode? Node { get; private set; }
         public bool Connected => Node != null;
 
@@ -44,6 +65,8 @@ namespace Industropolis.Sim
 
     public class Building : MapObject
     {
+        public enum BuildingDirection { Down, Left, Up, Right };
+
         public IntVector Pos { get; set; }
         public BuildingType Type { get; protected set; }
 
@@ -52,6 +75,12 @@ namespace Industropolis.Sim
 
         public int Width { get; protected set; } = 1;
         public int Height { get; protected set; } = 1;
+
+        public int MapWidth => Rotated ? Height : Width;
+        public int MapHeight => Rotated ? Width : Height;
+
+        public BuildingDirection Direction { get; set; } = BuildingDirection.Down;
+        public bool Rotated => Direction switch { Up => false, Down => false, Left => true, Right => true, _ => false };
 
         public bool HasEntrance => Entrance != null;
         public BuildingEntrance? Entrance { get; protected set; }
