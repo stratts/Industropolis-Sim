@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -7,10 +8,11 @@ using System.Text.Json;
 
 namespace Industropolis.Sim.SaveGame
 {
-    public static class TestSave
+    public static class GameSaver
     {
         private static bool _zip = false;
         private static ZipArchive _archive = null!;
+        private const string _saveDirectory = "savegame";
 
         private static ISaveProvider[] _providers = new ISaveProvider[] {
             new PathSaver(),
@@ -20,44 +22,59 @@ namespace Industropolis.Sim.SaveGame
             new ResourceSaver(),
         };
 
-        private static Stream? GetReadStream(string path)
+        private static Stream? GetReadStream(string name, string path)
         {
             if (_zip) return _archive.GetEntry(path).Open();
             else
             {
-                var p = Path.Join("savegame", path);
+                var p = SavePath(name, path);
                 if (!File.Exists(p)) return null;
-                return File.OpenRead(Path.Join("savegame", path));
+                return File.OpenRead(p);
             }
         }
 
-        private static Stream GetWriteStream(string path)
+        private static Stream GetWriteStream(string name, string path)
         {
             if (_zip) return _archive.CreateEntry(path, CompressionLevel.NoCompression).Open();
-            else return File.Open(Path.Join("savegame", path), FileMode.Create);
+            else return File.Open(SavePath(name, path), FileMode.Create);
         }
 
-        public static void Save(Map map)
+        private static string SavePath(string name, string? path = null)
+        {
+            if (path == null) return Path.Join(_saveDirectory, name);
+            else return Path.Join(_saveDirectory, name, path);
+        }
+
+        public static IEnumerable<string> GetSaves()
+        {
+            var info = new DirectoryInfo(_saveDirectory);
+            if (_zip) return info.EnumerateFiles().Select(finfo => finfo.Name);
+            else return info.EnumerateDirectories().Select(dinfo => dinfo.Name);
+        }
+
+        public static void Save(Map map, string name)
         {
             Console.Write("Saving... ");
             var start = DateTime.Now;
+
+            if (!Directory.Exists(_saveDirectory)) Directory.CreateDirectory(_saveDirectory);
 
             // Create ZIP file if using
             var stream = new MemoryStream();
             if (_zip) _archive = new ZipArchive(stream, ZipArchiveMode.Create, true);
             else
             {
-                if (Directory.Exists("savegame")) Directory.Delete("savegame", true);
-                Directory.CreateDirectory("savegame");
-                Directory.CreateDirectory("savegame/chunks");
+                if (Directory.Exists(SavePath(name))) Directory.Delete(SavePath(name), true);
+                Directory.CreateDirectory(SavePath(name));
+                Directory.CreateDirectory(SavePath(name, "chunks"));
             }
 
-            foreach (var provider in _providers) provider.Save(GetWriteStream(provider.Path), map);
+            foreach (var provider in _providers) provider.Save(GetWriteStream(name, provider.Path), map);
 
             // Save chunks
             foreach (var chunk in map.Chunks)
             {
-                using (var writer = new StackWriter(GetWriteStream($"chunks/chunk_{chunk.Pos.X}_{chunk.Pos.Y}.csv")))
+                using (var writer = new StackWriter(GetWriteStream(name, $"chunks/chunk_{chunk.Pos.X}_{chunk.Pos.Y}.csv")))
                 {
                     foreach (var tile in chunk.Tiles)
                     {
@@ -70,7 +87,7 @@ namespace Industropolis.Sim.SaveGame
             if (_zip)
             {
                 _archive.Dispose();
-                using (var f = File.Open("savegame.zip", FileMode.Create))
+                using (var f = File.Open(SavePath(name) + ".zip", FileMode.Create))
                 {
                     stream.Seek(0, SeekOrigin.Begin);
                     stream.CopyTo(f);
@@ -83,7 +100,7 @@ namespace Industropolis.Sim.SaveGame
             Console.WriteLine($"done (took {Math.Round(span.TotalMilliseconds)} ms).");
         }
 
-        public static void Load(Map map)
+        public static void Load(Map map, string name)
         {
             Console.Write("Loading... ");
             var start = DateTime.Now;
@@ -92,7 +109,7 @@ namespace Industropolis.Sim.SaveGame
             var stream = new MemoryStream();
             if (_zip)
             {
-                using (var f = File.OpenRead("savegame.zip"))
+                using (var f = File.OpenRead(SavePath(name) + ".zip"))
                 {
                     f.CopyTo(stream);
                 }
@@ -101,7 +118,7 @@ namespace Industropolis.Sim.SaveGame
 
             foreach (var provider in _providers)
             {
-                var file = GetReadStream(provider.Path);
+                var file = GetReadStream(name, provider.Path);
                 if (file != null) provider.Load(file, map);
             }
 
