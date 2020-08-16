@@ -52,6 +52,12 @@ namespace Industropolis.Sim.SaveGame
             else return info.EnumerateDirectories().Select(dinfo => dinfo.Name);
         }
 
+        public static void DeleteSave(string name)
+        {
+            if (_zip) File.Delete(SavePath(name) + ".zip");
+            else Directory.Delete(SavePath(name), true);
+        }
+
         public static void Save(Map map, string name)
         {
             Console.Write("Saving... ");
@@ -102,7 +108,7 @@ namespace Industropolis.Sim.SaveGame
 
         public static void Load(Map map, string name)
         {
-            Console.Write("Loading... ");
+            Console.Write($"Loading {name}... ");
             var start = DateTime.Now;
 
             // Load ZIP file if using
