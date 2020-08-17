@@ -9,6 +9,7 @@ namespace Industropolis.Sim
     {
         None,
         Workshop,
+        Smelter,
         //House,
         Mine,
         Farm,
@@ -36,6 +37,7 @@ namespace Industropolis.Sim
                 case TrainStation: return new TrainStation(map);
                 case Core: return new Core(map);
                 case Lumbermill: return new Lumbermill(map, pos);
+                case Smelter: return new Smelter();
                 default: return new TestProducer();
             }
         }
