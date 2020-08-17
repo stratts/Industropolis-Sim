@@ -48,8 +48,8 @@ namespace Industropolis.Sim.SaveGame
         public static IEnumerable<string> GetSaves()
         {
             var info = new DirectoryInfo(_saveDirectory);
-            if (_zip) return info.EnumerateFiles().Select(finfo => finfo.Name);
-            else return info.EnumerateDirectories().Select(dinfo => dinfo.Name);
+            if (_zip) return info.EnumerateFiles().Select(finfo => finfo.Name).OrderBy(n => n);
+            else return info.EnumerateDirectories().Select(dinfo => dinfo.Name).OrderBy(n => n);
         }
 
         public static void DeleteSave(string name)
