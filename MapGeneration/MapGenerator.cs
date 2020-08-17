@@ -16,18 +16,30 @@ namespace Industropolis.Sim
         }
 
         private static ResourceDef[] Resources = new[] {
-        new ResourceDef() {
-            Item = Item.Stone,
-            Scale = 1,
-            Threshold = 1,
-            Amount = 1
-        },
-        new ResourceDef() {
-            Item = Item.Wood,
-            Scale = 1.2,
-            Threshold = 0.8,
-            Amount = 1
-        }
+            new ResourceDef() {
+                Item = Item.Stone,
+                Scale = 1,
+                Threshold = 1,
+                Amount = 1
+            },
+            new ResourceDef() {
+                Item = Item.Wood,
+                Scale = 1.2,
+                Threshold = 0.8,
+                Amount = 1
+            },
+            new ResourceDef() {
+                Item = Item.IronOre,
+                Scale = 1,
+                Threshold = 1,
+                Amount = 1
+            },
+            new ResourceDef() {
+                Item = Item.CopperOre,
+                Scale = 1,
+                Threshold = 1,
+                Amount = 1
+            }
     };
 
         public static Tile[,] GenerateChunk(int x, int y, int width, int height, long seed)

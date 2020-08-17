@@ -9,7 +9,11 @@ namespace Industropolis.Sim
         Stone,
         Wood,
         Log,
-        Food
+        Food,
+        IronOre,
+        CopperOre,
+        Iron,
+        Copper
     }
 
     public class RequiredResources : IEnumerable<(Item item, int amount)>
