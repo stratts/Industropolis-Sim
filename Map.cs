@@ -279,6 +279,36 @@ namespace Industropolis.Sim
             return ref chunk.Tiles[chunkIndex.X, chunkIndex.Y];
         }
 
+        public Item GetNearestResource(IntVector pos, float radius, params Item[] filter)
+        {
+            var visited = new HashSet<IntVector>();
+            var queue = new Queue<IntVector>();
+            queue.Enqueue(pos);
+
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                visited.Add(p);
+                if (p.Distance(pos) > radius || !ValidPos(p)) continue;
+                var tile = GetTile(p);
+                if (filter.Length > 0)
+                {
+                    foreach (var item in filter)
+                    {
+                        if (tile.Resource == item) return item;
+                    }
+                }
+                else if (tile.Resource != Item.None) return tile.Resource;
+
+                foreach (var n in p.Neighbours)
+                {
+                    if (!visited.Contains(n)) queue.Enqueue(n);
+                }
+            }
+
+            return Item.None;
+        }
+
         public bool ValidPos(IntVector pos) => GetChunkAt(pos).HasValue;
 
         private MapChunk? GetChunkAt(IntVector pos)

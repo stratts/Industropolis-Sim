@@ -5,9 +5,10 @@ namespace Industropolis.Sim.Buildings
     {
         public Mine(Map map, IntVector pos)
         {
+            var item = map.GetNearestResource(pos + (Width / 2, Height / 2), 2, Item.Stone, Item.IronOre, Item.CopperOre);
             Type = BuildingType.Mine;
-            Consumer = new ResourceInput(map, this, (-1, -1), 4, Item.Stone);
-            var output = new DirectProducer(5, 1, Item.Stone);
+            Consumer = new ResourceInput(map, this, (-1, -1), 4, item);
+            var output = new DirectProducer(5, 1, item);
             Output = output;
             Producer = output;
             ProcessingTime = 2;
