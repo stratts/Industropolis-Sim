@@ -47,6 +47,7 @@ namespace Industropolis.Sim.SaveGame
 
         public static IEnumerable<string> GetSaves()
         {
+            if (!Directory.Exists(_saveDirectory)) Directory.CreateDirectory(_saveDirectory);
             var info = new DirectoryInfo(_saveDirectory);
             if (_zip) return info.EnumerateFiles().Select(finfo => finfo.Name).OrderBy(n => n);
             else return info.EnumerateDirectories().Select(dinfo => dinfo.Name).OrderBy(n => n);
